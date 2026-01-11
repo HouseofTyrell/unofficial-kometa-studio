@@ -1,0 +1,25 @@
+{
+  "name": "unofficial-kometa-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An unofficial, local-first IDE for building and validating Kometa config.yml files",
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean"
+  },
+  "keywords": [
+    "kometa",
+    "plex",
+    "config",
+    "ide"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
+  }
+}

@@ -75,6 +75,9 @@ export const configApi = {
   exportJson: (id: string) => request<any>(`/api/configs/${id}/export-json`, {
     method: 'POST',
   }),
+  deleteAll: () => request<{ success: boolean; deletedCount: number }>('/api/configs', {
+    method: 'DELETE',
+  }),
 };
 
 // Profiles
@@ -100,5 +103,8 @@ export const profileApi = {
   import: (data: any) => request<any>('/api/profiles/import', {
     method: 'POST',
     body: JSON.stringify(data),
+  }),
+  deleteAll: () => request<{ success: boolean; deletedCount: number }>('/api/profiles', {
+    method: 'DELETE',
   }),
 };

@@ -44,19 +44,19 @@ async function start() {
   const fastify = Fastify({
     logger: {
       level: 'info',
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
-        },
-      },
     },
   });
 
   // Register CORS
   await fastify.register(cors, {
-    origin: CORS_ORIGIN,
+    origin: (origin, cb) => {
+      // Allow any localhost/127.0.0.1 origin in development
+      if (!origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Not allowed by CORS'), false);
+      }
+    },
     credentials: true,
   });
 

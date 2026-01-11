@@ -57,14 +57,15 @@ export async function profileRoutes(
     return { profiles };
   });
 
-  // Get profile by ID (with masked secrets)
+  // Get profile by ID (with unmasked secrets for local-first access)
   fastify.get<{ Params: { id: string } }>('/api/profiles/:id', async (request, reply) => {
     const profile = profileRepo.findById(request.params.id);
     if (!profile) {
       reply.status(404);
       return { error: 'Profile not found' };
     }
-    return maskProfileSecrets(profile);
+    // Return unmasked secrets since this is a local-first app
+    return profile;
   });
 
   // Create new profile
@@ -85,7 +86,7 @@ export async function profileRoutes(
       });
 
       reply.status(201);
-      return maskProfileSecrets(newProfile);
+      return newProfile;
     } catch (error) {
       reply.status(400);
       return {
@@ -103,7 +104,7 @@ export async function profileRoutes(
         reply.status(404);
         return { error: 'Profile not found' };
       }
-      return maskProfileSecrets(updated);
+      return updated;
     } catch (error) {
       reply.status(400);
       return {
@@ -161,7 +162,7 @@ export async function profileRoutes(
       });
 
       reply.status(201);
-      return maskProfileSecrets(newProfile);
+      return newProfile;
     } catch (error) {
       reply.status(400);
       return {

@@ -1,0 +1,188 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input,
+.select {
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.input:hover,
+.select:hover {
+  border-color: var(--border-hover);
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 4px 0 0 0;
+}
+
+.info {
+  padding: 16px;
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.info p {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.info p:last-child {
+  margin-bottom: 0;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancelButton {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-hover);
+}
+
+.saveButton {
+  padding: 10px 20px;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -13,7 +13,7 @@ export function Sidebar() {
 
   useEffect(() => {
     loadConfigs();
-  }, []);
+  }, [location.pathname]);
 
   const loadConfigs = async () => {
     try {
@@ -76,6 +76,13 @@ export function Sidebar() {
           className={`${styles.navItem} ${isActive('/profiles') ? styles.active : ''}`}
         >
           Profiles
+        </Link>
+
+        <Link
+          to="/overlay-builder"
+          className={`${styles.navItem} ${isActive('/overlay-builder') ? styles.active : ''}`}
+        >
+          Overlay Builder
         </Link>
 
         <Link

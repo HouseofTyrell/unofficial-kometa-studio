@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { ConfigRepository } from '../db/config.repository.js';
 import { ProfileRepository } from '../db/profile.repository.js';
-import { parseKometaYaml } from '../yaml/parser.js';
+import { parseKometaYaml, extractSecretsFromYaml } from '../yaml/parser.js';
 import { generateYaml } from '../yaml/generator.js';
 import { validateConfig } from '@kometa-studio/shared';
 import { randomUUID } from 'node:crypto';
@@ -96,6 +96,7 @@ export async function configRoutes(
           return { error: 'YAML content is required' };
         }
 
+        // Parse the config
         const config = parseKometaYaml(yaml, preserveExtras);
         const updated = configRepo.update(request.params.id, { config });
 
@@ -104,12 +105,35 @@ export async function configRoutes(
           return { error: 'Config not found' };
         }
 
-        return updated;
+        // Extract secrets and create a profile if any secrets were found
+        const secrets = extractSecretsFromYaml(yaml);
+        let profileId: string | undefined;
+        let extractedSecrets: any = undefined;
+
+        if (Object.keys(secrets).length > 0) {
+          const profileName = `${updated.name} - Imported`;
+          profileId = randomUUID();
+          const newProfile = profileRepo.create({
+            id: profileId,
+            name: profileName,
+            description: `Auto-generated profile from importing ${updated.name}`,
+            secrets,
+          });
+          fastify.log.info({ profileId, profileName }, 'Created profile from import');
+
+          // Return the unmasked secrets so frontend can cache them
+          extractedSecrets = secrets;
+        }
+
+        return { ...updated, profileId, extractedSecrets };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        fastify.log.error({ error: errorMessage, stack: errorStack }, 'Import YAML error');
         reply.status(400);
         return {
           error: 'Failed to import YAML',
-          details: error instanceof Error ? error.message : 'Unknown error',
+          details: errorMessage,
         };
       }
     }
@@ -200,4 +224,38 @@ export async function configRoutes(
       return config;
     }
   );
+
+  // Delete all configs
+  fastify.delete('/api/configs', async (request, reply) => {
+    try {
+      const configs = configRepo.findAll();
+      for (const config of configs) {
+        configRepo.delete(config.id);
+      }
+      return { success: true, deletedCount: configs.length };
+    } catch (error) {
+      reply.status(500);
+      return {
+        error: 'Failed to delete all configs',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  });
+
+  // Delete all profiles
+  fastify.delete('/api/profiles', async (request, reply) => {
+    try {
+      const profiles = profileRepo.findAll();
+      for (const profile of profiles) {
+        profileRepo.delete(profile.id);
+      }
+      return { success: true, deletedCount: profiles.length };
+    } catch (error) {
+      reply.status(500);
+      return {
+        error: 'Failed to delete all profiles',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  });
 }

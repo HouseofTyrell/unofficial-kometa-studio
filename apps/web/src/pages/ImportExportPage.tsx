@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './ImportExportPage.module.css';
-import { configApi } from '../api/client';
+import { configApi, profileApi } from '../api/client';
 
 export function ImportExportPage() {
   const [yamlInput, setYamlInput] = useState('');
   const [importing, setImporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const handleImportYaml = async () => {
     if (!yamlInput.trim()) {
@@ -22,9 +25,12 @@ export function ImportExportPage() {
         config: {},
       });
 
-      await configApi.importYaml(newConfig.id, yamlInput, true);
-      alert('Configuration imported successfully!');
-      setYamlInput('');
+      const result = await configApi.importYaml(newConfig.id, yamlInput, true);
+
+      // Navigate to the imported configuration, passing profileId if one was created
+      navigate(`/config/${newConfig.id}`, {
+        state: { profileId: result.profileId },
+      });
     } catch (error) {
       console.error('Failed to import:', error);
       alert(`Import failed: ${(error as Error).message}`);
@@ -91,14 +97,28 @@ export function ImportExportPage() {
             This will delete all configurations and profiles. This cannot be undone.
           </p>
           <button
-            onClick={() => {
-              if (confirm('Delete ALL data? This cannot be undone!')) {
-                alert('Feature not yet implemented. Please manually delete the database file.');
+            onClick={async () => {
+              if (!confirm('Delete ALL configurations and profiles? This cannot be undone!')) {
+                return;
+              }
+
+              setDeleting(true);
+              try {
+                const configResult = await configApi.deleteAll();
+                const profileResult = await profileApi.deleteAll();
+                alert(`Deleted ${configResult.deletedCount} configurations and ${profileResult.deletedCount} profiles`);
+                navigate('/');
+              } catch (error) {
+                console.error('Failed to delete data:', error);
+                alert(`Failed to delete data: ${(error as Error).message}`);
+              } finally {
+                setDeleting(false);
               }
             }}
+            disabled={deleting}
             className={styles.dangerButton}
           >
-            Reset All Local Data
+            {deleting ? 'Deleting...' : 'Reset All Local Data'}
           </button>
         </div>
       </div>

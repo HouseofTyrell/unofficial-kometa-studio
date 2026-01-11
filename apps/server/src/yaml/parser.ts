@@ -7,7 +7,8 @@ import { KometaConfigSchema } from '@kometa-studio/shared';
  */
 function extractWithExtras<T extends Record<string, any>>(
   obj: Record<string, any>,
-  knownKeys: string[]
+  knownKeys: string[],
+  secretKeys: string[] = []
 ): { data: Partial<T>; extras: Record<string, unknown> } {
   const data: any = {};
   const extras: Record<string, unknown> = {};
@@ -15,9 +16,11 @@ function extractWithExtras<T extends Record<string, any>>(
   for (const [key, value] of Object.entries(obj)) {
     if (knownKeys.includes(key)) {
       data[key] = value;
-    } else {
+    } else if (!secretKeys.includes(key)) {
+      // Only add to extras if it's not a secret key
       extras[key] = value;
     }
+    // If it's a secret key, skip it entirely (it will go in the profile)
   }
 
   return { data, extras: Object.keys(extras).length > 0 ? extras : undefined as any };
@@ -96,28 +99,32 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
   // Plex
   if (parsed.plex) {
     const plexKnownKeys = ['timeout', 'clean_bundles', 'empty_trash', 'optimize'];
-    const { data, extras } = extractWithExtras(parsed.plex, plexKnownKeys);
+    const plexSecretKeys = ['url', 'token'];
+    const { data, extras } = extractWithExtras(parsed.plex, plexKnownKeys, plexSecretKeys);
     config.plex = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
   // TMDB
   if (parsed.tmdb) {
     const tmdbKnownKeys = ['cache_expiration', 'language', 'region'];
-    const { data, extras } = extractWithExtras(parsed.tmdb, tmdbKnownKeys);
+    const tmdbSecretKeys = ['apikey'];
+    const { data, extras } = extractWithExtras(parsed.tmdb, tmdbKnownKeys, tmdbSecretKeys);
     config.tmdb = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
   // Tautulli
   if (parsed.tautulli) {
     const tautulliKnownKeys: string[] = [];
-    const { data, extras } = extractWithExtras(parsed.tautulli, tautulliKnownKeys);
+    const tautulliSecretKeys = ['url', 'apikey'];
+    const { data, extras } = extractWithExtras(parsed.tautulli, tautulliKnownKeys, tautulliSecretKeys);
     config.tautulli = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
   // MDBList
   if (parsed.mdblist) {
     const mdblistKnownKeys = ['cache_expiration'];
-    const { data, extras } = extractWithExtras(parsed.mdblist, mdblistKnownKeys);
+    const mdblistSecretKeys = ['apikey'];
+    const { data, extras } = extractWithExtras(parsed.mdblist, mdblistKnownKeys, mdblistSecretKeys);
     config.mdblist = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
@@ -136,7 +143,8 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
       'tag',
       'search',
     ];
-    const { data, extras } = extractWithExtras(parsed.radarr, radarrKnownKeys);
+    const radarrSecretKeys = ['url', 'token'];
+    const { data, extras } = extractWithExtras(parsed.radarr, radarrKnownKeys, radarrSecretKeys);
     config.radarr = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
@@ -158,14 +166,16 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
       'search',
       'cutoff_search',
     ];
-    const { data, extras } = extractWithExtras(parsed.sonarr, sonarrKnownKeys);
+    const sonarrSecretKeys = ['url', 'token'];
+    const { data, extras } = extractWithExtras(parsed.sonarr, sonarrKnownKeys, sonarrSecretKeys);
     config.sonarr = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
   // Trakt
   if (parsed.trakt) {
     const traktKnownKeys = ['client_id'];
-    const { data, extras } = extractWithExtras(parsed.trakt, traktKnownKeys);
+    const traktSecretKeys = ['client_secret', 'authorization'];
+    const { data, extras } = extractWithExtras(parsed.trakt, traktKnownKeys, traktSecretKeys);
     config.trakt = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
   }
 
@@ -208,4 +218,77 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
   }
 
   return config;
+}
+
+/**
+ * Extracts secrets from parsed YAML to create a profile
+ */
+export function extractSecretsFromYaml(yamlString: string): {
+  plex?: { url?: string; token?: string };
+  tmdb?: { apikey?: string };
+  tautulli?: { url?: string; apikey?: string };
+  mdblist?: { apikey?: string };
+  radarr?: { url?: string; token?: string };
+  sonarr?: { url?: string; token?: string };
+  trakt?: { client_secret?: string; authorization?: { access_token?: string; refresh_token?: string } };
+} {
+  const parsed = YAML.parse(yamlString);
+
+  if (!parsed || typeof parsed !== 'object') {
+    return {};
+  }
+
+  const secrets: any = {};
+
+  // Extract Plex secrets
+  if (parsed.plex) {
+    secrets.plex = {};
+    if (parsed.plex.url) secrets.plex.url = parsed.plex.url;
+    if (parsed.plex.token) secrets.plex.token = parsed.plex.token;
+  }
+
+  // Extract TMDB secrets
+  if (parsed.tmdb?.apikey) {
+    secrets.tmdb = { apikey: parsed.tmdb.apikey };
+  }
+
+  // Extract Tautulli secrets
+  if (parsed.tautulli) {
+    secrets.tautulli = {};
+    if (parsed.tautulli.url) secrets.tautulli.url = parsed.tautulli.url;
+    if (parsed.tautulli.apikey) secrets.tautulli.apikey = parsed.tautulli.apikey;
+  }
+
+  // Extract MDBList secrets
+  if (parsed.mdblist?.apikey) {
+    secrets.mdblist = { apikey: parsed.mdblist.apikey };
+  }
+
+  // Extract Radarr secrets
+  if (parsed.radarr) {
+    secrets.radarr = {};
+    if (parsed.radarr.url) secrets.radarr.url = parsed.radarr.url;
+    if (parsed.radarr.token) secrets.radarr.token = parsed.radarr.token;
+  }
+
+  // Extract Sonarr secrets
+  if (parsed.sonarr) {
+    secrets.sonarr = {};
+    if (parsed.sonarr.url) secrets.sonarr.url = parsed.sonarr.url;
+    if (parsed.sonarr.token) secrets.sonarr.token = parsed.sonarr.token;
+  }
+
+  // Extract Trakt secrets
+  if (parsed.trakt) {
+    secrets.trakt = {};
+    if (parsed.trakt.client_secret) secrets.trakt.client_secret = parsed.trakt.client_secret;
+    if (parsed.trakt.authorization) {
+      secrets.trakt.authorization = {
+        access_token: parsed.trakt.authorization.access_token,
+        refresh_token: parsed.trakt.authorization.refresh_token,
+      };
+    }
+  }
+
+  return secrets;
 }

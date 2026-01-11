@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styles from './YamlPreviewPanel.module.css';
 import { configApi, profileApi } from '../../api/client';
 
 type YamlMode = 'template' | 'masked' | 'full';
 
 export function YamlPreviewPanel() {
-  const { configId } = useParams();
+  const location = useLocation();
+  // Extract configId from pathname: /config/:configId
+  const configId = location.pathname.startsWith('/config/')
+    ? location.pathname.split('/')[2]
+    : undefined;
   const [yaml, setYaml] = useState('');
   const [mode, setMode] = useState<YamlMode>('masked');
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -15,9 +19,18 @@ export function YamlPreviewPanel() {
   const [loading, setLoading] = useState(false);
   const [showValidation, setShowValidation] = useState(true);
 
+  // Load profiles when component mounts or when navigating
   useEffect(() => {
     loadProfiles();
-  }, []);
+  }, [location.pathname]);
+
+  // Auto-select profile from navigation state (e.g., after import)
+  useEffect(() => {
+    const state = location.state as { profileId?: string } | null;
+    if (state?.profileId && profiles.length > 0) {
+      setSelectedProfile(state.profileId);
+    }
+  }, [location.state, profiles]);
 
   useEffect(() => {
     if (configId) {
@@ -33,7 +46,8 @@ export function YamlPreviewPanel() {
     try {
       const { profiles: profileList } = await profileApi.list();
       setProfiles(profileList);
-      if (profileList.length > 0) {
+      // Only auto-select first profile if no profile is currently selected
+      if (profileList.length > 0 && !selectedProfile) {
         setSelectedProfile(profileList[0].id);
       }
     } catch (error) {

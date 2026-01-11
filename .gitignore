@@ -46,3 +46,13 @@ coverage/
 # Temporary files
 tmp/
 temp/
+nul
+
+# Claude AI
+.claude/
+
+# Lock files (optional - some projects commit these)
+# pnpm-lock.yaml
+
+# Data directory
+apps/server/data/

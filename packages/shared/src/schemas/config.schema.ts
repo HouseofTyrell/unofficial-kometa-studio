@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const SettingsSchema = z.object({
   cache: z.boolean().optional(),
   cache_expiration: z.number().optional(),
-  asset_directory: z.string().optional(),
+  asset_directory: z.union([z.string(), z.array(z.string())]).optional(),
   asset_folders: z.boolean().optional(),
   asset_depth: z.number().optional(),
   create_asset_folders: z.boolean().optional(),
@@ -28,19 +28,19 @@ export const SettingsSchema = z.object({
   only_filter_missing: z.boolean().optional(),
   save_report: z.boolean().optional(),
   tvdb_language: z.string().optional(),
-  ignore_ids: z.array(z.string()).optional(),
-  ignore_imdb_ids: z.array(z.string()).optional(),
+  ignore_ids: z.array(z.string()).optional().nullable(),
+  ignore_imdb_ids: z.array(z.string()).optional().nullable(),
   item_refresh_delay: z.number().optional(),
-  playlist_sync_to_users: z.enum(['all', 'none']).or(z.array(z.string())).optional(),
-  playlist_exclude_users: z.array(z.string()).optional(),
+  playlist_sync_to_users: z.enum(['all', 'none']).or(z.array(z.string())).optional().nullable(),
+  playlist_exclude_users: z.array(z.string()).optional().nullable(),
   playlist_report: z.boolean().optional(),
   verify_ssl: z.boolean().optional(),
-  custom_repo: z.string().optional(),
+  custom_repo: z.string().optional().nullable(),
   check_nightly: z.boolean().optional(),
   run_order: z.array(z.string()).optional(),
   // Allow arbitrary additional keys
   extras: z.record(z.unknown()).optional(),
-}).strict();
+}).passthrough();
 
 // Template variables - flexible key-value pairs
 export const TemplateVariablesSchema = z.record(z.unknown());
@@ -136,7 +136,7 @@ export const RadarrConfigSchema = z.object({
   monitor: z.boolean().optional(),
   availability: z.enum(['announced', 'cinemas', 'released', 'db']).optional(),
   quality_profile: z.string().optional(),
-  tag: z.array(z.string()).optional(),
+  tag: z.array(z.string()).optional().nullable(),
   search: z.boolean().optional(),
   extras: z.record(z.unknown()).optional(),
 });
@@ -154,7 +154,7 @@ export const SonarrConfigSchema = z.object({
   language_profile: z.string().optional(),
   series_type: z.enum(['standard', 'daily', 'anime']).optional(),
   season_folder: z.boolean().optional(),
-  tag: z.array(z.string()).optional(),
+  tag: z.array(z.string()).optional().nullable(),
   search: z.boolean().optional(),
   cutoff_search: z.boolean().optional(),
   extras: z.record(z.unknown()).optional(),

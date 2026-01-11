@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { ConfigEditorPage } from './pages/ConfigEditorPage';
 import { ProfilesPage } from './pages/ProfilesPage';
 import { ImportExportPage } from './pages/ImportExportPage';
+import { OverlayBuilderPage } from './pages/OverlayBuilderPage';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/config/:configId" element={<ConfigEditorPage />} />
           <Route path="/profiles" element={<ProfilesPage />} />
           <Route path="/import-export" element={<ImportExportPage />} />
+          <Route path="/overlay-builder" element={<OverlayBuilderPage />} />
         </Routes>
       </IDELayout>
     </BrowserRouter>

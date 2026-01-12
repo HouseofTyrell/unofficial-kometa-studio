@@ -148,7 +148,7 @@ export function OverlayPresetSelector({
 }: OverlayPresetSelectorProps) {
   return (
     <div className={styles.container}>
-      <label className={styles.label}>Select Preset Template:</label>
+      <label className={styles.label}>Preset:</label>
       <select
         value={selectedPresetId}
         onChange={(e) => onPresetChange(e.target.value)}
@@ -156,7 +156,7 @@ export function OverlayPresetSelector({
       >
         {OVERLAY_PRESETS.map((preset) => (
           <option key={preset.id} value={preset.id}>
-            {preset.name} - {preset.description}
+            {preset.name}
           </option>
         ))}
       </select>

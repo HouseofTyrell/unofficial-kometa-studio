@@ -258,4 +258,181 @@ export async function configRoutes(
       };
     }
   });
+
+  // Get overlay files from config
+  fastify.get<{ Params: { id: string } }>('/api/configs/:id/overlay-files', async (request, reply) => {
+    try {
+      const configRecord = configRepo.findById(request.params.id);
+      if (!configRecord) {
+        reply.status(404);
+        return { error: 'Config not found' };
+      }
+
+      // Extract overlay files from all libraries with enhanced metadata
+      const overlayFiles: Array<{
+        libraryName: string;
+        file: any;
+        index: number;
+        // Enhanced metadata
+        overlayType?: string;  // e.g., "ratings", "resolution", "audio_codec"
+        overlayPath?: string;  // git/pmm path
+        level?: string;        // "series", "season", "episode" for TV; "movie" for movies
+        customFilePath?: string; // local file path
+      }> = [];
+
+      if (configRecord.config.libraries) {
+        for (const [libraryName, library] of Object.entries(configRecord.config.libraries)) {
+          if (library && typeof library === 'object' && 'overlay_files' in library) {
+            const files = library.overlay_files as any[];
+            if (Array.isArray(files)) {
+              files.forEach((file, index) => {
+                // Parse overlay file to extract type and level
+                let overlayType = file.default;
+                let overlayPath = file.git || file.pmm;
+                let customFilePath = file.file;
+                let level: string | undefined;
+
+                // Infer level from path or file structure
+                if (overlayPath) {
+                  // Extract from git/pmm path (e.g., "overlays/ratings" -> "ratings")
+                  const pathParts = overlayPath.split('/');
+                  const lastPart = pathParts[pathParts.length - 1];
+                  // Check if it indicates a level
+                  if (lastPart.includes('season')) level = 'season';
+                  else if (lastPart.includes('episode')) level = 'episode';
+                  else if (lastPart.includes('show') || lastPart.includes('series')) level = 'series';
+                }
+
+                // Check template_variables for level indicators
+                if (file.template_variables) {
+                  const vars = file.template_variables;
+                  if (vars.overlay_level) {
+                    level = vars.overlay_level;
+                  } else if (vars.builder_level) {
+                    level = vars.builder_level;
+                  }
+                }
+
+                // If no level found and it's a TV library, default to series
+                if (!level && libraryName && libraryName.toLowerCase().includes('tv')) {
+                  level = 'series';
+                } else if (!level) {
+                  level = 'movie';
+                }
+
+                overlayFiles.push({
+                  libraryName,
+                  file,
+                  index,
+                  overlayType,
+                  overlayPath,
+                  level,
+                  customFilePath,
+                });
+              });
+            }
+          }
+        }
+      }
+
+      // Enhanced debug logging
+      console.log('\n📄 Overlay Files Detection Summary:');
+      console.log(`Total overlays found: ${overlayFiles.length}`);
+
+      // Group by library
+      const byLibrary = overlayFiles.reduce((acc: any, f) => {
+        if (!acc[f.libraryName]) acc[f.libraryName] = [];
+        acc[f.libraryName].push(f);
+        return acc;
+      }, {});
+
+      Object.entries(byLibrary).forEach(([library, files]: [string, any]) => {
+        console.log(`\n  📚 ${library}: ${files.length} overlays`);
+        files.forEach((f: any) => {
+          console.log(`    - ${f.overlayType || 'unknown'} (${f.level}) ${f.overlayPath ? `[${f.overlayPath}]` : ''}`);
+          if (f.file.template_variables) {
+            console.log(`      Template vars:`, Object.keys(f.file.template_variables));
+          }
+        });
+      });
+      console.log('\n');
+
+      return { overlayFiles };
+    } catch (error) {
+      reply.status(400);
+      return {
+        error: 'Failed to get overlay files',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  });
+
+  // Get all overlay assets (images, logos, etc.) from config for preview
+  fastify.get<{ Params: { id: string } }>('/api/configs/:id/overlay-assets', async (request, reply) => {
+    try {
+      const configRecord = configRepo.findById(request.params.id);
+      if (!configRecord) {
+        reply.status(404);
+        return { error: 'Config not found' };
+      }
+
+      // Extract all image/asset URLs from overlay files
+      const assets: Record<string, string> = {};
+
+      if (configRecord.config.libraries) {
+        for (const [libraryName, library] of Object.entries(configRecord.config.libraries)) {
+          if (library && typeof library === 'object' && 'overlay_files' in library) {
+            const files = library.overlay_files as any[];
+            if (Array.isArray(files)) {
+              files.forEach((file) => {
+                // Extract template_variables that contain image URLs
+                if (file.template_variables) {
+                  const vars = file.template_variables;
+
+                  // Check for rating image URLs (rating1_image_url, rating2_image_url, etc.)
+                  Object.keys(vars).forEach((key) => {
+                    if (key.includes('_image_url') || key.includes('_image') || key === 'url') {
+                      const value = vars[key];
+                      if (typeof value === 'string' && (value.startsWith('http') || value.startsWith('/'))) {
+                        // Store with a descriptive key
+                        assets[`${libraryName}_${file.default || 'unknown'}_${key}`] = value;
+                      }
+                    }
+                  });
+
+                  // Check for addon images (used in ratings overlays)
+                  ['rating1_image', 'rating2_image', 'rating3_image'].forEach((ratingKey) => {
+                    if (vars[ratingKey]) {
+                      const imageType = vars[ratingKey]; // e.g., "imdb", "tmdb", "rt_tomato"
+                      // Map to Kometa's default image paths
+                      const kometaImagePath = `https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/rating/${imageType}.png`;
+                      assets[`${libraryName}_${file.default || 'ratings'}_${ratingKey}`] = kometaImagePath;
+                    }
+                  });
+
+                  // Check for custom file paths
+                  if (file.file && typeof file.file === 'string') {
+                    assets[`${libraryName}_${file.default || 'unknown'}_file`] = file.file;
+                  }
+                }
+              });
+            }
+          }
+        }
+      }
+
+      console.log('\n🖼️  Overlay Assets Extracted:', Object.keys(assets).length, 'assets');
+      Object.entries(assets).forEach(([key, url]) => {
+        console.log(`  - ${key}: ${url.substring(0, 80)}...`);
+      });
+
+      return { assets };
+    } catch (error) {
+      reply.status(400);
+      return {
+        error: 'Failed to get overlay assets',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  });
 }

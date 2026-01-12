@@ -25,14 +25,29 @@ This is an **unofficial, community-created project** and is not affiliated with,
 - **Schema Support**: Full support for Kometa's configuration schema
 - **Extras Preservation**: Unknown keys preserved in `extras` fields
 
-### 🎨 Overlay Builder (NEW!)
-- **Visual Editor**: Create overlays with drag-and-drop interface
-- **Live Preview**: See overlays on real TMDB posters instantly
+### 🎨 Overlay Builder (In Progress)
+- **Visual Preview**: See overlays on real TMDB posters instantly
+- **Automatic Overlay Loading**: Overlays automatically appear based on your config when media is selected
+- **Kometa-Compatible Rendering**: Matches Kometa's exact overlay output with proper positioning, sizing, and styling
+- **Smart Overlay Generation**: Overlays adapt to media properties (resolution badges, ratings with logos, codecs)
+- **Rating Badges**: Displays TMDB, IMDb, and Rotten Tomatoes ratings with proper logos and format
+  - TMDB: Shows percentage (e.g., "78%")
+  - IMDb: Shows 0-10 rating (e.g., "8.0")
+  - RT: Shows Fresh/Rotten status with percentage (e.g., "FRESH 83%")
+- **TV Show Hierarchy**: Preview overlays for series posters, season posters, and episode stills
+- **Config & Overlay File Browser**: Load and preview existing overlays from your configuration
+- **Plex Media Server Integration** (Optional):
+  - Fetch real media information (resolution, video codec, audio codec, channels)
+  - Automatic library search by title and year
+  - Display accurate technical metadata for precise overlay previews
+  - Required for audio/video codec overlays (e.g., "DOLBY DV", "TRUE HD ATMOS")
+- **TMDB Integration**: Search movies/TV shows and fetch ratings
+- **Kometa Defaults Repository**: Load official Kometa overlay templates directly
 - **Preset Templates**: Start with pre-built templates (4K, HDR, Rating badges, etc.)
-- **Custom Elements**: Add text, badges, ribbons, and images
-- **TMDB Integration**: Search and preview any movie or TV show
-- **Code View**: Toggle between visual and YAML code views
-- **Save to Config**: Export overlays directly to library configurations
+- **Code View**: View generated Kometa-compatible YAML configuration
+- **Real-time Notifications**: On-page alerts for status updates
+
+**Note**: The Overlay Builder currently focuses on accurate preview and rendering. Full visual editing capabilities (drag-and-drop, custom elements, save to config) are planned for future releases.
 
 ### 🔄 Import/Export
 - **YAML Import**: Import existing `config.yml` files with auto-profile creation
@@ -86,7 +101,10 @@ This is an **unofficial, community-created project** and is not affiliated with,
    - Navigate to **Profiles** in the sidebar
    - Click **Create New Profile**
    - Enter a name (e.g., "Production")
-   - Add your API keys (TMDB, Plex, Radarr, Sonarr, Tautulli, etc.)
+   - Add your API keys and credentials:
+     - **TMDB**: Required for Overlay Builder poster search
+     - **Plex**: Optional but recommended for real media metadata (resolution, codecs)
+     - **Radarr, Sonarr, Tautulli**: Optional for enhanced functionality
    - Use **Test** buttons to verify each connection
    - Toggle **Show Secrets** to reveal/hide your API keys
 
@@ -106,23 +124,44 @@ This is an **unofficial, community-created project** and is not affiliated with,
 1. **Navigate to Overlay Builder**:
    - Click **Overlay Builder** in the sidebar
    - Select your profile (TMDB API key required)
+   - Optionally add Plex server credentials for real media metadata
 
-2. **Choose a Template** (Optional):
+2. **Load Existing Config** (Optional):
+   - Select a config file from the dropdown
+   - Browse and preview existing overlay files
+   - Overlays automatically load when you select media
+
+3. **Search for Media**:
+   - Use the search bar to find movies or TV shows
+   - Select any title to load its poster
+   - **For TV Shows**: Choose between series, season, or episode posters
+   - **Automatic Preview**: Overlays from your config appear automatically based on media properties
+
+4. **Choose a Template** (Optional):
    - Select from preset templates like 4K Badge, HDR Ribbon, Rating Badge
    - Or start from scratch with "+ Badge" or "+ Text"
 
-3. **Customize Your Overlay**:
+5. **View Real Media Information**:
+   - See technical details from Plex (resolution, codecs, audio channels)
+   - View TMDB and IMDb ratings
+   - Overlays adapt automatically to show relevant badges (4K, HDR, ratings, etc.)
+
+6. **Customize Your Overlay**:
    - Select element type (Badge, Text, Ribbon, etc.)
    - Position with X/Y coordinates or drag
    - Customize colors, text, fonts, and sizes
    - Preview changes in real-time on TMDB posters
 
-4. **Search & Preview**:
-   - Use the search bar to find specific movies/TV shows
-   - See how your overlay looks on different posters
-   - Toggle between visual editor and code view
+7. **Load from Kometa Defaults** (Optional):
+   - Click **Load Overlay** to fetch official Kometa templates
+   - Choose overlay type (resolution, audio_codec, ratings, etc.)
+   - Templates automatically populate with your media's data
 
-5. **Save to Config**:
+8. **Toggle Views**:
+   - Switch between visual editor and code view
+   - See the generated YAML in real-time
+
+9. **Save to Config**:
    - Click **Save to Config**
    - Choose a library and overlay file name
    - Overlay YAML is added to your configuration
@@ -146,7 +185,10 @@ kometa-studio/
 │       │   │   ├── layout/      # App layout
 │       │   │   └── overlay/     # Overlay builder components
 │       │   ├── pages/           # Route pages
-│       │   └── services/        # TMDB service
+│       │   └── services/        # External service integrations
+│       │       ├── tmdb.service.ts          # TMDB API (movies, TV, ratings)
+│       │       ├── plex.service.ts          # Plex Media Server integration
+│       │       └── kometa-defaults.service.ts  # Kometa defaults repository
 │       └── public/
 │
 └── packages/

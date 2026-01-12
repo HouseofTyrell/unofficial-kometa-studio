@@ -1,7 +1,8 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+  height: 100%;
 }
 
 .section {
@@ -43,7 +44,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
@@ -123,15 +124,20 @@
 }
 
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
 }
 
 .formRow {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.formRow.fullWidth {
+  grid-column: 1 / -1;
 }
 
 .formRow label {
@@ -157,4 +163,22 @@
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+
+.topSection {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.editorFormSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  flex: 1;
+  min-width: 300px;
 }

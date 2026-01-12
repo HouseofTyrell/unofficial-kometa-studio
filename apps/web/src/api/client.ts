@@ -78,6 +78,8 @@ export const configApi = {
   deleteAll: () => request<{ success: boolean; deletedCount: number }>('/api/configs', {
     method: 'DELETE',
   }),
+  getOverlayFiles: (id: string) => request<{ overlayFiles: Array<{ libraryName: string; file: any; index: number }> }>(`/api/configs/${id}/overlay-files`),
+  getOverlayAssets: (id: string) => request<{ assets: Record<string, string> }>(`/api/configs/${id}/overlay-assets`),
 };
 
 // Profiles

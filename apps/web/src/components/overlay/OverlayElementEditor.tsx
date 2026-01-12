@@ -16,6 +16,24 @@ export function OverlayElementEditor({
 }: OverlayElementEditorProps) {
   const selectedElement = selectedElementIndex !== null ? elements[selectedElementIndex] : null;
 
+  // Helper to get display values for position
+  const getPositionDisplay = (element: OverlayElement) => {
+    if (element.position) {
+      return {
+        horizontal: element.position.horizontal || 'left',
+        vertical: element.position.vertical || 'top',
+        horizontalOffset: element.offset?.horizontal || 0,
+        verticalOffset: element.offset?.vertical || 0,
+      };
+    }
+    return {
+      horizontal: 'left',
+      vertical: 'top',
+      horizontalOffset: element.x || 0,
+      verticalOffset: element.y || 0,
+    };
+  };
+
   const updateElement = (index: number, updates: Partial<OverlayElement>) => {
     const newElements = [...elements];
     newElements[index] = { ...newElements[index], ...updates };
@@ -72,6 +90,7 @@ export function OverlayElementEditor({
 
   return (
     <div className={styles.container}>
+      {/* Add buttons */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>Add Element</h3>
         <div className={styles.buttonGroup}>
@@ -90,68 +109,167 @@ export function OverlayElementEditor({
         </div>
       </div>
 
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Elements ({elements.length})</h3>
-        <div className={styles.elementList}>
-          {elements.map((element, index) => (
-            <div
-              key={index}
-              className={`${styles.elementItem} ${selectedElementIndex === index ? styles.selected : ''}`}
-              onClick={() => onSelectedElementChange(index)}
-            >
-              <div className={styles.elementInfo}>
-                <span className={styles.elementType}>{element.type.toUpperCase()}</span>
-                {element.text && (
-                  <span className={styles.elementText}>"{element.text}"</span>
-                )}
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeElement(index);
-                }}
-                className={styles.removeButton}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-          {elements.length === 0 && (
-            <div className={styles.emptyMessage}>No elements yet. Add one above.</div>
-          )}
+      {/* Element list and editor side by side */}
+      <div className={styles.topSection}>
+        {/* Element list */}
+        <div className={styles.section} style={{ flex: '0 0 280px' }}>
+          <h3 className={styles.sectionTitle}>Elements ({elements.length})</h3>
+          <div className={styles.elementList}>
+            {elements.map((element, index) => {
+              // Create descriptive label for element
+              const getElementLabel = () => {
+                const text = element.text || element.content;
+                if (text) {
+                  return `"${text}"`;
+                }
+                if (element.type === 'image' && element.imageUrl) {
+                  const filename = element.imageUrl.split('/').pop() || 'Image';
+                  return filename.length > 20 ? filename.substring(0, 20) + '...' : filename;
+                }
+                return 'No content';
+              };
+
+              // Get position info for additional context
+              const getPositionInfo = () => {
+                if (element.position) {
+                  const h = element.position.horizontal || 'left';
+                  const v = element.position.vertical || 'top';
+                  return ` • ${h}-${v}`;
+                }
+                return '';
+              };
+
+              return (
+                <div
+                  key={index}
+                  className={`${styles.elementItem} ${selectedElementIndex === index ? styles.selected : ''}`}
+                  onClick={() => onSelectedElementChange(index)}
+                >
+                  <div className={styles.elementInfo}>
+                    <span className={styles.elementType}>
+                      {element.type.toUpperCase()}{getPositionInfo()}
+                    </span>
+                    <span className={styles.elementText}>{getElementLabel()}</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeElement(index);
+                    }}
+                    className={styles.removeButton}
+                  >
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+            {elements.length === 0 && (
+              <div className={styles.emptyMessage}>No elements yet. Add one above.</div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {selectedElement !== null && selectedElementIndex !== null && (
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>
-            Edit {selectedElement.type.toUpperCase()}
-          </h3>
+        {/* Edit form */}
+        {selectedElement !== null && selectedElementIndex !== null ? (
+          <div className={styles.editorFormSection}>
+            <h3 className={styles.sectionTitle}>
+              Edit {selectedElement.type.toUpperCase()}
+            </h3>
 
-          <div className={styles.form}>
-            <div className={styles.formRow}>
-              <label>X Position:</label>
-              <input
-                type="number"
-                value={selectedElement.x}
-                onChange={(e) =>
-                  updateElement(selectedElementIndex, { x: Number(e.target.value) })
-                }
-                className={styles.input}
-              />
-            </div>
+            <div className={styles.form}>
+            {selectedElement.position ? (
+              <>
+                {/* Position-based layout (Kometa style) */}
+                <div className={styles.formRow}>
+                  <label>Horizontal Align:</label>
+                  <select
+                    value={selectedElement.position.horizontal || 'left'}
+                    onChange={(e) =>
+                      updateElement(selectedElementIndex, {
+                        position: { ...selectedElement.position, horizontal: e.target.value as any }
+                      })
+                    }
+                    className={styles.input}
+                  >
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
 
-            <div className={styles.formRow}>
-              <label>Y Position:</label>
-              <input
-                type="number"
-                value={selectedElement.y}
-                onChange={(e) =>
-                  updateElement(selectedElementIndex, { y: Number(e.target.value) })
-                }
-                className={styles.input}
-              />
-            </div>
+                <div className={styles.formRow}>
+                  <label>Vertical Align:</label>
+                  <select
+                    value={selectedElement.position.vertical || 'top'}
+                    onChange={(e) =>
+                      updateElement(selectedElementIndex, {
+                        position: { ...selectedElement.position, vertical: e.target.value as any }
+                      })
+                    }
+                    className={styles.input}
+                  >
+                    <option value="top">Top</option>
+                    <option value="center">Center</option>
+                    <option value="bottom">Bottom</option>
+                  </select>
+                </div>
+
+                <div className={styles.formRow}>
+                  <label>Horizontal Offset:</label>
+                  <input
+                    type="number"
+                    value={selectedElement.offset?.horizontal || 0}
+                    onChange={(e) =>
+                      updateElement(selectedElementIndex, {
+                        offset: { ...selectedElement.offset, horizontal: Number(e.target.value) }
+                      })
+                    }
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formRow}>
+                  <label>Vertical Offset:</label>
+                  <input
+                    type="number"
+                    value={selectedElement.offset?.vertical || 0}
+                    onChange={(e) =>
+                      updateElement(selectedElementIndex, {
+                        offset: { ...selectedElement.offset, vertical: Number(e.target.value) }
+                      })
+                    }
+                    className={styles.input}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Absolute positioning */}
+                <div className={styles.formRow}>
+                  <label>X Position:</label>
+                  <input
+                    type="number"
+                    value={selectedElement.x || 0}
+                    onChange={(e) =>
+                      updateElement(selectedElementIndex, { x: Number(e.target.value) })
+                    }
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formRow}>
+                  <label>Y Position:</label>
+                  <input
+                    type="number"
+                    value={selectedElement.y || 0}
+                    onChange={(e) =>
+                      updateElement(selectedElementIndex, { y: Number(e.target.value) })
+                    }
+                    className={styles.input}
+                  />
+                </div>
+              </>
+            )}
 
             {(selectedElement.type === 'badge' ||
               selectedElement.type === 'ribbon' ||
@@ -195,10 +313,15 @@ export function OverlayElementEditor({
                   <label>Text:</label>
                   <input
                     type="text"
-                    value={selectedElement.text || ''}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, { text: e.target.value })
-                    }
+                    value={selectedElement.text || selectedElement.content || ''}
+                    onChange={(e) => {
+                      // Update both text and content to stay in sync
+                      const updates: any = { text: e.target.value };
+                      if (selectedElement.content !== undefined) {
+                        updates.content = e.target.value;
+                      }
+                      updateElement(selectedElementIndex, updates);
+                    }}
                     className={styles.input}
                   />
                 </div>
@@ -310,8 +433,15 @@ export function OverlayElementEditor({
               />
             </div>
           </div>
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className={styles.editorFormSection}>
+            <div className={styles.emptyMessage} style={{ padding: '40px', textAlign: 'center' }}>
+              Select an element to edit its properties
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

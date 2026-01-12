@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './IDELayout.module.css';
 import { Sidebar } from './Sidebar';
 import { YamlPreviewPanel } from './YamlPreviewPanel';
@@ -10,6 +11,13 @@ interface IDELayoutProps {
 export function IDELayout({ children }: IDELayoutProps) {
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [previewWidth, setPreviewWidth] = useState(400);
+  const location = useLocation();
+
+  // Hide preview panel on pages that don't need it
+  const showPreviewPanel =
+    location.pathname !== '/overlay-builder' &&
+    location.pathname !== '/profiles' &&
+    location.pathname !== '/import-export';
 
   return (
     <div className={styles.layout}>
@@ -20,10 +28,14 @@ export function IDELayout({ children }: IDELayoutProps) {
       <div className={styles.main}>
         {children}
       </div>
-      <div className={styles.resizer} />
-      <div className={styles.preview} style={{ width: previewWidth }}>
-        <YamlPreviewPanel />
-      </div>
+      {showPreviewPanel && (
+        <>
+          <div className={styles.resizer} />
+          <div className={styles.preview} style={{ width: previewWidth }}>
+            <YamlPreviewPanel />
+          </div>
+        </>
+      )}
     </div>
   );
 }

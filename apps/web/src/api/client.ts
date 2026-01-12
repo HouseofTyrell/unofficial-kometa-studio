@@ -117,3 +117,67 @@ export const profileApi = {
       method: 'DELETE',
     }),
 };
+
+// Proxy APIs - route external API calls through backend
+export const proxyApi = {
+  // TMDB
+  tmdb: {
+    search: (profileId: string, query: string, type: 'movie' | 'tv') =>
+      request<{ results: any[] }>('/api/proxy/tmdb/search', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, query, type }),
+      }),
+    get: (profileId: string, type: 'movie' | 'tv', id: number) =>
+      request<any>('/api/proxy/tmdb/get', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, type, id }),
+      }),
+    getSeason: (profileId: string, tvId: number, seasonNumber: number) =>
+      request<any>('/api/proxy/tmdb/season', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, tvId, seasonNumber }),
+      }),
+    getEpisode: (profileId: string, tvId: number, seasonNumber: number, episodeNumber: number) =>
+      request<any>('/api/proxy/tmdb/episode', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, tvId, seasonNumber, episodeNumber }),
+      }),
+    find: (profileId: string, externalId: string, externalSource = 'imdb_id') =>
+      request<any>('/api/proxy/tmdb/find', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, externalId, externalSource }),
+      }),
+  },
+
+  // Plex
+  plex: {
+    search: (profileId: string, query: string, type: 'movie' | 'show') =>
+      request<any>('/api/proxy/plex/search', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, query, type }),
+      }),
+    getSeasons: (profileId: string, showKey: string) =>
+      request<any>('/api/proxy/plex/seasons', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, showKey }),
+      }),
+    getEpisodes: (profileId: string, seasonKey: string) =>
+      request<any>('/api/proxy/plex/episodes', {
+        method: 'POST',
+        body: JSON.stringify({ profileId, seasonKey }),
+      }),
+  },
+
+  // Connection testing
+  testConnection: (
+    service: 'tmdb' | 'plex' | 'radarr' | 'sonarr' | 'tautulli' | 'mdblist' | 'trakt',
+    secrets: Record<string, string>
+  ) =>
+    request<{ success: boolean; message?: string; error?: string; version?: string }>(
+      '/api/proxy/test-connection',
+      {
+        method: 'POST',
+        body: JSON.stringify({ service, secrets }),
+      }
+    ),
+};

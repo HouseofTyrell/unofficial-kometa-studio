@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './ProfilesPage.module.css';
-import { profileApi } from '../api/client';
+import { profileApi, proxyApi } from '../api/client';
 
 export function ProfilesPage() {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -173,104 +173,34 @@ export function ProfilesPage() {
         return;
       }
 
-      switch (service) {
-        case 'tmdb': {
-          if (!secrets.apikey) {
-            showNotification('TMDB API key is required', 'error');
-            return;
-          }
-          const tmdbResponse = await fetch(
-            `https://api.themoviedb.org/3/movie/603?api_key=${secrets.apikey}`
-          );
-          if (tmdbResponse.ok) {
-            showNotification('TMDB connection successful!', 'success');
-          } else {
-            const error = await tmdbResponse.json();
-            showNotification(
-              `TMDB connection failed: ${error.status_message || tmdbResponse.statusText}`,
-              'error'
-            );
-          }
-          break;
-        }
+      // Validate service is a supported type
+      const supportedServices = [
+        'tmdb',
+        'plex',
+        'radarr',
+        'sonarr',
+        'tautulli',
+        'mdblist',
+        'trakt',
+      ];
+      if (!supportedServices.includes(service)) {
+        showNotification('Test not implemented for this service', 'info');
+        return;
+      }
 
-        case 'plex': {
-          if (!secrets.url || !secrets.token) {
-            showNotification('Plex URL and token are required', 'error');
-            return;
-          }
-          const plexResponse = await fetch(`${secrets.url}/identity`, {
-            headers: { 'X-Plex-Token': secrets.token },
-          });
-          if (plexResponse.ok) {
-            showNotification('Plex connection successful!', 'success');
-          } else {
-            showNotification(`Plex connection failed: ${plexResponse.statusText}`, 'error');
-          }
-          break;
-        }
+      // Use proxy API to test connection (keeps secrets on backend)
+      const result = await proxyApi.testConnection(
+        service as 'tmdb' | 'plex' | 'radarr' | 'sonarr' | 'tautulli' | 'mdblist' | 'trakt',
+        secrets
+      );
 
-        case 'radarr':
-        case 'sonarr': {
-          if (!secrets.url || !secrets.token) {
-            showNotification(
-              `${service.charAt(0).toUpperCase() + service.slice(1)} URL and token are required`,
-              'error'
-            );
-            return;
-          }
-          const arrResponse = await fetch(`${secrets.url}/api/v3/system/status`, {
-            headers: { 'X-Api-Key': secrets.token },
-          });
-          if (arrResponse.ok) {
-            const data = await arrResponse.json();
-            showNotification(
-              `${service.charAt(0).toUpperCase() + service.slice(1)} connection successful! Version: ${data.version}`,
-              'success'
-            );
-          } else {
-            showNotification(
-              `${service.charAt(0).toUpperCase() + service.slice(1)} connection failed: ${arrResponse.statusText}`,
-              'error'
-            );
-          }
-          break;
-        }
-
-        case 'tautulli': {
-          if (!secrets.url || !secrets.apikey) {
-            showNotification('Tautulli URL and API key are required', 'error');
-            return;
-          }
-          const tautulliResponse = await fetch(
-            `${secrets.url}/api/v2?apikey=${secrets.apikey}&cmd=get_server_info`
-          );
-          if (tautulliResponse.ok) {
-            showNotification('Tautulli connection successful!', 'success');
-          } else {
-            showNotification(`Tautulli connection failed: ${tautulliResponse.statusText}`, 'error');
-          }
-          break;
-        }
-
-        case 'mdblist':
-          if (!secrets.apikey) {
-            showNotification('MDBList API key is required', 'error');
-            return;
-          }
-          showNotification('MDBList test not yet implemented - key saved', 'info');
-          break;
-
-        case 'trakt':
-          if (!secrets.client_id || !secrets.client_secret) {
-            showNotification('Trakt client ID and secret are required', 'error');
-            return;
-          }
-          showNotification('Trakt test not yet implemented - credentials saved', 'info');
-          break;
-
-        default:
-          showNotification('Test not implemented for this service', 'info');
+      if (result.success) {
+        const message = result.version
+          ? `${result.message} Version: ${result.version}`
+          : result.message || `${service} connection successful!`;
+        showNotification(message, 'success');
+      } else {
+        showNotification(result.error || `${service} connection failed`, 'error');
       }
     } catch (error) {
       console.error(`Test ${service} failed:`, error);

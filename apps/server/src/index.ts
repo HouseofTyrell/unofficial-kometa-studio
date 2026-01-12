@@ -8,6 +8,7 @@ import { validateMasterKey } from './crypto/encryption.js';
 import { healthRoutes } from './routes/health.routes.js';
 import { configRoutes } from './routes/config.routes.js';
 import { profileRoutes } from './routes/profile.routes.js';
+import { proxyRoutes } from './routes/proxy.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -68,6 +69,7 @@ async function start() {
   await fastify.register(healthRoutes);
   await fastify.register(configRoutes, { configRepo, profileRepo });
   await fastify.register(profileRoutes, { profileRepo });
+  await fastify.register(proxyRoutes, { profileRepo });
 
   // Error handler
   fastify.setErrorHandler((error, request, reply) => {

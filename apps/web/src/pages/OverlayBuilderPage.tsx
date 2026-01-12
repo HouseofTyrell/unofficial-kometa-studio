@@ -46,7 +46,7 @@ export function OverlayBuilderPage() {
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<any[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
-  const [tmdbApiKey, setTmdbApiKey] = useState<string>('');
+  const [profileReady, setProfileReady] = useState(false);
   const [needsApiKey, setNeedsApiKey] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -109,21 +109,21 @@ export function OverlayBuilderPage() {
   }, [notification]);
 
   useEffect(() => {
-    if (tmdbApiKey) {
+    if (profileReady && selectedProfile) {
       loadDefaultPreview();
     }
-  }, [tmdbApiKey, mediaType]);
+  }, [profileReady, selectedProfile, mediaType]);
 
   // Load seasons when a TV show is selected
   useEffect(() => {
-    if (mediaType === 'tv' && currentMedia && tmdbApiKey) {
+    if (mediaType === 'tv' && currentMedia && profileReady && selectedProfile) {
       loadSeasons();
     }
-  }, [currentMedia, mediaType, tmdbApiKey]);
+  }, [currentMedia, mediaType, profileReady, selectedProfile]);
 
   // Load poster when poster type or season/episode changes
   useEffect(() => {
-    if (tmdbApiKey && currentMedia) {
+    if (profileReady && selectedProfile && currentMedia) {
       loadPosterForType();
     }
   }, [posterType, selectedSeason, selectedEpisode]);
@@ -223,16 +223,19 @@ export function OverlayBuilderPage() {
   const checkProfileForApiKey = async (profileId: string) => {
     try {
       const profile = await profileApi.get(profileId);
-      const apiKey = profile.secrets?.tmdb?.apikey;
+      // Check if TMDB API key is configured (secrets are masked on client)
+      const hasTmdbConfig = profile.secrets?.tmdb?.apikey;
 
-      if (apiKey) {
-        setTmdbApiKey(apiKey);
+      if (hasTmdbConfig) {
+        setProfileReady(true);
         setNeedsApiKey(false);
       } else {
+        setProfileReady(false);
         setNeedsApiKey(true);
       }
     } catch (error) {
       console.error('Failed to check profile for API key:', error);
+      setProfileReady(false);
       setNeedsApiKey(true);
     }
   };
@@ -257,7 +260,7 @@ export function OverlayBuilderPage() {
       };
 
       await profileApi.update(selectedProfile, { secrets: updatedSecrets });
-      setTmdbApiKey(key);
+      setProfileReady(true);
       setNeedsApiKey(false);
       setNotification({
         message: 'TMDB API key saved to profile!',
@@ -273,10 +276,10 @@ export function OverlayBuilderPage() {
   };
 
   const loadDefaultPreview = async () => {
-    if (!tmdbApiKey) return;
+    if (!selectedProfile || !profileReady) return;
 
     try {
-      const tmdbService = new TmdbService(tmdbApiKey);
+      const tmdbService = new TmdbService(selectedProfile);
       const defaultTitle =
         mediaType === 'movie' ? DEFAULT_PREVIEW_TITLES.movie : DEFAULT_PREVIEW_TITLES.tv;
 
@@ -316,7 +319,7 @@ export function OverlayBuilderPage() {
     if (!currentMedia || !('name' in currentMedia)) return;
 
     try {
-      const tmdbService = new TmdbService(tmdbApiKey);
+      const tmdbService = new TmdbService(selectedProfile);
       const tvShow = await tmdbService.getTVShow(currentMedia.id);
 
       if (tvShow.seasons && tvShow.seasons.length > 0) {
@@ -340,7 +343,7 @@ export function OverlayBuilderPage() {
     if (!currentMedia || !('name' in currentMedia)) return;
 
     try {
-      const tmdbService = new TmdbService(tmdbApiKey);
+      const tmdbService = new TmdbService(selectedProfile);
       const season = await tmdbService.getSeason(currentMedia.id, seasonNumber);
 
       if (season.episodes && season.episodes.length > 0) {
@@ -359,7 +362,7 @@ export function OverlayBuilderPage() {
   const loadPosterForType = async () => {
     if (!currentMedia) return;
 
-    const tmdbService = new TmdbService(tmdbApiKey);
+    const tmdbService = new TmdbService(selectedProfile);
 
     try {
       if (mediaType === 'movie') {
@@ -391,7 +394,7 @@ export function OverlayBuilderPage() {
   const handleMediaSelect = async (media: TmdbMovie | TmdbTVShow) => {
     setCurrentMedia(media);
     setPosterType('show'); // Reset to show poster
-    const tmdbService = new TmdbService(tmdbApiKey);
+    const tmdbService = new TmdbService(selectedProfile);
     const poster = tmdbService.getPosterUrl(media.poster_path, 'w500');
     setPosterUrl(poster);
 
@@ -505,7 +508,7 @@ export function OverlayBuilderPage() {
 
   const loadMediaMetadata = async (media: TmdbMovie | TmdbTVShow) => {
     try {
-      const tmdbService = new TmdbService(tmdbApiKey);
+      const tmdbService = new TmdbService(selectedProfile);
       const title = 'title' in media ? media.title : media.name;
       const year =
         'release_date' in media
@@ -541,10 +544,7 @@ export function OverlayBuilderPage() {
       try {
         const profile = await profileApi.get(selectedProfile);
         if (profile.secrets?.plex?.url && profile.secrets?.plex?.token) {
-          const plexService = new PlexService({
-            url: profile.secrets.plex.url,
-            token: profile.secrets.plex.token,
-          });
+          const plexService = new PlexService(selectedProfile);
 
           let plexInfo: PlexMediaInfo | null = null;
           if (mediaType === 'movie') {
@@ -563,23 +563,16 @@ export function OverlayBuilderPage() {
             // Merge Plex ratings with TMDB ratings
             // Plex ratings come from Kometa's mass_*_rating_update operations
             if (plexInfo.ratings) {
-              console.log('🎯 Merging Plex ratings with TMDB ratings:', {
-                plex: plexInfo.ratings,
-                tmdb: metadata.ratings,
-              });
-
               // Prefer Plex ratings (which come from Kometa) over TMDB direct fetch
               metadata.ratings = {
                 tmdb: plexInfo.ratings.tmdb || metadata.ratings?.tmdb || 0,
                 imdb: plexInfo.ratings.imdb || metadata.ratings?.imdb,
               };
-
-              console.log('  ✅ Final merged ratings:', metadata.ratings);
             }
           }
         }
       } catch (error) {
-        console.log('Plex info not available:', error);
+        console.error('Plex info not available:', error);
         // Not critical, continue without Plex data
       }
 
@@ -687,7 +680,7 @@ export function OverlayBuilderPage() {
         </select>
 
         <MediaSearch
-          tmdbService={new TmdbService(tmdbApiKey)}
+          tmdbService={new TmdbService(selectedProfile)}
           mediaType={mediaType}
           onMediaSelect={handleMediaSelect}
         />

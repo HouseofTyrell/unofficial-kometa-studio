@@ -1,6 +1,9 @@
 /**
  * Service for fetching media information from Plex Media Server
+ * Uses backend proxy to keep API tokens secure
  */
+
+import { proxyApi } from '../api/client';
 
 export interface PlexMediaInfo {
   title: string;
@@ -23,20 +26,14 @@ export interface PlexMediaInfo {
     container?: string; // e.g., "mkv", "mp4"
     bitrate?: number;
   };
-}
-
-export interface PlexConnectionConfig {
-  url: string;
-  token: string;
+  key?: string; // Plex key for further API calls
 }
 
 export class PlexService {
-  private url: string;
-  private token: string;
+  private profileId: string;
 
-  constructor(config: PlexConnectionConfig) {
-    this.url = config.url.replace(/\/$/, ''); // Remove trailing slash
-    this.token = config.token;
+  constructor(profileId: string) {
+    this.profileId = profileId;
   }
 
   /**
@@ -44,19 +41,7 @@ export class PlexService {
    */
   async searchMovie(title: string, year?: number): Promise<PlexMediaInfo | null> {
     try {
-      const searchUrl = `${this.url}/search?query=${encodeURIComponent(title)}&type=1`;
-      const response = await fetch(searchUrl, {
-        headers: {
-          'X-Plex-Token': this.token,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Plex API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await proxyApi.plex.search(this.profileId, title, 'movie');
       const results = data.MediaContainer?.Metadata || [];
 
       // Find best match
@@ -81,19 +66,7 @@ export class PlexService {
    */
   async searchTVShow(title: string): Promise<PlexMediaInfo | null> {
     try {
-      const searchUrl = `${this.url}/search?query=${encodeURIComponent(title)}&type=2`;
-      const response = await fetch(searchUrl, {
-        headers: {
-          'X-Plex-Token': this.token,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Plex API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await proxyApi.plex.search(this.profileId, title, 'show');
       const results = data.MediaContainer?.Metadata || [];
 
       if (results.length === 0) {
@@ -116,20 +89,8 @@ export class PlexService {
     episodeNumber: number
   ): Promise<PlexMediaInfo | null> {
     try {
-      // First get the season
-      const seasonUrl = `${this.url}${showKey}/children`;
-      const seasonResponse = await fetch(seasonUrl, {
-        headers: {
-          'X-Plex-Token': this.token,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!seasonResponse.ok) {
-        return null;
-      }
-
-      const seasonData = await seasonResponse.json();
+      // Get the seasons for this show
+      const seasonData = await proxyApi.plex.getSeasons(this.profileId, showKey);
       const seasons = seasonData.MediaContainer?.Metadata || [];
       const season = seasons.find((s: any) => s.index === seasonNumber);
 
@@ -137,20 +98,8 @@ export class PlexService {
         return null;
       }
 
-      // Then get episodes in that season
-      const episodeUrl = `${this.url}${season.key}`;
-      const episodeResponse = await fetch(episodeUrl, {
-        headers: {
-          'X-Plex-Token': this.token,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!episodeResponse.ok) {
-        return null;
-      }
-
-      const episodeData = await episodeResponse.json();
+      // Get episodes in that season
+      const episodeData = await proxyApi.plex.getEpisodes(this.profileId, season.key);
       const episodes = episodeData.MediaContainer?.Metadata || [];
       const episode = episodes.find((e: any) => e.index === episodeNumber);
 
@@ -169,13 +118,6 @@ export class PlexService {
    * Extract media information from Plex metadata
    */
   private extractMediaInfo(metadata: any): PlexMediaInfo {
-    console.log('🔍 Extracting Plex media info for:', metadata.title);
-    console.log('  Raw Plex ratings:', {
-      rating: metadata.rating,
-      audienceRating: metadata.audienceRating,
-      Ratings: metadata.Rating,
-    });
-
     const info: PlexMediaInfo = {
       title: metadata.title,
       year: metadata.year,
@@ -183,11 +125,11 @@ export class PlexService {
       audienceRating: metadata.audienceRating,
       criticRating: metadata.rating, // Plex uses 'rating' for critic score
       duration: metadata.duration,
+      key: metadata.key,
     };
 
     // Extract ratings from Plex's Rating array
     // Kometa's mass_*_rating_update operations populate these fields
-    // The Rating array contains detailed rating information with source identifiers
     if (metadata.Rating && Array.isArray(metadata.Rating)) {
       info.ratings = {
         imdb: undefined,
@@ -195,45 +137,26 @@ export class PlexService {
         rottenTomatoes: undefined,
       };
 
-      console.log('  Processing Rating array:', metadata.Rating.length, 'entries');
-
       for (const ratingEntry of metadata.Rating) {
-        console.log('    Rating entry:', {
-          type: ratingEntry.type,
-          value: ratingEntry.value,
-          image: ratingEntry.image,
-        });
-
         // Check the image/type to determine the source
-        // Plex uses different identifiers based on the rating source
         if (ratingEntry.image?.includes('imdb') || ratingEntry.type === 'audience') {
-          // In Kometa configs, critic rating is often set to IMDb via mass_critic_rating_update: imdb
-          // This populates the 'rating' field with IMDb rating
           info.ratings.imdb = parseFloat(ratingEntry.value);
-          console.log('    ✅ Found IMDb rating:', info.ratings.imdb);
         } else if (
           ratingEntry.image?.includes('themoviedb') ||
           ratingEntry.image?.includes('tmdb')
         ) {
           info.ratings.tmdb = parseFloat(ratingEntry.value);
-          console.log('    ✅ Found TMDB rating:', info.ratings.tmdb);
         } else if (ratingEntry.image?.includes('rottentomatoes')) {
           info.ratings.rottenTomatoes = parseFloat(ratingEntry.value);
-          console.log('    ✅ Found RT rating:', info.ratings.rottenTomatoes);
         }
       }
     }
 
     // Fallback: If Rating array doesn't have IMDb, check if 'rating' field contains IMDb
-    // Kometa's mass_critic_rating_update: imdb puts the IMDb rating in the main 'rating' field
     if (!info.ratings?.imdb && metadata.rating) {
-      // If we know the critic rating is IMDb (based on user's Kometa config), use it
-      console.log('  ℹ️ Using main rating field as potential IMDb rating:', metadata.rating);
       if (!info.ratings) info.ratings = {};
       info.ratings.imdb = metadata.rating;
     }
-
-    console.log('  Final extracted ratings:', info.ratings);
 
     // Extract media details from the first Media object
     const media = metadata.Media?.[0];
@@ -308,23 +231,5 @@ export class PlexService {
     };
 
     return channelMap[channels] || `${channels}ch`;
-  }
-
-  /**
-   * Test connection to Plex server
-   */
-  async testConnection(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.url}/`, {
-        headers: {
-          'X-Plex-Token': this.token,
-          Accept: 'application/json',
-        },
-      });
-
-      return response.ok;
-    } catch (error) {
-      return false;
-    }
   }
 }

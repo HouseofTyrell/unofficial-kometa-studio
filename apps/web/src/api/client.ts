@@ -171,7 +171,7 @@ export const proxyApi = {
   // Connection testing
   testConnection: (
     service: 'tmdb' | 'plex' | 'radarr' | 'sonarr' | 'tautulli' | 'mdblist' | 'trakt',
-    secrets: Record<string, string>
+    secrets: Record<string, unknown>
   ) =>
     request<{ success: boolean; message?: string; error?: string; version?: string }>(
       '/api/proxy/test-connection',

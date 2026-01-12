@@ -44,6 +44,7 @@ export const ProfileSecretsSchema = z.object({
 
   trakt: z
     .object({
+      client_id: z.string().optional(),
       client_secret: z.string().optional(),
       authorization: z
         .object({
@@ -106,6 +107,7 @@ export const MaskedProfileSchema = ProfileSchema.extend({
       .optional(),
     trakt: z
       .object({
+        client_id: z.string().optional(),
         client_secret: z.string().optional(), // Masked
         authorization: z
           .object({

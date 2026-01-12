@@ -362,31 +362,32 @@ export function PosterPreview({
   const renderImageElement = async (ctx: CanvasRenderingContext2D, element: OverlayElement) => {
     const imageUrl = element.imageUrl || element.content;
     if (!imageUrl) return;
-    if (!element.x || !element.y) return;
+    if (element.x === undefined || element.y === undefined) return;
 
+    const elementX = element.x;
+    const elementY = element.y;
     const img = new Image();
     img.crossOrigin = 'anonymous';
 
-    await new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve) => {
       img.onload = () => {
         const w = element.width || img.width;
         const h = element.height || img.height;
-        ctx.drawImage(img, element.x, element.y, w, h);
+        ctx.drawImage(img, elementX, elementY, w, h);
         resolve();
       };
       img.onerror = () => {
         // If image fails to load, show a placeholder
-        console.warn(`Failed to load image: ${imageUrl}`);
         ctx.fillStyle = '#333';
-        ctx.fillRect(element.x, element.y, element.width || 200, element.height || 100);
+        ctx.fillRect(elementX, elementY, element.width || 200, element.height || 100);
         ctx.fillStyle = '#999';
         ctx.font = '14px system-ui';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
           imageUrl.split('/').pop() || 'Image',
-          element.x + (element.width || 200) / 2,
-          element.y + (element.height || 100) / 2
+          elementX + (element.width || 200) / 2,
+          elementY + (element.height || 100) / 2
         );
         resolve();
       };

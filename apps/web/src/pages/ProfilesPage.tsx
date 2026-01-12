@@ -2,18 +2,41 @@ import { useState, useEffect } from 'react';
 import styles from './ProfilesPage.module.css';
 import { profileApi, proxyApi } from '../api/client';
 import { ConfirmDialog } from '../components/shared/ConfirmDialog';
+import type { MaskedProfile, ProfileSecrets } from '@kometa-studio/shared';
+
+// Valid service names for secrets
+type ServiceName = 'plex' | 'tmdb' | 'tautulli' | 'mdblist' | 'radarr' | 'sonarr' | 'trakt';
+
+// Form data for creating/editing profiles
+interface ProfileFormData {
+  name: string;
+  description?: string;
+  secrets: ProfileSecrets;
+}
+
+// Helper to safely access nested secret values
+function getNestedSecretValue(
+  secrets: ProfileSecrets | undefined,
+  service: ServiceName,
+  field: string
+): string | undefined {
+  if (!secrets) return undefined;
+  const serviceSecrets = secrets[service];
+  if (!serviceSecrets || typeof serviceSecrets !== 'object') return undefined;
+  return (serviceSecrets as Record<string, string | undefined>)[field];
+}
 
 export function ProfilesPage() {
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [profiles, setProfiles] = useState<MaskedProfile[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<MaskedProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNewForm, setShowNewForm] = useState(false);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     description: '',
     secrets: {},
   });
-  const [unmaskedSecrets, setUnmaskedSecrets] = useState<any>({});
+  const [unmaskedSecrets, setUnmaskedSecrets] = useState<ProfileSecrets>({});
   const [testing, setTesting] = useState<Record<string, boolean>>({});
   const [showSecrets, setShowSecrets] = useState(false);
   const [notification, setNotification] = useState<{
@@ -67,27 +90,37 @@ export function ProfilesPage() {
 
     try {
       // Merge unmasked secrets into formData before saving
-      const dataToSave = {
-        ...formData,
-        secrets: {
-          ...formData.secrets,
-        },
-      };
+      const mergedSecrets: ProfileSecrets = { ...formData.secrets };
 
       // Override with unmasked values where available
-      Object.keys(unmaskedSecrets).forEach((service) => {
-        if (unmaskedSecrets[service]) {
-          dataToSave.secrets[service] = {
-            ...dataToSave.secrets[service],
-            ...unmaskedSecrets[service],
-          };
+      const services: ServiceName[] = [
+        'plex',
+        'tmdb',
+        'tautulli',
+        'mdblist',
+        'radarr',
+        'sonarr',
+        'trakt',
+      ];
+      for (const service of services) {
+        const unmasked = unmaskedSecrets[service];
+        if (unmasked) {
+          mergedSecrets[service] = {
+            ...mergedSecrets[service],
+            ...unmasked,
+          } as ProfileSecrets[typeof service];
         }
-      });
+      }
 
-      if (selectedProfile) {
+      const dataToSave = {
+        ...formData,
+        secrets: mergedSecrets,
+      };
+
+      if (selectedProfile?.id) {
         await profileApi.update(selectedProfile.id, dataToSave);
         setNotification({ message: 'Profile updated successfully', type: 'success' });
-      } else {
+      } else if (!selectedProfile) {
         await profileApi.create(dataToSave);
         setNotification({ message: 'Profile created successfully', type: 'success' });
         setShowNewForm(false);
@@ -125,7 +158,7 @@ export function ProfilesPage() {
     setDeleteConfirm({ isOpen: false, profileId: null });
   };
 
-  const handleSecretChange = (service: string, field: string, value: string) => {
+  const handleSecretChange = (service: ServiceName, field: string, value: string) => {
     setFormData({
       ...formData,
       secrets: {
@@ -133,7 +166,7 @@ export function ProfilesPage() {
         [service]: {
           ...formData.secrets?.[service],
           [field]: value || undefined,
-        },
+        } as ProfileSecrets[typeof service],
       },
     });
 
@@ -143,7 +176,7 @@ export function ProfilesPage() {
       [service]: {
         ...unmaskedSecrets?.[service],
         [field]: value || undefined,
-      },
+      } as ProfileSecrets[typeof service],
     });
   };
 
@@ -152,8 +185,12 @@ export function ProfilesPage() {
   };
 
   // Get the value to display (unmasked if available, otherwise masked from formData)
-  const getSecretValue = (service: string, field: string): string => {
-    return unmaskedSecrets?.[service]?.[field] || formData.secrets?.[service]?.[field] || '';
+  const getSecretValue = (service: ServiceName, field: string): string => {
+    return (
+      getNestedSecretValue(unmaskedSecrets, service, field) ||
+      getNestedSecretValue(formData.secrets, service, field) ||
+      ''
+    );
   };
 
   // Check if a value is masked (format: XXXX****YYYY)
@@ -178,7 +215,7 @@ export function ProfilesPage() {
     return false;
   };
 
-  const testConnection = async (service: string) => {
+  const testConnection = async (service: ServiceName) => {
     setTesting({ ...testing, [service]: true });
 
     try {
@@ -189,26 +226,8 @@ export function ProfilesPage() {
         return;
       }
 
-      // Validate service is a supported type
-      const supportedServices = [
-        'tmdb',
-        'plex',
-        'radarr',
-        'sonarr',
-        'tautulli',
-        'mdblist',
-        'trakt',
-      ];
-      if (!supportedServices.includes(service)) {
-        showNotification('Test not implemented for this service', 'info');
-        return;
-      }
-
       // Use proxy API to test connection (keeps secrets on backend)
-      const result = await proxyApi.testConnection(
-        service as 'tmdb' | 'plex' | 'radarr' | 'sonarr' | 'tautulli' | 'mdblist' | 'trakt',
-        secrets
-      );
+      const result = await proxyApi.testConnection(service, secrets);
 
       if (result.success) {
         const message = result.version
@@ -248,18 +267,20 @@ export function ProfilesPage() {
           </button>
         </div>
         <div className={styles.profileList}>
-          {profiles.map((profile) => (
-            <div
-              key={profile.id}
-              className={`${styles.profileItem} ${selectedProfile?.id === profile.id ? styles.active : ''}`}
-              onClick={() => loadProfile(profile.id)}
-            >
-              <div className={styles.profileName}>{profile.name}</div>
-              {profile.description && (
-                <div className={styles.profileDescription}>{profile.description}</div>
-              )}
-            </div>
-          ))}
+          {profiles
+            .filter((p) => p.id)
+            .map((profile) => (
+              <div
+                key={profile.id}
+                className={`${styles.profileItem} ${selectedProfile?.id === profile.id ? styles.active : ''}`}
+                onClick={() => profile.id && loadProfile(profile.id)}
+              >
+                <div className={styles.profileName}>{profile.name}</div>
+                {profile.description && (
+                  <div className={styles.profileDescription}>{profile.description}</div>
+                )}
+              </div>
+            ))}
         </div>
       </div>
 
@@ -555,15 +576,19 @@ export function ProfilesPage() {
               <button type="submit" className={styles.saveButton}>
                 Save Profile
               </button>
-              {selectedProfile && (
-                <button
-                  type="button"
-                  onClick={() => handleDeleteClick(selectedProfile.id)}
-                  className={styles.deleteButton}
-                >
-                  Delete Profile
-                </button>
-              )}
+              {selectedProfile?.id &&
+                (() => {
+                  const profileId = selectedProfile.id;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteClick(profileId)}
+                      className={styles.deleteButton}
+                    >
+                      Delete Profile
+                    </button>
+                  );
+                })()}
             </div>
           </form>
         )}

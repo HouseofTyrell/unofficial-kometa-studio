@@ -3,8 +3,21 @@ import { ConfigRepository } from '../db/config.repository.js';
 import { ProfileRepository } from '../db/profile.repository.js';
 import { parseKometaYaml, extractSecretsFromYaml } from '../yaml/parser.js';
 import { generateYaml } from '../yaml/generator.js';
-import { validateConfig } from '@kometa-studio/shared';
+import {
+  validateConfig,
+  CreateConfigSchema,
+  UpdateConfigSchema,
+  ImportYamlRequestSchema,
+  RenderYamlRequestSchema,
+  ValidateConfigRequestSchema,
+  type CreateConfigInput,
+  type UpdateConfigInput,
+  type ImportYamlRequestInput,
+  type RenderYamlRequestInput,
+  type ValidateConfigRequestInput,
+} from '@kometa-studio/shared';
 import { randomUUID } from 'node:crypto';
+import { validateBody, validateIdParam } from '../middleware/validation.js';
 
 export async function configRoutes(
   fastify: FastifyInstance,
@@ -20,7 +33,10 @@ export async function configRoutes(
 
   // Get config by ID
   fastify.get<{ Params: { id: string } }>('/api/configs/:id', async (request, reply) => {
-    const config = configRepo.findById(request.params.id);
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
+    const config = configRepo.findById(id);
     if (!config) {
       reply.status(404);
       return { error: 'Config not found' };
@@ -29,20 +45,16 @@ export async function configRoutes(
   });
 
   // Create new config
-  fastify.post<{ Body: any }>('/api/configs', async (request, reply) => {
+  fastify.post<{ Body: CreateConfigInput }>('/api/configs', async (request, reply) => {
+    const body = await validateBody(request, reply, CreateConfigSchema);
+    if (!body) return;
+
     try {
-      const { name, description, config } = request.body;
-
-      if (!name || !config) {
-        reply.status(400);
-        return { error: 'Name and config are required' };
-      }
-
       const newConfig = configRepo.create({
         id: randomUUID(),
-        name,
-        description,
-        config,
+        name: body.name,
+        description: body.description,
+        config: body.config,
       });
 
       reply.status(201);
@@ -57,9 +69,15 @@ export async function configRoutes(
   });
 
   // Update config
-  fastify.put<{ Params: { id: string }; Body: any }>('/api/configs/:id', async (request, reply) => {
+  fastify.put<{ Params: { id: string }; Body: UpdateConfigInput }>('/api/configs/:id', async (request, reply) => {
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
+    const body = await validateBody(request, reply, UpdateConfigSchema);
+    if (!body) return;
+
     try {
-      const updated = configRepo.update(request.params.id, request.body);
+      const updated = configRepo.update(id, body);
       if (!updated) {
         reply.status(404);
         return { error: 'Config not found' };
@@ -76,7 +94,10 @@ export async function configRoutes(
 
   // Delete config
   fastify.delete<{ Params: { id: string } }>('/api/configs/:id', async (request, reply) => {
-    const success = configRepo.delete(request.params.id);
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
+    const success = configRepo.delete(id);
     if (!success) {
       reply.status(404);
       return { error: 'Config not found' };
@@ -85,20 +106,19 @@ export async function configRoutes(
   });
 
   // Import YAML
-  fastify.post<{ Params: { id: string }; Body: any }>(
+  fastify.post<{ Params: { id: string }; Body: ImportYamlRequestInput }>(
     '/api/configs/:id/import-yaml',
     async (request, reply) => {
+      const id = await validateIdParam(request, reply);
+      if (!id) return;
+
+      const body = await validateBody(request, reply, ImportYamlRequestSchema);
+      if (!body) return;
+
       try {
-        const { yaml, preserveExtras = true } = request.body;
-
-        if (!yaml) {
-          reply.status(400);
-          return { error: 'YAML content is required' };
-        }
-
         // Parse the config
-        const config = parseKometaYaml(yaml, preserveExtras);
-        const updated = configRepo.update(request.params.id, { config });
+        const config = parseKometaYaml(body.yaml, body.preserveExtras);
+        const updated = configRepo.update(id, { config });
 
         if (!updated) {
           reply.status(404);
@@ -106,7 +126,7 @@ export async function configRoutes(
         }
 
         // Extract secrets and create a profile if any secrets were found
-        const secrets = extractSecretsFromYaml(yaml);
+        const secrets = extractSecretsFromYaml(body.yaml);
         let profileId: string | undefined;
         let extractedSecrets: any = undefined;
 
@@ -140,21 +160,25 @@ export async function configRoutes(
   );
 
   // Render YAML
-  fastify.post<{ Params: { id: string }; Body: any }>(
+  fastify.post<{ Params: { id: string }; Body: RenderYamlRequestInput }>(
     '/api/configs/:id/render-yaml',
     async (request, reply) => {
+      const id = await validateIdParam(request, reply);
+      if (!id) return;
+
+      const body = await validateBody(request, reply, RenderYamlRequestSchema);
+      if (!body) return;
+
       try {
-        const configRecord = configRepo.findById(request.params.id);
+        const configRecord = configRepo.findById(id);
         if (!configRecord) {
           reply.status(404);
           return { error: 'Config not found' };
         }
 
-        const { profileId, mode = 'masked', includeComment = true } = request.body;
-
         let profile;
-        if (profileId) {
-          profile = profileRepo.findById(profileId);
+        if (body.profileId) {
+          profile = profileRepo.findById(body.profileId);
           if (!profile) {
             reply.status(404);
             return { error: 'Profile not found' };
@@ -164,8 +188,8 @@ export async function configRoutes(
         const yaml = generateYaml({
           config: configRecord.config,
           profile,
-          mode,
-          includeComment,
+          mode: body.mode,
+          includeComment: body.includeComment,
         });
 
         return { yaml };
@@ -180,21 +204,28 @@ export async function configRoutes(
   );
 
   // Validate config
-  fastify.post<{ Params: { id: string }; Body: any }>(
+  fastify.post<{ Params: { id: string }; Body: ValidateConfigRequestInput }>(
     '/api/configs/:id/validate',
     async (request, reply) => {
+      const id = await validateIdParam(request, reply);
+      if (!id) return;
+
+      const body = await validateBody(request, reply, ValidateConfigRequestSchema);
+      if (!body) return;
+
       try {
-        const configRecord = configRepo.findById(request.params.id);
+        const configRecord = configRepo.findById(id);
         if (!configRecord) {
           reply.status(404);
           return { error: 'Config not found' };
         }
 
-        const { profileId } = request.body;
-
-        let profile;
-        if (profileId) {
-          profile = profileRepo.findById(profileId);
+        let profile = undefined;
+        if (body.profileId) {
+          const foundProfile = profileRepo.findById(body.profileId);
+          if (foundProfile) {
+            profile = foundProfile;
+          }
         }
 
         const validation = validateConfig(configRecord.config, profile);
@@ -213,7 +244,10 @@ export async function configRoutes(
   fastify.post<{ Params: { id: string } }>(
     '/api/configs/:id/export-json',
     async (request, reply) => {
-      const config = configRepo.findById(request.params.id);
+      const id = await validateIdParam(request, reply);
+      if (!id) return;
+
+      const config = configRepo.findById(id);
       if (!config) {
         reply.status(404);
         return { error: 'Config not found' };
@@ -261,8 +295,11 @@ export async function configRoutes(
 
   // Get overlay files from config
   fastify.get<{ Params: { id: string } }>('/api/configs/:id/overlay-files', async (request, reply) => {
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
     try {
-      const configRecord = configRepo.findById(request.params.id);
+      const configRecord = configRepo.findById(id);
       if (!configRecord) {
         reply.status(404);
         return { error: 'Config not found' };
@@ -287,9 +324,9 @@ export async function configRoutes(
             if (Array.isArray(files)) {
               files.forEach((file, index) => {
                 // Parse overlay file to extract type and level
-                let overlayType = file.default;
-                let overlayPath = file.git || file.pmm;
-                let customFilePath = file.file;
+                const overlayType = file.default;
+                const overlayPath = file.git || file.pmm;
+                const customFilePath = file.file;
                 let level: string | undefined;
 
                 // Infer level from path or file structure
@@ -369,8 +406,11 @@ export async function configRoutes(
 
   // Get all overlay assets (images, logos, etc.) from config for preview
   fastify.get<{ Params: { id: string } }>('/api/configs/:id/overlay-assets', async (request, reply) => {
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
     try {
-      const configRecord = configRepo.findById(request.params.id);
+      const configRecord = configRepo.findById(id);
       if (!configRecord) {
         reply.status(404);
         return { error: 'Config not found' };

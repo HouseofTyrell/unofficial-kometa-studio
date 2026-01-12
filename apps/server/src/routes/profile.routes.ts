@@ -1,7 +1,18 @@
 import type { FastifyInstance } from 'fastify';
 import { ProfileRepository } from '../db/profile.repository.js';
-import { maskSecret } from '@kometa-studio/shared';
+import {
+  maskSecret,
+  CreateProfileSchema,
+  UpdateProfileSchema,
+  ExportProfileRequestSchema,
+  ImportProfileRequestSchema,
+  type CreateProfileInput,
+  type UpdateProfileInput,
+  type ExportProfileRequestInput,
+  type ImportProfileRequestInput,
+} from '@kometa-studio/shared';
 import { randomUUID } from 'node:crypto';
+import { validateBody, validateIdParam } from '../middleware/validation.js';
 
 function maskProfileSecrets(profile: any): any {
   const masked = { ...profile };
@@ -59,7 +70,10 @@ export async function profileRoutes(
 
   // Get profile by ID (with unmasked secrets for local-first access)
   fastify.get<{ Params: { id: string } }>('/api/profiles/:id', async (request, reply) => {
-    const profile = profileRepo.findById(request.params.id);
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
+    const profile = profileRepo.findById(id);
     if (!profile) {
       reply.status(404);
       return { error: 'Profile not found' };
@@ -69,20 +83,16 @@ export async function profileRoutes(
   });
 
   // Create new profile
-  fastify.post<{ Body: any }>('/api/profiles', async (request, reply) => {
+  fastify.post<{ Body: CreateProfileInput }>('/api/profiles', async (request, reply) => {
+    const body = await validateBody(request, reply, CreateProfileSchema);
+    if (!body) return;
+
     try {
-      const { name, description, secrets } = request.body;
-
-      if (!name) {
-        reply.status(400);
-        return { error: 'Name is required' };
-      }
-
       const newProfile = profileRepo.create({
         id: randomUUID(),
-        name,
-        description,
-        secrets: secrets || {},
+        name: body.name,
+        description: body.description,
+        secrets: body.secrets || {},
       });
 
       reply.status(201);
@@ -97,9 +107,15 @@ export async function profileRoutes(
   });
 
   // Update profile
-  fastify.put<{ Params: { id: string }; Body: any }>('/api/profiles/:id', async (request, reply) => {
+  fastify.put<{ Params: { id: string }; Body: UpdateProfileInput }>('/api/profiles/:id', async (request, reply) => {
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
+    const body = await validateBody(request, reply, UpdateProfileSchema);
+    if (!body) return;
+
     try {
-      const updated = profileRepo.update(request.params.id, request.body);
+      const updated = profileRepo.update(id, body);
       if (!updated) {
         reply.status(404);
         return { error: 'Profile not found' };
@@ -116,7 +132,10 @@ export async function profileRoutes(
 
   // Delete profile
   fastify.delete<{ Params: { id: string } }>('/api/profiles/:id', async (request, reply) => {
-    const success = profileRepo.delete(request.params.id);
+    const id = await validateIdParam(request, reply);
+    if (!id) return;
+
+    const success = profileRepo.delete(id);
     if (!success) {
       reply.status(404);
       return { error: 'Profile not found' };
@@ -125,18 +144,22 @@ export async function profileRoutes(
   });
 
   // Export profile
-  fastify.post<{ Params: { id: string }; Body: any }>(
+  fastify.post<{ Params: { id: string }; Body: ExportProfileRequestInput }>(
     '/api/profiles/:id/export',
     async (request, reply) => {
-      const profile = profileRepo.findById(request.params.id);
+      const id = await validateIdParam(request, reply);
+      if (!id) return;
+
+      const body = await validateBody(request, reply, ExportProfileRequestSchema);
+      if (!body) return;
+
+      const profile = profileRepo.findById(id);
       if (!profile) {
         reply.status(404);
         return { error: 'Profile not found' };
       }
 
-      const { includeSecrets = false } = request.body;
-
-      const exportData = includeSecrets ? profile : maskProfileSecrets(profile);
+      const exportData = body.includeSecrets ? profile : maskProfileSecrets(profile);
 
       reply.header('Content-Type', 'application/json');
       reply.header('Content-Disposition', `attachment; filename="${profile.name}-profile.json"`);
@@ -145,20 +168,16 @@ export async function profileRoutes(
   );
 
   // Import profile
-  fastify.post<{ Body: any }>('/api/profiles/import', async (request, reply) => {
+  fastify.post<{ Body: ImportProfileRequestInput }>('/api/profiles/import', async (request, reply) => {
+    const body = await validateBody(request, reply, ImportProfileRequestSchema);
+    if (!body) return;
+
     try {
-      const profileData = request.body;
-
-      if (!profileData.name || !profileData.secrets) {
-        reply.status(400);
-        return { error: 'Invalid profile data' };
-      }
-
       const newProfile = profileRepo.create({
         id: randomUUID(),
-        name: profileData.name,
-        description: profileData.description,
-        secrets: profileData.secrets,
+        name: body.name,
+        description: body.description,
+        secrets: body.secrets,
       });
 
       reply.status(201);

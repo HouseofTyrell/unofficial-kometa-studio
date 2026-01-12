@@ -17,7 +17,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 | Feature | Description | Status |
 |---------|-------------|--------|
 | **Drag & Drop Positioning** | Allow users to visually drag overlay elements on the canvas instead of manual x/y input | ✅ Complete |
-| **Missing Overlay Types** | Implement remaining Kometa overlay types: `content_rating`, `studio`, `network`, `versions`, `mediastinger` | Not started |
+| **Missing Overlay Types** | Implement remaining Kometa overlay types: `content_rating`, `studio`, `network`, `versions`, `mediastinger` | ✅ Complete |
 | **Badge Size Accuracy** | Audit and correct badge dimensions to match Kometa's actual rendering | Partial |
 | **Asset Resolution Fixes** | Ensure logos and assets render consistently with proper fallbacks | Partial |
 
@@ -276,3 +276,5 @@ When implementing a feature:
 - ✅ Preview zoom controls (50%-150%)
 - ✅ Community Overlays gallery with popular Kometa presets
 - ✅ GitHub YAML import with live overlay preview
+- ✅ Missing overlay types: content_rating, studio, network, versions, mediastinger
+- ✅ 17 new presets across 4 new categories (Studio, Network, Versions, MediaStinger)

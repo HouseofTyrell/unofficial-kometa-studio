@@ -329,6 +329,11 @@ export class KometaDefaultsService {
       audioCodec?: string;
       audioChannels?: string;
       status?: string;
+      contentRating?: string; // PG, R, TV-MA, etc.
+      studio?: string; // Production studio name
+      network?: string; // TV network name
+      edition?: string; // Extended, Directors Cut, etc.
+      hasMediaStinger?: boolean; // Has post-credits scene
       ratings?: {
         tmdb?: number;
         imdb?: number;
@@ -730,6 +735,258 @@ export class KometaDefaultsService {
         fontSize: scaledFontSize,
         fontColor: '#FFFFFF',
         backgroundColor: ribbonColors[ribbonStyle] || ribbonColors.red,
+      });
+    }
+
+    // Content Rating overlay - show age rating badge (PG, R, TV-MA, etc.)
+    if (overlayType === 'content_rating' && metadata.contentRating) {
+      // Kometa content_rating overlay uses image-based approach
+      // We'll use a badge with text for preview
+      const rating = metadata.contentRating.toUpperCase();
+
+      // Color coding based on rating severity
+      const ratingColors: Record<string, string> = {
+        'G': '#4CAF50',
+        'PG': '#8BC34A',
+        'PG-13': '#FFC107',
+        'R': '#FF5722',
+        'NC-17': '#F44336',
+        'NR': '#9E9E9E',
+        'TV-Y': '#4CAF50',
+        'TV-Y7': '#8BC34A',
+        'TV-G': '#4CAF50',
+        'TV-PG': '#FFC107',
+        'TV-14': '#FF9800',
+        'TV-MA': '#F44336',
+      };
+
+      const bgColor = ratingColors[rating] || templateVars?.back_color || '#00000099';
+
+      // Kometa values for 1000x1500 canvas
+      const kometaBackWidth = templateVars?.back_width || 120;
+      const kometaBackHeight = templateVars?.back_height || 80;
+      const kometaFontSize = templateVars?.font_size || 32;
+
+      elements.push({
+        type: 'badge',
+        content: rating,
+        text: rating,
+        position: {
+          horizontal: templateVars?.horizontal_align || 'right',
+          vertical: templateVars?.vertical_align || 'top',
+        },
+        offset: {
+          horizontal: templateVars?.horizontal_offset || 15,
+          vertical: templateVars?.vertical_offset || 15,
+        },
+        fontSize: kometaFontSize,
+        fontColor: '#FFFFFF',
+        backgroundColor: bgColor,
+        padding: 10,
+        borderRadius: 8,
+        width: kometaBackWidth,
+        height: kometaBackHeight,
+      });
+    }
+
+    // Studio overlay - show production studio logo/name
+    if (overlayType === 'studio' && metadata.studio) {
+      const studioName = metadata.studio;
+
+      // Map common studios to their logo URLs from Kometa defaults
+      const studioLogos: Record<string, string> = {
+        'Warner Bros.': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/warner.png',
+        'Universal Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/universal.png',
+        'Paramount Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/paramount.png',
+        'Walt Disney Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/disney.png',
+        '20th Century Studios': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/20th_century.png',
+        'Columbia Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/columbia.png',
+        'Lionsgate': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/lionsgate.png',
+        'New Line Cinema': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/newline.png',
+        'Marvel Studios': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/marvel.png',
+        'Pixar': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/pixar.png',
+        'DreamWorks': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/dreamworks.png',
+        'A24': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/a24.png',
+      };
+
+      const logoUrl = studioLogos[studioName] || configAssets?.studio_logo;
+
+      if (logoUrl) {
+        // Image-based studio overlay
+        elements.push({
+          type: 'image',
+          imageUrl: logoUrl,
+          position: {
+            horizontal: templateVars?.horizontal_align || 'left',
+            vertical: templateVars?.vertical_align || 'bottom',
+          },
+          offset: {
+            horizontal: templateVars?.horizontal_offset || 15,
+            vertical: templateVars?.vertical_offset || 15,
+          },
+          width: templateVars?.back_width || 150,
+          height: templateVars?.back_height || 75,
+        });
+      } else {
+        // Text fallback for unknown studios
+        elements.push({
+          type: 'badge',
+          content: studioName,
+          text: studioName,
+          position: {
+            horizontal: templateVars?.horizontal_align || 'left',
+            vertical: templateVars?.vertical_align || 'bottom',
+          },
+          offset: {
+            horizontal: templateVars?.horizontal_offset || 15,
+            vertical: templateVars?.vertical_offset || 15,
+          },
+          fontSize: templateVars?.font_size || 24,
+          fontColor: '#FFFFFF',
+          backgroundColor: templateVars?.back_color || '#00000099',
+          padding: 8,
+          borderRadius: 6,
+          width: templateVars?.back_width || 200,
+          height: templateVars?.back_height || 60,
+        });
+      }
+    }
+
+    // Network overlay - show TV network logo/name
+    if (overlayType === 'network' && metadata.network) {
+      const networkName = metadata.network;
+
+      // Map common networks to their logo URLs from Kometa defaults
+      const networkLogos: Record<string, string> = {
+        'HBO': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/hbo.png',
+        'Netflix': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/netflix.png',
+        'Amazon': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/amazon.png',
+        'Disney+': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/disney_plus.png',
+        'Apple TV+': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/apple_tv_plus.png',
+        'AMC': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/amc.png',
+        'NBC': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/nbc.png',
+        'CBS': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/cbs.png',
+        'ABC': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/abc.png',
+        'FOX': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/fox.png',
+        'FX': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/fx.png',
+        'Showtime': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/showtime.png',
+        'Paramount+': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/paramount_plus.png',
+        'Peacock': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/peacock.png',
+        'Hulu': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/hulu.png',
+      };
+
+      const logoUrl = networkLogos[networkName] || configAssets?.network_logo;
+
+      if (logoUrl) {
+        // Image-based network overlay
+        elements.push({
+          type: 'image',
+          imageUrl: logoUrl,
+          position: {
+            horizontal: templateVars?.horizontal_align || 'right',
+            vertical: templateVars?.vertical_align || 'bottom',
+          },
+          offset: {
+            horizontal: templateVars?.horizontal_offset || 15,
+            vertical: templateVars?.vertical_offset || 15,
+          },
+          width: templateVars?.back_width || 120,
+          height: templateVars?.back_height || 60,
+        });
+      } else {
+        // Text fallback for unknown networks
+        elements.push({
+          type: 'badge',
+          content: networkName,
+          text: networkName,
+          position: {
+            horizontal: templateVars?.horizontal_align || 'right',
+            vertical: templateVars?.vertical_align || 'bottom',
+          },
+          offset: {
+            horizontal: templateVars?.horizontal_offset || 15,
+            vertical: templateVars?.vertical_offset || 15,
+          },
+          fontSize: templateVars?.font_size || 24,
+          fontColor: '#FFFFFF',
+          backgroundColor: templateVars?.back_color || '#00000099',
+          padding: 8,
+          borderRadius: 6,
+          width: templateVars?.back_width || 150,
+          height: templateVars?.back_height || 50,
+        });
+      }
+    }
+
+    // Versions/Edition overlay - show file edition (Extended, Directors Cut, etc.)
+    if (overlayType === 'versions' && metadata.edition) {
+      const edition = metadata.edition;
+
+      // Map common editions to colors
+      const editionColors: Record<string, string> = {
+        'Extended': '#9C27B0',
+        'Extended Edition': '#9C27B0',
+        'Extended Cut': '#9C27B0',
+        'Directors Cut': '#E91E63',
+        "Director's Cut": '#E91E63',
+        'Theatrical': '#2196F3',
+        'Unrated': '#F44336',
+        'Uncut': '#F44336',
+        'Special Edition': '#FF9800',
+        'Ultimate Edition': '#FFD700',
+        'Remastered': '#4CAF50',
+        '4K Remaster': '#4CAF50',
+        'IMAX': '#00BCD4',
+      };
+
+      const bgColor = editionColors[edition] || templateVars?.back_color || '#673AB7';
+
+      elements.push({
+        type: 'badge',
+        content: edition.toUpperCase(),
+        text: edition.toUpperCase(),
+        position: {
+          horizontal: templateVars?.horizontal_align || 'center',
+          vertical: templateVars?.vertical_align || 'bottom',
+        },
+        offset: {
+          horizontal: templateVars?.horizontal_offset || 0,
+          vertical: templateVars?.vertical_offset || 15,
+        },
+        fontSize: templateVars?.font_size || 28,
+        fontColor: '#FFFFFF',
+        backgroundColor: bgColor,
+        padding: 10,
+        borderRadius: 6,
+        width: templateVars?.back_width || 250,
+        height: templateVars?.back_height || 60,
+      });
+    }
+
+    // MediaStinger overlay - indicate post-credits scene
+    if (overlayType === 'mediastinger' && metadata.hasMediaStinger) {
+      // Kometa uses an image for this, we'll use a badge with icon/text
+      const stingerText = templateVars?.text || 'POST-CREDITS';
+
+      elements.push({
+        type: 'badge',
+        content: stingerText,
+        text: stingerText,
+        position: {
+          horizontal: templateVars?.horizontal_align || 'right',
+          vertical: templateVars?.vertical_align || 'top',
+        },
+        offset: {
+          horizontal: templateVars?.horizontal_offset || 15,
+          vertical: templateVars?.vertical_offset || 130,
+        },
+        fontSize: templateVars?.font_size || 20,
+        fontColor: '#000000',
+        backgroundColor: templateVars?.back_color || '#FFD700',
+        padding: 8,
+        borderRadius: 4,
+        width: templateVars?.back_width || 140,
+        height: templateVars?.back_height || 40,
       });
     }
 

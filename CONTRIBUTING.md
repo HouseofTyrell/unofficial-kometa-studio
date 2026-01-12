@@ -23,17 +23,20 @@ Thank you for your interest in contributing to Kometa Studio! This document prov
 ### Pull Requests
 
 1. **Fork and Clone**:
+
    ```bash
    git clone https://github.com/yourusername/kometa-studio.git
    cd kometa-studio
    ```
 
 2. **Create Branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 3. **Install Dependencies**:
+
    ```bash
    pnpm install
    ```
@@ -43,6 +46,7 @@ Thank you for your interest in contributing to Kometa Studio! This document prov
 5. **Test Thoroughly**: Ensure your changes don't break existing functionality
 
 6. **Commit with Clear Messages**:
+
    ```bash
    git commit -m "feat: add amazing feature"
    ```
@@ -55,6 +59,7 @@ Thank you for your interest in contributing to Kometa Studio! This document prov
 ## 💻 Development Setup
 
 ### Prerequisites
+
 - Node.js 18+
 - pnpm 8+
 - Git
@@ -104,12 +109,12 @@ interface User {
 
 const getUser = (id: string): User => {
   // ...
-}
+};
 
 // Avoid
 const getUser = (id: any): any => {
   // ...
-}
+};
 ```
 
 ### React Components
@@ -198,6 +203,7 @@ Follow conventional commits format:
 ```
 
 ### Types
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -207,6 +213,7 @@ Follow conventional commits format:
 - `chore`: Maintenance tasks
 
 ### Examples
+
 ```
 feat(overlay): add drag-and-drop positioning
 fix(parser): handle null values in extras

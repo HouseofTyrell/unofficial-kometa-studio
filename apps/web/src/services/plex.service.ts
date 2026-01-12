@@ -48,7 +48,7 @@ export class PlexService {
       const response = await fetch(searchUrl, {
         headers: {
           'X-Plex-Token': this.token,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
@@ -85,7 +85,7 @@ export class PlexService {
       const response = await fetch(searchUrl, {
         headers: {
           'X-Plex-Token': this.token,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
@@ -110,14 +110,18 @@ export class PlexService {
   /**
    * Get episode information
    */
-  async getEpisode(showKey: string, seasonNumber: number, episodeNumber: number): Promise<PlexMediaInfo | null> {
+  async getEpisode(
+    showKey: string,
+    seasonNumber: number,
+    episodeNumber: number
+  ): Promise<PlexMediaInfo | null> {
     try {
       // First get the season
       const seasonUrl = `${this.url}${showKey}/children`;
       const seasonResponse = await fetch(seasonUrl, {
         headers: {
           'X-Plex-Token': this.token,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
@@ -138,7 +142,7 @@ export class PlexService {
       const episodeResponse = await fetch(episodeUrl, {
         headers: {
           'X-Plex-Token': this.token,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
@@ -207,7 +211,10 @@ export class PlexService {
           // This populates the 'rating' field with IMDb rating
           info.ratings.imdb = parseFloat(ratingEntry.value);
           console.log('    ✅ Found IMDb rating:', info.ratings.imdb);
-        } else if (ratingEntry.image?.includes('themoviedb') || ratingEntry.image?.includes('tmdb')) {
+        } else if (
+          ratingEntry.image?.includes('themoviedb') ||
+          ratingEntry.image?.includes('tmdb')
+        ) {
           info.ratings.tmdb = parseFloat(ratingEntry.value);
           console.log('    ✅ Found TMDB rating:', info.ratings.tmdb);
         } else if (ratingEntry.image?.includes('rottentomatoes')) {
@@ -271,17 +278,17 @@ export class PlexService {
     if (!codec) return undefined;
 
     const codecMap: Record<string, string> = {
-      'aac': 'AAC',
-      'ac3': 'Dolby Digital',
-      'eac3': 'Dolby Digital Plus',
-      'truehd': 'Dolby TrueHD',
-      'dts': 'DTS',
-      'dca': 'DTS',
-      'dtshd': 'DTS-HD',
-      'flac': 'FLAC',
-      'mp3': 'MP3',
-      'opus': 'Opus',
-      'vorbis': 'Vorbis',
+      aac: 'AAC',
+      ac3: 'Dolby Digital',
+      eac3: 'Dolby Digital Plus',
+      truehd: 'Dolby TrueHD',
+      dts: 'DTS',
+      dca: 'DTS',
+      dtshd: 'DTS-HD',
+      flac: 'FLAC',
+      mp3: 'MP3',
+      opus: 'Opus',
+      vorbis: 'Vorbis',
     };
 
     return codecMap[codec.toLowerCase()] || codec.toUpperCase();
@@ -311,7 +318,7 @@ export class PlexService {
       const response = await fetch(`${this.url}/`, {
         headers: {
           'X-Plex-Token': this.token,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 

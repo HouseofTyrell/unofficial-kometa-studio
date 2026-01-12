@@ -75,9 +75,7 @@ export function ConfigEditorPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>{config.name}</h1>
-        {config.description && (
-          <p className={styles.description}>{config.description}</p>
-        )}
+        {config.description && <p className={styles.description}>{config.description}</p>}
         {saving && <span className={styles.savingIndicator}>Saving...</span>}
       </div>
 
@@ -116,10 +114,7 @@ export function ConfigEditorPage() {
           />
         )}
         {activeSection === 'integrations' && (
-          <IntegrationsEditor
-            config={config.config}
-            onChange={handleConfigChange}
-          />
+          <IntegrationsEditor config={config.config} onChange={handleConfigChange} />
         )}
       </div>
     </div>

@@ -52,8 +52,8 @@ export function ImportExportPage() {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Import YAML Configuration</h2>
           <p className={styles.sectionDescription}>
-            Paste your existing config.yml content below to import it into Kometa Studio.
-            Unknown keys will be preserved in extras.
+            Paste your existing config.yml content below to import it into Kometa Studio. Unknown
+            keys will be preserved in extras.
           </p>
 
           <textarea
@@ -74,9 +74,7 @@ export function ImportExportPage() {
 
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Export Configurations</h2>
-          <p className={styles.sectionDescription}>
-            To export a configuration:
-          </p>
+          <p className={styles.sectionDescription}>To export a configuration:</p>
           <ol className={styles.instructions}>
             <li>Open the configuration you want to export</li>
             <li>Use the YAML preview panel on the right</li>
@@ -85,9 +83,9 @@ export function ImportExportPage() {
           </ol>
 
           <div className={styles.warning}>
-            <strong>⚠️ Security Warning:</strong> When using "Full" mode, your secrets
-            will be included in the exported YAML. Only use this for actual deployment.
-            Use "Template" or "Masked" modes for sharing or backup.
+            <strong>⚠️ Security Warning:</strong> When using "Full" mode, your secrets will be
+            included in the exported YAML. Only use this for actual deployment. Use "Template" or
+            "Masked" modes for sharing or backup.
           </div>
         </div>
 
@@ -106,7 +104,9 @@ export function ImportExportPage() {
               try {
                 const configResult = await configApi.deleteAll();
                 const profileResult = await profileApi.deleteAll();
-                alert(`Deleted ${configResult.deletedCount} configurations and ${profileResult.deletedCount} profiles`);
+                alert(
+                  `Deleted ${configResult.deletedCount} configurations and ${profileResult.deletedCount} profiles`
+                );
                 navigate('/');
               } catch (error) {
                 console.error('Failed to delete data:', error);

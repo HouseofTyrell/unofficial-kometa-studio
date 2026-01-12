@@ -12,6 +12,7 @@ This is an **unofficial, community-created project** and is not affiliated with,
 ## ✨ Features
 
 ### 🔐 Profile Management
+
 - **Secure Secret Storage**: Store API keys and tokens locally (unmasked for easy access)
 - **Show/Hide Secrets Toggle**: Reveal or mask secrets with a single click
 - **Test Connections**: Verify API credentials with one-click connection tests
@@ -20,12 +21,14 @@ This is an **unofficial, community-created project** and is not affiliated with,
 - **Real-time Notifications**: On-page alerts for save/delete/test operations
 
 ### 📝 Configuration Editor
+
 - **Visual YAML Editor**: Edit Kometa configs with a user-friendly interface
 - **Real-time Validation**: Catch errors before deployment
 - **Schema Support**: Full support for Kometa's configuration schema
 - **Extras Preservation**: Unknown keys preserved in `extras` fields
 
 ### 🎨 Overlay Builder (In Progress)
+
 - **Visual Preview**: See overlays on real TMDB posters instantly
 - **Automatic Overlay Loading**: Overlays automatically appear based on your config when media is selected
 - **Kometa-Compatible Rendering**: Matches Kometa's exact overlay output with proper positioning, sizing, and styling
@@ -50,6 +53,7 @@ This is an **unofficial, community-created project** and is not affiliated with,
 **Note**: The Overlay Builder currently focuses on accurate preview and rendering. Full visual editing capabilities (drag-and-drop, custom elements, save to config) are planned for future releases.
 
 ### 🔄 Import/Export
+
 - **YAML Import**: Import existing `config.yml` files with auto-profile creation
 - **Secret Extraction**: Automatically extracts and secures API keys during import
 - **Multiple Export Modes**:
@@ -58,6 +62,7 @@ This is an **unofficial, community-created project** and is not affiliated with,
   - **Full**: For deployment (complete with secrets)
 
 ### 🗄️ Local-First Architecture
+
 - **No Cloud Dependencies**: All data stored locally in SQLite
 - **Privacy Focused**: Your secrets never leave your machine
 - **Offline Capable**: Works without internet (except TMDB features)
@@ -72,17 +77,20 @@ This is an **unofficial, community-created project** and is not affiliated with,
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/yourusername/kometa-studio.git
    cd kometa-studio
    ```
 
 2. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 3. **Start the development server**:
+
    ```bash
    pnpm dev
    ```
@@ -200,6 +208,7 @@ kometa-studio/
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **React 18** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
@@ -207,12 +216,14 @@ kometa-studio/
 - **CSS Modules** - Scoped styling
 
 ### Backend
+
 - **Fastify** - Fast web framework
 - **better-sqlite3** - Local database
 - **YAML** - Config parsing/rendering
 - **Zod** - Schema validation
 
 ### Development
+
 - **pnpm** - Package manager
 - **tsx** - TypeScript execution
 - **Monorepo** - Workspace structure
@@ -220,6 +231,7 @@ kometa-studio/
 ## 🔐 Security Features
 
 ### Secret Management
+
 - **Local-First Storage**: All secrets stored locally on your machine (SQLite)
 - **Profile Isolation**: Each profile's secrets are separate
 - **Export Control**: Choose what to include when exporting (Template/Masked/Full)
@@ -227,6 +239,7 @@ kometa-studio/
 - **No Cloud Transmission**: Secrets never leave your machine (runs on localhost)
 
 ### Best Practices
+
 - Never commit `.env` files or database files
 - Use Template mode when sharing configs
 - Regularly backup your profiles (without secrets)
@@ -245,6 +258,7 @@ pnpm start
 ## 🤝 Contributing
 
 We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
 - Code of conduct
 - Development workflow
 - Commit message conventions

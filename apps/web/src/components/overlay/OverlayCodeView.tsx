@@ -23,7 +23,8 @@ export function OverlayCodeView({ elements, onElementsChange }: OverlayCodeViewP
 
     elements.forEach((element, index) => {
       const content = element.text || element.content || '';
-      const elementType = element.type === 'badge' ? 'badge' : element.type === 'ribbon' ? 'text' : element.type;
+      const elementType =
+        element.type === 'badge' ? 'badge' : element.type === 'ribbon' ? 'text' : element.type;
 
       lines.push('');
       lines.push(`  overlay_${index + 1}:`);
@@ -151,8 +152,8 @@ export function OverlayCodeView({ elements, onElementsChange }: OverlayCodeViewP
 
       <div className={styles.info}>
         <p>
-          This represents your overlay configuration in YAML format. Changes made in
-          the visual editor are automatically reflected here.
+          This represents your overlay configuration in YAML format. Changes made in the visual
+          editor are automatically reflected here.
         </p>
       </div>
     </div>

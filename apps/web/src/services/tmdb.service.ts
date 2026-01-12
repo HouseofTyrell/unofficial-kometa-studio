@@ -135,7 +135,10 @@ export class TmdbService {
   /**
    * Get season details for a TV show
    */
-  async getSeason(tvId: number, seasonNumber: number): Promise<TmdbSeason & { episodes: TmdbEpisode[] }> {
+  async getSeason(
+    tvId: number,
+    seasonNumber: number
+  ): Promise<TmdbSeason & { episodes: TmdbEpisode[] }> {
     const url = `${TMDB_BASE_URL}/tv/${tvId}/season/${seasonNumber}?api_key=${this.apiKey}`;
     const response = await fetch(url);
 
@@ -151,7 +154,11 @@ export class TmdbService {
   /**
    * Get episode details
    */
-  async getEpisode(tvId: number, seasonNumber: number, episodeNumber: number): Promise<TmdbEpisode> {
+  async getEpisode(
+    tvId: number,
+    seasonNumber: number,
+    episodeNumber: number
+  ): Promise<TmdbEpisode> {
     const url = `${TMDB_BASE_URL}/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${this.apiKey}`;
     const response = await fetch(url);
 
@@ -185,7 +192,9 @@ export class TmdbService {
   /**
    * Get detailed movie information including external IDs and ratings
    */
-  async getMovieDetails(movieId: number): Promise<TmdbMovie & { external_ids?: { imdb_id?: string } }> {
+  async getMovieDetails(
+    movieId: number
+  ): Promise<TmdbMovie & { external_ids?: { imdb_id?: string } }> {
     const url = `${TMDB_BASE_URL}/movie/${movieId}?api_key=${this.apiKey}&append_to_response=external_ids`;
     const response = await fetch(url);
 
@@ -201,7 +210,9 @@ export class TmdbService {
   /**
    * Get detailed TV show information including external IDs and ratings
    */
-  async getTVShowDetails(tvId: number): Promise<TmdbTVShow & { external_ids?: { imdb_id?: string } }> {
+  async getTVShowDetails(
+    tvId: number
+  ): Promise<TmdbTVShow & { external_ids?: { imdb_id?: string } }> {
     const url = `${TMDB_BASE_URL}/tv/${tvId}?api_key=${this.apiKey}&append_to_response=external_ids`;
     const response = await fetch(url);
 
@@ -306,7 +317,10 @@ export class TmdbService {
    * @param posterPath - The poster path from TMDB API (e.g., "/8uO0gUM8aNqYLs1OsTBQiXu0fEv.jpg")
    * @param size - Size: "w92", "w154", "w185", "w342", "w500", "w780", "original"
    */
-  getPosterUrl(posterPath: string | null, size: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original' = 'w500'): string | null {
+  getPosterUrl(
+    posterPath: string | null,
+    size: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original' = 'w500'
+  ): string | null {
     if (!posterPath) return null;
     return `${TMDB_IMAGE_BASE_URL}/${size}${posterPath}`;
   }
@@ -316,7 +330,10 @@ export class TmdbService {
    * @param backdropPath - The backdrop path from TMDB API
    * @param size - Size: "w300", "w780", "w1280", "original"
    */
-  getBackdropUrl(backdropPath: string | null, size: 'w300' | 'w780' | 'w1280' | 'original' = 'w1280'): string | null {
+  getBackdropUrl(
+    backdropPath: string | null,
+    size: 'w300' | 'w780' | 'w1280' | 'original' = 'w1280'
+  ): string | null {
     if (!backdropPath) return null;
     return `${TMDB_IMAGE_BASE_URL}/${size}${backdropPath}`;
   }
@@ -326,7 +343,10 @@ export class TmdbService {
    * @param stillPath - The still path from TMDB API
    * @param size - Size: "w92", "w185", "w300", "original"
    */
-  getStillUrl(stillPath: string | null, size: 'w92' | 'w185' | 'w300' | 'original' = 'w300'): string | null {
+  getStillUrl(
+    stillPath: string | null,
+    size: 'w92' | 'w185' | 'w300' | 'original' = 'w300'
+  ): string | null {
     if (!stillPath) return null;
     return `${TMDB_IMAGE_BASE_URL}/${size}${stillPath}`;
   }

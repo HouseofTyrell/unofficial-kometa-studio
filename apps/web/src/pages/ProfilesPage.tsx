@@ -15,7 +15,10 @@ export function ProfilesPage() {
   const [unmaskedSecrets, setUnmaskedSecrets] = useState<any>({});
   const [testing, setTesting] = useState<Record<string, boolean>>({});
   const [showSecrets, setShowSecrets] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
 
   useEffect(() => {
     loadProfiles();
@@ -171,7 +174,7 @@ export function ProfilesPage() {
       }
 
       switch (service) {
-        case 'tmdb':
+        case 'tmdb': {
           if (!secrets.apikey) {
             showNotification('TMDB API key is required', 'error');
             return;
@@ -183,11 +186,15 @@ export function ProfilesPage() {
             showNotification('TMDB connection successful!', 'success');
           } else {
             const error = await tmdbResponse.json();
-            showNotification(`TMDB connection failed: ${error.status_message || tmdbResponse.statusText}`, 'error');
+            showNotification(
+              `TMDB connection failed: ${error.status_message || tmdbResponse.statusText}`,
+              'error'
+            );
           }
           break;
+        }
 
-        case 'plex':
+        case 'plex': {
           if (!secrets.url || !secrets.token) {
             showNotification('Plex URL and token are required', 'error');
             return;
@@ -201,11 +208,15 @@ export function ProfilesPage() {
             showNotification(`Plex connection failed: ${plexResponse.statusText}`, 'error');
           }
           break;
+        }
 
         case 'radarr':
-        case 'sonarr':
+        case 'sonarr': {
           if (!secrets.url || !secrets.token) {
-            showNotification(`${service.charAt(0).toUpperCase() + service.slice(1)} URL and token are required`, 'error');
+            showNotification(
+              `${service.charAt(0).toUpperCase() + service.slice(1)} URL and token are required`,
+              'error'
+            );
             return;
           }
           const arrResponse = await fetch(`${secrets.url}/api/v3/system/status`, {
@@ -213,13 +224,20 @@ export function ProfilesPage() {
           });
           if (arrResponse.ok) {
             const data = await arrResponse.json();
-            showNotification(`${service.charAt(0).toUpperCase() + service.slice(1)} connection successful! Version: ${data.version}`, 'success');
+            showNotification(
+              `${service.charAt(0).toUpperCase() + service.slice(1)} connection successful! Version: ${data.version}`,
+              'success'
+            );
           } else {
-            showNotification(`${service.charAt(0).toUpperCase() + service.slice(1)} connection failed: ${arrResponse.statusText}`, 'error');
+            showNotification(
+              `${service.charAt(0).toUpperCase() + service.slice(1)} connection failed: ${arrResponse.statusText}`,
+              'error'
+            );
           }
           break;
+        }
 
-        case 'tautulli':
+        case 'tautulli': {
           if (!secrets.url || !secrets.apikey) {
             showNotification('Tautulli URL and API key are required', 'error');
             return;
@@ -233,6 +251,7 @@ export function ProfilesPage() {
             showNotification(`Tautulli connection failed: ${tautulliResponse.statusText}`, 'error');
           }
           break;
+        }
 
         case 'mdblist':
           if (!secrets.apikey) {
@@ -283,7 +302,7 @@ export function ProfilesPage() {
           </button>
         </div>
         <div className={styles.profileList}>
-          {profiles.map(profile => (
+          {profiles.map((profile) => (
             <div
               key={profile.id}
               className={`${styles.profileItem} ${selectedProfile?.id === profile.id ? styles.active : ''}`}
@@ -300,9 +319,7 @@ export function ProfilesPage() {
 
       <div className={styles.content}>
         {!selectedProfile && !showNewForm ? (
-          <div className={styles.emptyState}>
-            Select a profile or create a new one
-          </div>
+          <div className={styles.emptyState}>Select a profile or create a new one</div>
         ) : (
           <form onSubmit={handleSave} className={styles.form}>
             {notification && (
@@ -318,14 +335,16 @@ export function ProfilesPage() {
               </div>
             )}
 
-            <h1 className={styles.title}>
-              {selectedProfile ? formData.name : 'New Profile'}
-            </h1>
+            <h1 className={styles.title}>{selectedProfile ? formData.name : 'New Profile'}</h1>
 
             {hasMaskedSecrets() && (
-              <div className={`${styles.notification} ${styles.info}`} style={{ marginTop: '16px' }}>
+              <div
+                className={`${styles.notification} ${styles.info}`}
+                style={{ marginTop: '16px' }}
+              >
                 <span>
-                  ⚠️ This profile contains masked secrets. To use them, re-enter the actual API keys/tokens in the fields below and save.
+                  ⚠️ This profile contains masked secrets. To use them, re-enter the actual API
+                  keys/tokens in the fields below and save.
                 </span>
               </div>
             )}

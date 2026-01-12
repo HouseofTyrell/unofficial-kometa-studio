@@ -25,9 +25,7 @@ export function IDELayout({ children }: IDELayoutProps) {
         <Sidebar />
       </div>
       <div className={styles.resizer} />
-      <div className={styles.main}>
-        {children}
-      </div>
+      <div className={styles.main}>{children}</div>
       {showPreviewPanel && (
         <>
           <div className={styles.resizer} />

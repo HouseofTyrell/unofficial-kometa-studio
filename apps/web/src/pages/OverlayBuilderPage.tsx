@@ -2,7 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './OverlayBuilderPage.module.css';
 import { profileApi, configApi } from '../api/client';
-import { TmdbService, DEFAULT_PREVIEW_TITLES, TmdbMovie, TmdbTVShow, TmdbSeason, TmdbEpisode, TmdbRatings } from '../services/tmdb.service';
+import {
+  TmdbService,
+  DEFAULT_PREVIEW_TITLES,
+  TmdbMovie,
+  TmdbTVShow,
+  TmdbSeason,
+  TmdbEpisode,
+  TmdbRatings,
+} from '../services/tmdb.service';
 import { KometaDefaultsService } from '../services/kometa-defaults.service';
 import { PlexService, PlexMediaInfo } from '../services/plex.service';
 
@@ -25,7 +33,10 @@ export interface MediaMetadata {
   plexInfo?: PlexMediaInfo;
 }
 import { PosterPreview, OverlayElement } from '../components/overlay/PosterPreview';
-import { OverlayPresetSelector, OVERLAY_PRESETS } from '../components/overlay/OverlayPresetSelector';
+import {
+  OverlayPresetSelector,
+  OVERLAY_PRESETS,
+} from '../components/overlay/OverlayPresetSelector';
 import { OverlayElementEditor } from '../components/overlay/OverlayElementEditor';
 import { OverlayCodeView } from '../components/overlay/OverlayCodeView';
 import { MediaSearch } from '../components/overlay/MediaSearch';
@@ -42,15 +53,17 @@ export function OverlayBuilderPage() {
   // Config and overlay files
   const [configs, setConfigs] = useState<any[]>([]);
   const [selectedConfig, setSelectedConfig] = useState<string>('');
-  const [overlayFiles, setOverlayFiles] = useState<Array<{
-    libraryName: string;
-    file: any;
-    index: number;
-    overlayType?: string;
-    overlayPath?: string;
-    level?: string;
-    customFilePath?: string;
-  }>>([]);
+  const [overlayFiles, setOverlayFiles] = useState<
+    Array<{
+      libraryName: string;
+      file: any;
+      index: number;
+      overlayType?: string;
+      overlayPath?: string;
+      level?: string;
+      customFilePath?: string;
+    }>
+  >([]);
   const [overlayAssets, setOverlayAssets] = useState<Record<string, string>>({});
 
   // Media selection
@@ -78,7 +91,10 @@ export function OverlayBuilderPage() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   // Notification state
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
 
   useEffect(() => {
     loadProfiles();
@@ -134,7 +150,7 @@ export function OverlayBuilderPage() {
       if (profileList.length === 0) {
         setNotification({
           message: 'Please create a profile first with your TMDB API key.',
-          type: 'info'
+          type: 'info',
         });
         navigate('/profiles');
         return;
@@ -148,7 +164,7 @@ export function OverlayBuilderPage() {
       console.error('Failed to load profiles:', error);
       setNotification({
         message: 'Failed to load profiles',
-        type: 'error'
+        type: 'error',
       });
     } finally {
       setLoading(false);
@@ -191,7 +207,7 @@ export function OverlayBuilderPage() {
           const type = f.overlayType || 'unknown';
           acc[type] = (acc[type] || 0) + 1;
           return acc;
-        }, {})
+        }, {}),
       });
       setOverlayFiles(files);
 
@@ -245,13 +261,13 @@ export function OverlayBuilderPage() {
       setNeedsApiKey(false);
       setNotification({
         message: 'TMDB API key saved to profile!',
-        type: 'success'
+        type: 'success',
       });
     } catch (error) {
       console.error('Failed to save API key:', error);
       setNotification({
         message: 'Failed to save API key to profile',
-        type: 'error'
+        type: 'error',
       });
     }
   };
@@ -261,7 +277,8 @@ export function OverlayBuilderPage() {
 
     try {
       const tmdbService = new TmdbService(tmdbApiKey);
-      const defaultTitle = mediaType === 'movie' ? DEFAULT_PREVIEW_TITLES.movie : DEFAULT_PREVIEW_TITLES.tv;
+      const defaultTitle =
+        mediaType === 'movie' ? DEFAULT_PREVIEW_TITLES.movie : DEFAULT_PREVIEW_TITLES.tv;
 
       let media;
       if (mediaType === 'movie') {
@@ -281,7 +298,7 @@ export function OverlayBuilderPage() {
       if (errorMessage.includes('API') || errorMessage.includes('TMDB')) {
         setNotification({
           message: `Failed to load preview from TMDB: ${errorMessage}. Please check your TMDB API key.`,
-          type: 'error'
+          type: 'error',
         });
       }
     }
@@ -305,8 +322,8 @@ export function OverlayBuilderPage() {
       if (tvShow.seasons && tvShow.seasons.length > 0) {
         // Filter out season 0 (specials) if you want, or keep it
         const seasonNumbers = tvShow.seasons
-          .map(s => s.season_number)
-          .filter(n => n >= 0)
+          .map((s) => s.season_number)
+          .filter((n) => n >= 0)
           .sort((a, b) => a - b);
 
         setAvailableSeasons(seasonNumbers);
@@ -327,9 +344,7 @@ export function OverlayBuilderPage() {
       const season = await tmdbService.getSeason(currentMedia.id, seasonNumber);
 
       if (season.episodes && season.episodes.length > 0) {
-        const episodeNumbers = season.episodes
-          .map(e => e.episode_number)
-          .sort((a, b) => a - b);
+        const episodeNumbers = season.episodes.map((e) => e.episode_number).sort((a, b) => a - b);
 
         setAvailableEpisodes(episodeNumbers);
         if (episodeNumbers.length > 0) {
@@ -359,7 +374,11 @@ export function OverlayBuilderPage() {
           const poster = tmdbService.getPosterUrl(season.poster_path, 'w500');
           setPosterUrl(poster);
         } else if (posterType === 'episode') {
-          const episode = await tmdbService.getEpisode(currentMedia.id, selectedSeason, selectedEpisode);
+          const episode = await tmdbService.getEpisode(
+            currentMedia.id,
+            selectedSeason,
+            selectedEpisode
+          );
           const still = tmdbService.getStillUrl(episode.still_path, 'w300');
           setPosterUrl(still);
         }
@@ -405,25 +424,28 @@ export function OverlayBuilderPage() {
     }
 
     // Filter overlay files for the current library and level
-    const overlaysToLoad = overlayFiles.filter(
-      (overlay) => {
-        // Must match library
-        if (overlay.libraryName !== libraryName) return false;
+    const overlaysToLoad = overlayFiles.filter((overlay) => {
+      // Must match library
+      if (overlay.libraryName !== libraryName) return false;
 
-        // Must have a default overlay type
-        if (!overlay.file.default) return false;
+      // Must have a default overlay type
+      if (!overlay.file.default) return false;
 
-        // For TV shows, must match the current level
-        if (mediaType === 'tv' && overlay.level) {
-          return overlay.level === currentLevel;
-        }
-
-        return true;
+      // For TV shows, must match the current level
+      if (mediaType === 'tv' && overlay.level) {
+        return overlay.level === currentLevel;
       }
-    );
 
-    console.log(`Loading ${overlaysToLoad.length} applicable overlays for ${libraryName} (level: ${currentLevel})`);
-    console.log('Overlays to load:', overlaysToLoad.map(o => ({ type: o.overlayType, level: o.level })));
+      return true;
+    });
+
+    console.log(
+      `Loading ${overlaysToLoad.length} applicable overlays for ${libraryName} (level: ${currentLevel})`
+    );
+    console.log(
+      'Overlays to load:',
+      overlaysToLoad.map((o) => ({ type: o.overlayType, level: o.level }))
+    );
 
     // Generate overlays for each overlay file
     for (const overlayFile of overlaysToLoad) {
@@ -455,7 +477,9 @@ export function OverlayBuilderPage() {
           overlayAssets
         );
 
-        console.log(`Generated ${elements.length} elements for ${overlayName} (${overlayFile.level || 'movie'})`);
+        console.log(
+          `Generated ${elements.length} elements for ${overlayName} (${overlayFile.level || 'movie'})`
+        );
         allElements.push(...elements);
       } catch (error) {
         console.error(`Failed to generate overlay for ${overlayFile.file.default}:`, error);
@@ -468,13 +492,13 @@ export function OverlayBuilderPage() {
       setSelectedPresetId('none');
       setNotification({
         message: `Loaded ${allElements.length} overlay element(s) from ${overlaysToLoad.length} overlay file(s) for ${currentLevel} level.`,
-        type: 'success'
+        type: 'success',
       });
     } else {
       console.log('No applicable overlays generated - metadata may be missing required fields');
       setNotification({
         message: `No overlays found for ${currentLevel} level. This media may not match the conditions, or may be missing required metadata (resolution, codecs, ratings). Try adding Plex credentials for more accurate data.`,
-        type: 'info'
+        type: 'info',
       });
     }
   };
@@ -483,9 +507,10 @@ export function OverlayBuilderPage() {
     try {
       const tmdbService = new TmdbService(tmdbApiKey);
       const title = 'title' in media ? media.title : media.name;
-      const year = 'release_date' in media
-        ? parseInt(media.release_date?.split('-')[0] || '0')
-        : parseInt(media.first_air_date?.split('-')[0] || '0');
+      const year =
+        'release_date' in media
+          ? parseInt(media.release_date?.split('-')[0] || '0')
+          : parseInt(media.first_air_date?.split('-')[0] || '0');
 
       const metadata: MediaMetadata = {
         title,
@@ -585,7 +610,6 @@ export function OverlayBuilderPage() {
     loadEpisodesForSeason(seasonNumber);
   };
 
-
   if (loading) {
     return <div className={styles.page}>Loading...</div>;
   }
@@ -672,7 +696,9 @@ export function OverlayBuilderPage() {
           <>
             <select
               value={posterType}
-              onChange={(e) => handlePosterTypeChange(e.target.value as 'show' | 'season' | 'episode')}
+              onChange={(e) =>
+                handlePosterTypeChange(e.target.value as 'show' | 'season' | 'episode')
+              }
               className={styles.compactSelect}
             >
               <option value="show">Show</option>
@@ -680,19 +706,20 @@ export function OverlayBuilderPage() {
               <option value="episode">Episode</option>
             </select>
 
-            {(posterType === 'season' || posterType === 'episode') && availableSeasons.length > 0 && (
-              <select
-                value={selectedSeason}
-                onChange={(e) => handleSeasonChange(Number(e.target.value))}
-                className={styles.compactSelect}
-              >
-                {availableSeasons.map((seasonNum) => (
-                  <option key={seasonNum} value={seasonNum}>
-                    S{seasonNum}
-                  </option>
-                ))}
-              </select>
-            )}
+            {(posterType === 'season' || posterType === 'episode') &&
+              availableSeasons.length > 0 && (
+                <select
+                  value={selectedSeason}
+                  onChange={(e) => handleSeasonChange(Number(e.target.value))}
+                  className={styles.compactSelect}
+                >
+                  {availableSeasons.map((seasonNum) => (
+                    <option key={seasonNum} value={seasonNum}>
+                      S{seasonNum}
+                    </option>
+                  ))}
+                </select>
+              )}
 
             {posterType === 'episode' && availableEpisodes.length > 0 && (
               <select
@@ -740,7 +767,10 @@ export function OverlayBuilderPage() {
                   )}
                   {mediaMetadata.audioCodec && (
                     <div className={styles.mediaInfoItem}>
-                      <strong>Audio:</strong> <span>{mediaMetadata.audioCodec} {mediaMetadata.audioChannels}</span>
+                      <strong>Audio:</strong>{' '}
+                      <span>
+                        {mediaMetadata.audioCodec} {mediaMetadata.audioChannels}
+                      </span>
                     </div>
                   )}
                   {mediaMetadata.ratings && (
@@ -750,7 +780,8 @@ export function OverlayBuilderPage() {
                       </div>
                       {mediaMetadata.ratings.imdb && (
                         <div className={styles.mediaInfoItem}>
-                          <strong>IMDb:</strong> <span>{mediaMetadata.ratings.imdb.toFixed(1)}</span>
+                          <strong>IMDb:</strong>{' '}
+                          <span>{mediaMetadata.ratings.imdb.toFixed(1)}</span>
                         </div>
                       )}
                     </>
@@ -767,12 +798,27 @@ export function OverlayBuilderPage() {
                 <h2 className={styles.posterTitle}>
                   {'title' in currentMedia ? currentMedia.title : currentMedia.name}
                   {overlayElements.length > 0 && (
-                    <span style={{ fontSize: '14px', fontWeight: 'normal', marginLeft: '12px', opacity: 0.7 }}>
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 'normal',
+                        marginLeft: '12px',
+                        opacity: 0.7,
+                      }}
+                    >
                       ({overlayElements.length} overlay{overlayElements.length !== 1 ? 's' : ''})
                     </span>
                   )}
                   {mediaType === 'tv' && (
-                    <span style={{ fontSize: '12px', fontWeight: 'normal', marginLeft: '12px', opacity: 0.5, textTransform: 'uppercase' }}>
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 'normal',
+                        marginLeft: '12px',
+                        opacity: 0.5,
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       • {posterType} Level
                     </span>
                   )}
@@ -806,10 +852,7 @@ export function OverlayBuilderPage() {
                 selectedPresetId={selectedPresetId}
                 onPresetChange={handlePresetChange}
               />
-              <button
-                className={styles.button}
-                onClick={() => setShowCode(!showCode)}
-              >
+              <button className={styles.button} onClick={() => setShowCode(!showCode)}>
                 {showCode ? 'Hide Code' : 'Show Code'}
               </button>
             </div>
@@ -824,14 +867,24 @@ export function OverlayBuilderPage() {
             />
 
             {showCode && (
-              <div style={{ marginTop: '16px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '12px' }}>
+              <div
+                style={{
+                  marginTop: '16px',
+                  borderTop: '1px solid var(--border-color)',
+                  paddingTop: '16px',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--text-primary)',
+                    marginBottom: '12px',
+                  }}
+                >
                   YAML Code
                 </h3>
-                <OverlayCodeView
-                  elements={overlayElements}
-                  onElementsChange={setOverlayElements}
-                />
+                <OverlayCodeView elements={overlayElements} onElementsChange={setOverlayElements} />
               </div>
             )}
           </div>

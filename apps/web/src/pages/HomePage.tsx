@@ -60,10 +60,7 @@ export function HomePage() {
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Configurations</h2>
-            <button
-              onClick={() => setShowNewConfigForm(true)}
-              className={styles.button}
-            >
+            <button onClick={() => setShowNewConfigForm(true)} className={styles.button}>
               + New Configuration
             </button>
           </div>
@@ -104,7 +101,7 @@ export function HomePage() {
             </div>
           ) : (
             <div className={styles.configList}>
-              {configs.map(config => (
+              {configs.map((config) => (
                 <div
                   key={config.id}
                   className={styles.configCard}
@@ -112,9 +109,7 @@ export function HomePage() {
                 >
                   <div className={styles.configName}>{config.name}</div>
                   {config.description && (
-                    <div className={styles.configDescription}>
-                      {config.description}
-                    </div>
+                    <div className={styles.configDescription}>{config.description}</div>
                   )}
                   <div className={styles.configMeta}>
                     Updated {new Date(config.updatedAt).toLocaleDateString()}

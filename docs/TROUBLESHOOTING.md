@@ -9,6 +9,7 @@ Common issues and how to fix them.
 **Cause**: Invalid or missing TMDB API key.
 
 **Solution**:
+
 1. Check that your profile has a TMDB API key
 2. Go to **Profiles** → Select your profile → Edit
 3. Verify the TMDB API key is correct
@@ -16,6 +17,7 @@ Common issues and how to fix them.
 5. Click "Add API Key" button in Overlay Builder if prompted
 
 **How to test your API key**:
+
 ```bash
 # Replace YOUR_API_KEY with your actual key
 curl "https://api.themoviedb.org/3/movie/603?api_key=YOUR_API_KEY"
@@ -28,6 +30,7 @@ If this returns movie data, your key is valid.
 **Cause**: The API key in your profile is incorrect or expired.
 
 **Solution**:
+
 1. Go to https://www.themoviedb.org/settings/api
 2. Generate a new API key
 3. Update your profile with the new key
@@ -38,6 +41,7 @@ If this returns movie data, your key is valid.
 **Cause**: Network issue or CORS problem.
 
 **Solution**:
+
 1. Check your internet connection
 2. Open browser DevTools (F12) → Console tab
 3. Look for specific error messages
@@ -47,11 +51,13 @@ If this returns movie data, your key is valid.
 ### Search returns no results
 
 **Possible causes**:
+
 - No movies/shows match your query
 - API key issue
 - Network problem
 
 **Solution**:
+
 1. Try a different search term
 2. Check spelling
 3. Verify API key (see above)
@@ -64,6 +70,7 @@ If this returns movie data, your key is valid.
 **Cause**: YAML syntax errors in your config.
 
 **Solution**:
+
 1. Validate YAML syntax at: https://www.yamllint.com/
 2. Common issues:
    - Incorrect indentation (use 2 spaces, not tabs)
@@ -76,6 +83,7 @@ If this returns movie data, your key is valid.
 **Cause**: Profile wasn't created or secrets in wrong format.
 
 **Solution**:
+
 1. After import, check **Profiles** page
 2. Look for a profile with "Imported" in the name
 3. Edit the profile to verify secrets were extracted
@@ -86,9 +94,10 @@ If this returns movie data, your key is valid.
 **Cause**: Using "Masked" or "Template" export mode.
 
 **Solution**:
+
 - Use "Full" mode for actual deployment
 - "Template" mode = no secrets
-- "Masked" mode = partial secrets (abcd****wxyz)
+- "Masked" mode = partial secrets (abcd\*\*\*\*wxyz)
 - "Full" mode = complete secrets
 
 ## Profile Issues
@@ -106,6 +115,7 @@ They are stored securely and used internally by the app.
 **Cause**: Clicked "Delete" or used "Reset All Data".
 
 **Solution**:
+
 - Profiles are stored in SQLite database
 - No automatic backups (local-first design)
 - **Prevention**: Export profiles regularly
@@ -118,6 +128,7 @@ They are stored securely and used internally by the app.
 **Cause**: Another process is using the backend port.
 
 **Solution**:
+
 ```bash
 # Windows
 netstat -ano | findstr :3001
@@ -135,6 +146,7 @@ npx kill-port 3001
 **Cause**: Another process is using the frontend port.
 
 **Solution**:
+
 ```bash
 # Kill the process
 npx kill-port 5176
@@ -150,6 +162,7 @@ server: {
 **Error**: "database is locked"
 
 **Solution**:
+
 ```bash
 # Close all running instances
 pkill node
@@ -162,6 +175,7 @@ pnpm dev
 **Error**: "no such table: configs"
 
 **Solution**:
+
 ```bash
 # Database corrupted or not initialized
 rm apps/server/data/kometa-studio.db
@@ -174,11 +188,13 @@ pnpm dev
 ### Blank page or white screen
 
 **Causes**:
+
 - JavaScript error
 - Build issue
 - Browser cache
 
 **Solution**:
+
 1. Open DevTools (F12) → Console
 2. Check for errors (red messages)
 3. Hard refresh: Ctrl/Cmd+Shift+R
@@ -189,6 +205,7 @@ pnpm dev
 ### Changes not showing up
 
 **Solution**:
+
 ```bash
 # Hard refresh browser
 Ctrl+Shift+R (Windows)
@@ -204,6 +221,7 @@ pnpm dev
 **Cause**: Missing dependencies or build cache issue.
 
 **Solution**:
+
 ```bash
 # Clean install
 rm -rf node_modules
@@ -222,6 +240,7 @@ pnpm dev
 **Error**: "EACCES: permission denied"
 
 **Solution**:
+
 ```bash
 # Don't use sudo with pnpm
 # Fix npm permissions instead
@@ -232,6 +251,7 @@ export PATH=~/.npm-global/bin:$PATH
 **Error**: "No matching version found"
 
 **Solution**:
+
 ```bash
 # Update pnpm
 npm install -g pnpm@latest
@@ -244,6 +264,7 @@ pnpm install
 ### TypeScript errors during build
 
 **Solution**:
+
 ```bash
 # Clean TypeScript cache
 rm -rf dist
@@ -254,6 +275,7 @@ pnpm build
 ### Build succeeds but app doesn't work
 
 **Solution**:
+
 ```bash
 # Check environment
 node --version  # Should be 18+
@@ -271,6 +293,7 @@ pnpm build
 ### App is slow or laggy
 
 **Solutions**:
+
 1. Close browser DevTools when not debugging
 2. Restart dev server periodically
 3. Clear browser cache
@@ -282,6 +305,7 @@ pnpm build
 **Cause**: Development mode keeps old builds in memory.
 
 **Solution**:
+
 ```bash
 # Restart dev server
 Ctrl+C
@@ -293,12 +317,14 @@ pnpm dev
 ### Doesn't work in [browser]
 
 **Supported browsers**:
+
 - Chrome 100+
 - Firefox 100+
 - Edge 100+
 - Safari 15+
 
 **Solution**:
+
 1. Update your browser
 2. Try a different browser
 3. Disable browser extensions
@@ -311,6 +337,7 @@ pnpm dev
 **Cause**: Usually affects external APIs (TMDB).
 
 **Solution**:
+
 - TMDB API should work from browser
 - If persists, check firewall/antivirus
 - Try different network (VPN off)
@@ -320,6 +347,7 @@ pnpm dev
 ### How to backup my data
 
 **Configs**:
+
 ```bash
 # Export each config as YAML
 # Use Template mode for sharing
@@ -327,6 +355,7 @@ pnpm dev
 ```
 
 **Profiles**:
+
 ```bash
 # Use Profile export feature
 # Copy with secrets for backup
@@ -334,6 +363,7 @@ pnpm dev
 ```
 
 **Database**:
+
 ```bash
 # Copy the database file
 cp apps/server/data/kometa-studio.db backup/
@@ -389,6 +419,7 @@ pnpm list --depth 0
 ```
 
 Everything good? Then:
+
 ```bash
 pnpm dev
 ```

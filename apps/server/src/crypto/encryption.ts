@@ -54,7 +54,9 @@ export function encrypt(plaintext: string, masterKey: string): string {
 
     return JSON.stringify(envelope);
   } catch (error) {
-    throw new Error(`Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
@@ -82,7 +84,9 @@ export function decrypt(envelopeStr: string, masterKey: string): string {
 
     return decrypted;
   } catch (error) {
-    throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 

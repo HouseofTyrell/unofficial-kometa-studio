@@ -50,10 +50,7 @@ export function LibrariesEditor({ libraries, onChange }: LibrariesEditorProps) {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>Libraries</h2>
-        <button
-          onClick={() => setShowNewLibraryForm(true)}
-          className={styles.addButton}
-        >
+        <button onClick={() => setShowNewLibraryForm(true)} className={styles.addButton}>
           + Add Library
         </button>
       </div>
@@ -87,20 +84,16 @@ export function LibrariesEditor({ libraries, onChange }: LibrariesEditorProps) {
       )}
 
       {libraryNames.length === 0 ? (
-        <div className={styles.emptyState}>
-          No libraries configured. Add one to get started.
-        </div>
+        <div className={styles.emptyState}>No libraries configured. Add one to get started.</div>
       ) : (
         <div className={styles.libraryList}>
-          {libraryNames.map(name => (
+          {libraryNames.map((name) => (
             <div key={name} className={styles.libraryItem}>
               <div
                 className={styles.libraryHeader}
                 onClick={() => setExpandedLibrary(expandedLibrary === name ? null : name)}
               >
-                <span className={styles.arrow}>
-                  {expandedLibrary === name ? '▼' : '▶'}
-                </span>
+                <span className={styles.arrow}>{expandedLibrary === name ? '▼' : '▶'}</span>
                 <span className={styles.libraryName}>{name}</span>
                 <button
                   onClick={(e) => {

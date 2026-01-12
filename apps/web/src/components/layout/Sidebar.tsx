@@ -25,7 +25,7 @@ export function Sidebar() {
   };
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
@@ -46,16 +46,13 @@ export function Sidebar() {
         </Link>
 
         <div className={styles.section}>
-          <button
-            className={styles.sectionHeader}
-            onClick={() => toggleSection('configs')}
-          >
+          <button className={styles.sectionHeader} onClick={() => toggleSection('configs')}>
             <span className={styles.arrow}>{expandedSections.configs ? '▼' : '▶'}</span>
             Configurations
           </button>
           {expandedSections.configs && (
             <div className={styles.sectionContent}>
-              {configs.map(config => (
+              {configs.map((config) => (
                 <Link
                   key={config.id}
                   to={`/config/${config.id}`}
@@ -94,9 +91,7 @@ export function Sidebar() {
       </nav>
 
       <div className={styles.footer}>
-        <div className={styles.disclaimer}>
-          Unofficial project
-        </div>
+        <div className={styles.disclaimer}>Unofficial project</div>
       </div>
     </div>
   );

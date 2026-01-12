@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Visual Overlay Builder with live preview
 - TMDB integration for poster search and preview
 - TV Show hierarchy support (Show/Season/Episode poster types)
@@ -43,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Responsive layout with sidebar navigation
 
 ### Changed
+
 - Removed secret masking from Profile API (local-first app, no security risk)
 - **Replaced popup alerts with elegant on-page notifications** in Overlay Builder
 - Added slide-in animation for notifications (auto-dismiss after 5 seconds)
@@ -52,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved TMDB error messages (shows specific API errors)
 
 ### Fixed
+
 - Secret masking preventing secrets from being saved correctly
 - Secrets not displaying properly after import
 - Generic TMDB error messages not showing specific issues
@@ -65,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-01-XX
 
 ### Added
+
 - Initial release
 - Basic configuration editor
 - Profile management

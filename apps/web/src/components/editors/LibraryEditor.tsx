@@ -46,7 +46,8 @@ export function LibraryEditor({ library, onChange }: LibraryEditorProps) {
             <div className={styles.fileSection}>
               <h3 className={styles.sectionTitle}>Collection Files</h3>
               <p className={styles.sectionDescription}>
-                Define collection files for this library. Each entry can reference a file, default, URL, or git repo.
+                Define collection files for this library. Each entry can reference a file, default,
+                URL, or git repo.
               </p>
               <FileListEditor
                 files={library.collection_files || []}
@@ -57,7 +58,8 @@ export function LibraryEditor({ library, onChange }: LibraryEditorProps) {
             <div className={styles.fileSection}>
               <h3 className={styles.sectionTitle}>Overlay Files</h3>
               <p className={styles.sectionDescription}>
-                Define overlay files for this library. You can use the same default multiple times with different template_variables.
+                Define overlay files for this library. You can use the same default multiple times
+                with different template_variables.
               </p>
               <FileListEditor
                 files={library.overlay_files || []}

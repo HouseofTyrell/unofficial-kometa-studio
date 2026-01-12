@@ -22,13 +22,17 @@ async function start() {
   // Validate master key
   if (!MASTER_KEY) {
     console.error('ERROR: KOMETA_STUDIO_MASTER_KEY environment variable is required');
-    console.error('Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"');
+    console.error(
+      "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\""
+    );
     process.exit(1);
   }
 
   if (!validateMasterKey(MASTER_KEY)) {
     console.error('ERROR: KOMETA_STUDIO_MASTER_KEY must be a valid 32-byte base64-encoded key');
-    console.error('Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"');
+    console.error(
+      "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\""
+    );
     process.exit(1);
   }
 

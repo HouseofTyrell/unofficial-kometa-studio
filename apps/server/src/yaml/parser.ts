@@ -23,7 +23,7 @@ function extractWithExtras<T extends Record<string, any>>(
     // If it's a secret key, skip it entirely (it will go in the profile)
   }
 
-  return { data, extras: Object.keys(extras).length > 0 ? extras : undefined as any };
+  return { data, extras: Object.keys(extras).length > 0 ? extras : (undefined as any) };
 }
 
 /**
@@ -116,8 +116,14 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
   if (parsed.tautulli) {
     const tautulliKnownKeys: string[] = [];
     const tautulliSecretKeys = ['url', 'apikey'];
-    const { data, extras } = extractWithExtras(parsed.tautulli, tautulliKnownKeys, tautulliSecretKeys);
-    config.tautulli = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
+    const { data, extras } = extractWithExtras(
+      parsed.tautulli,
+      tautulliKnownKeys,
+      tautulliSecretKeys
+    );
+    config.tautulli = preserveExtras
+      ? { enabled: true, ...data, extras }
+      : { enabled: true, ...data };
   }
 
   // MDBList
@@ -125,7 +131,9 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
     const mdblistKnownKeys = ['cache_expiration'];
     const mdblistSecretKeys = ['apikey'];
     const { data, extras } = extractWithExtras(parsed.mdblist, mdblistKnownKeys, mdblistSecretKeys);
-    config.mdblist = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
+    config.mdblist = preserveExtras
+      ? { enabled: true, ...data, extras }
+      : { enabled: true, ...data };
   }
 
   // Radarr
@@ -145,7 +153,9 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
     ];
     const radarrSecretKeys = ['url', 'token'];
     const { data, extras } = extractWithExtras(parsed.radarr, radarrKnownKeys, radarrSecretKeys);
-    config.radarr = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
+    config.radarr = preserveExtras
+      ? { enabled: true, ...data, extras }
+      : { enabled: true, ...data };
   }
 
   // Sonarr
@@ -168,7 +178,9 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
     ];
     const sonarrSecretKeys = ['url', 'token'];
     const { data, extras } = extractWithExtras(parsed.sonarr, sonarrKnownKeys, sonarrSecretKeys);
-    config.sonarr = preserveExtras ? { enabled: true, ...data, extras } : { enabled: true, ...data };
+    config.sonarr = preserveExtras
+      ? { enabled: true, ...data, extras }
+      : { enabled: true, ...data };
   }
 
   // Trakt
@@ -198,7 +210,10 @@ export function parseKometaYaml(yamlString: string, preserveExtras = true): Kome
     for (const [libraryName, libraryConfig] of Object.entries(parsed.libraries)) {
       if (typeof libraryConfig !== 'object' || !libraryConfig) continue;
 
-      const { data, extras } = extractWithExtras(libraryConfig as Record<string, any>, libraryKnownKeys);
+      const { data, extras } = extractWithExtras(
+        libraryConfig as Record<string, any>,
+        libraryKnownKeys
+      );
       config.libraries[libraryName] = preserveExtras ? { ...data, extras } : data;
     }
   }
@@ -230,7 +245,10 @@ export function extractSecretsFromYaml(yamlString: string): {
   mdblist?: { apikey?: string };
   radarr?: { url?: string; token?: string };
   sonarr?: { url?: string; token?: string };
-  trakt?: { client_secret?: string; authorization?: { access_token?: string; refresh_token?: string } };
+  trakt?: {
+    client_secret?: string;
+    authorization?: { access_token?: string; refresh_token?: string };
+  };
 } {
   const parsed = YAML.parse(yamlString);
 

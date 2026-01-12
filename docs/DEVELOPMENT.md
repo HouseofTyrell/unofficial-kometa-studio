@@ -17,6 +17,7 @@ pnpm dev
 ## 📁 Project Structure
 
 ### Monorepo Layout
+
 ```
 kometa-studio/
 ├── apps/
@@ -42,6 +43,7 @@ kometa-studio/
 ```
 
 ### Key Files
+
 - `apps/server/src/index.ts` - Backend entry point
 - `apps/web/src/App.tsx` - Frontend routing
 - `apps/web/src/components/layout/Sidebar.tsx` - Navigation
@@ -102,6 +104,7 @@ Schemas are defined in `packages/shared/src/schemas/` using Zod.
 **Adding a new field:**
 
 1. Update schema:
+
 ```typescript
 // packages/shared/src/schemas/config.schema.ts
 export const PlexConfigSchema = z.object({
@@ -113,12 +116,14 @@ export const PlexConfigSchema = z.object({
 ```
 
 2. Update parser:
+
 ```typescript
 // apps/server/src/yaml/parser.ts
 const plexKnownKeys = ['timeout', 'clean_bundles', 'new_field'];
 ```
 
 3. Update renderer:
+
 ```typescript
 // apps/server/src/yaml/renderer.ts
 if (plex.new_field) {
@@ -129,6 +134,7 @@ if (plex.new_field) {
 ### Adding a New API Endpoint
 
 1. **Create route file** (or add to existing):
+
 ```typescript
 // apps/server/src/routes/myfeature.routes.ts
 import { FastifyInstance } from 'fastify';
@@ -146,6 +152,7 @@ export async function myFeatureRoutes(fastify: FastifyInstance) {
 ```
 
 2. **Register route**:
+
 ```typescript
 // apps/server/src/index.ts
 import { myFeatureRoutes } from './routes/myfeature.routes';
@@ -154,20 +161,23 @@ await fastify.register(myFeatureRoutes);
 ```
 
 3. **Add client method**:
+
 ```typescript
 // apps/web/src/api/client.ts
 export const myFeatureApi = {
   get: () => request<{ message: string }>('/api/myfeature'),
-  create: (data: any) => request<{ success: boolean }>('/api/myfeature', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
+  create: (data: any) =>
+    request<{ success: boolean }>('/api/myfeature', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 ```
 
 ### Adding a New Page
 
 1. **Create page component**:
+
 ```tsx
 // apps/web/src/pages/MyPage.tsx
 import styles from './MyPage.module.css';
@@ -182,6 +192,7 @@ export function MyPage() {
 ```
 
 2. **Create styles**:
+
 ```css
 /* apps/web/src/pages/MyPage.module.css */
 .page {
@@ -190,14 +201,16 @@ export function MyPage() {
 ```
 
 3. **Add route**:
+
 ```tsx
 // apps/web/src/App.tsx
 import { MyPage } from './pages/MyPage';
 
-<Route path="/my-page" element={<MyPage />} />
+<Route path="/my-page" element={<MyPage />} />;
 ```
 
 4. **Add navigation**:
+
 ```tsx
 // apps/web/src/components/layout/Sidebar.tsx
 <Link to="/my-page" className={styles.navItem}>
@@ -239,6 +252,7 @@ curl -X POST http://localhost:3001/api/profiles \
 ### Backend Debugging
 
 Add console.log statements:
+
 ```typescript
 console.log('Debug:', variable);
 ```
@@ -255,6 +269,7 @@ Check server logs in terminal where `pnpm dev` is running.
 ### Common Issues
 
 **Port already in use:**
+
 ```bash
 # Kill process on port 3001 (backend)
 npx kill-port 3001
@@ -264,6 +279,7 @@ npx kill-port 5176
 ```
 
 **Database locked:**
+
 ```bash
 # Close all connections and restart
 rm apps/server/data/kometa-studio.db
@@ -271,6 +287,7 @@ pnpm dev
 ```
 
 **TypeScript errors:**
+
 ```bash
 # Clean build cache
 pnpm clean
@@ -281,11 +298,13 @@ pnpm dev
 ## 📊 Performance Tips
 
 ### Development
+
 - Use `--filter` to run commands in specific packages only
 - Keep browser DevTools closed when not debugging
 - Restart dev server if memory usage grows
 
 ### Production
+
 - Always build before deploying
 - Use production Node.js environment variables
 - Consider using PM2 or similar for process management
@@ -301,6 +320,7 @@ pnpm dev
 ## 📝 Code Style
 
 ### TypeScript
+
 ```typescript
 // Use explicit types
 function processConfig(config: KometaConfig): string {
@@ -313,6 +333,7 @@ const data: KometaConfig; // ✅ Good
 ```
 
 ### React Components
+
 ```tsx
 // Export props interface
 export interface ButtonProps {
@@ -327,11 +348,15 @@ export function Button({ label, onClick }: ButtonProps) {
 ```
 
 ### CSS Modules
+
 ```css
 /* Use camelCase for class names */
-.primaryButton { }
-.navItem { }
-.headerTitle { }
+.primaryButton {
+}
+.navItem {
+}
+.headerTitle {
+}
 ```
 
 ## 🚢 Deployment
@@ -339,6 +364,7 @@ export function Button({ label, onClick }: ButtonProps) {
 ### Environment Variables
 
 Create `.env` in `apps/server/`:
+
 ```bash
 PORT=3001
 DATABASE_PATH=./data/kometa-studio.db
@@ -346,16 +372,19 @@ NODE_ENV=production
 ```
 
 ### Building
+
 ```bash
 pnpm build
 ```
 
 ### Running
+
 ```bash
 pnpm start
 ```
 
 ### Docker (Future)
+
 Docker support planned for future release.
 
 ## 📚 Additional Resources

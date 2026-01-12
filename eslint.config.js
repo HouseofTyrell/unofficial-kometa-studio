@@ -14,6 +14,7 @@ export default tseslint.config(
       '**/*.d.ts',
       '**/coverage/**',
       '**/.turbo/**',
+      'scripts/**',
     ],
   },
 
@@ -75,6 +76,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off', // Not needed with new JSX transform
       'react/prop-types': 'off', // Using TypeScript for prop validation
+      'react/no-unescaped-entities': 'off', // Allow quotes in JSX text
       // Be lenient with unused vars
       '@typescript-eslint/no-unused-vars': [
         'warn',

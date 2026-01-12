@@ -10,11 +10,7 @@ export interface SaveOverlayDialogProps {
   onClose: () => void;
 }
 
-export function SaveOverlayDialog({
-  overlayElements,
-  mediaType,
-  onClose,
-}: SaveOverlayDialogProps) {
+export function SaveOverlayDialog({ overlayElements, mediaType, onClose }: SaveOverlayDialogProps) {
   const navigate = useNavigate();
   const [configs, setConfigs] = useState<any[]>([]);
   const [selectedConfigId, setSelectedConfigId] = useState<string>('');
@@ -199,7 +195,8 @@ export function SaveOverlayDialog({
           <div className={styles.info}>
             <p>
               <strong>Summary:</strong> Saving {overlayElements.length} overlay element
-              {overlayElements.length !== 1 ? 's' : ''} for {mediaType === 'movie' ? 'movies' : 'TV shows'}.
+              {overlayElements.length !== 1 ? 's' : ''} for{' '}
+              {mediaType === 'movie' ? 'movies' : 'TV shows'}.
             </p>
             <p className={styles.note}>
               Note: This overlay will be saved to the config's custom overlays section.
@@ -211,11 +208,7 @@ export function SaveOverlayDialog({
           <button onClick={onClose} className={styles.cancelButton}>
             Cancel
           </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className={styles.saveButton}
-          >
+          <button onClick={handleSave} disabled={saving} className={styles.saveButton}>
             {saving ? 'Saving...' : 'Save Overlay'}
           </button>
         </div>

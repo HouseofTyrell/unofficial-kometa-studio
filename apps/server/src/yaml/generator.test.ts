@@ -9,7 +9,7 @@ describe('YAML Generator', () => {
       tmdb: { enabled: true },
       plex: { enabled: true },
       libraries: {
-        'Movies': {
+        Movies: {
           collection_files: [{ default: 'imdb' }],
         },
       },
@@ -31,12 +31,8 @@ describe('YAML Generator', () => {
   it('should preserve collection_files order', () => {
     const config: KometaConfig = {
       libraries: {
-        'Movies': {
-          collection_files: [
-            { default: 'first' },
-            { default: 'second' },
-            { default: 'third' },
-          ],
+        Movies: {
+          collection_files: [{ default: 'first' }, { default: 'second' }, { default: 'third' }],
         },
       },
     };
@@ -54,7 +50,7 @@ describe('YAML Generator', () => {
   it('should support repeated defaults with different template_variables', () => {
     const config: KometaConfig = {
       libraries: {
-        'Movies': {
+        Movies: {
           overlay_files: [
             {
               default: 'studio',

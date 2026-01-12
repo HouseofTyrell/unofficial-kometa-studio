@@ -21,7 +21,7 @@ export interface OverlayElement {
   content?: string;
   fontSize?: number;
   fontFamily?: string;
-  fontColor?: string;  // Add support for fontColor (used by Kometa)
+  fontColor?: string; // Add support for fontColor (used by Kometa)
   color?: string;
   backgroundColor?: string;
   borderRadius?: number;
@@ -83,7 +83,10 @@ export function PosterPreview({
         x = offset.horizontal || 0;
         break;
       case 'center':
-        x = Math.floor(KOMETA_CANVAS_WIDTH / 2) - Math.floor(elementWidth / 2) + (offset.horizontal || 0);
+        x =
+          Math.floor(KOMETA_CANVAS_WIDTH / 2) -
+          Math.floor(elementWidth / 2) +
+          (offset.horizontal || 0);
         break;
       case 'right':
         // Kometa: image_value - over_value - value
@@ -99,7 +102,10 @@ export function PosterPreview({
         y = offset.vertical || 0;
         break;
       case 'center':
-        y = Math.floor(KOMETA_CANVAS_HEIGHT / 2) - Math.floor(elementHeight / 2) + (offset.vertical || 0);
+        y =
+          Math.floor(KOMETA_CANVAS_HEIGHT / 2) -
+          Math.floor(elementHeight / 2) +
+          (offset.vertical || 0);
         break;
       case 'bottom':
         // Kometa: image_value - over_value - value
@@ -114,7 +120,7 @@ export function PosterPreview({
       offset,
       size: { w: elementWidth, h: elementHeight },
       kometaCanvas: { w: KOMETA_CANVAS_WIDTH, h: KOMETA_CANVAS_HEIGHT },
-      result: { x, y }
+      result: { x, y },
     });
 
     return { x, y };
@@ -281,7 +287,9 @@ export function PosterPreview({
             const aspectRatio = addonImg!.width / addonImg!.height;
             addonHeight = targetHeight;
             addonWidth = targetHeight * aspectRatio;
-            console.log(`  ✅ Addon image loaded successfully! Size: ${addonImg!.width}x${addonImg!.height}, scaled to: ${addonWidth}x${addonHeight}`);
+            console.log(
+              `  ✅ Addon image loaded successfully! Size: ${addonImg!.width}x${addonImg!.height}, scaled to: ${addonWidth}x${addonHeight}`
+            );
             resolve();
           };
           addonImg!.onerror = (e) => {
@@ -310,7 +318,8 @@ export function PosterPreview({
     // Use element's fixed width/height if provided (Kometa's back_width/back_height)
     // Otherwise calculate from content size + padding
     const badgeWidth = element.width || Math.ceil(contentWidth + backPadding * 2);
-    const badgeHeight = element.height || Math.ceil(Math.max(textHeight, addonHeight) + backPadding * 2);
+    const badgeHeight =
+      element.height || Math.ceil(Math.max(textHeight, addonHeight) + backPadding * 2);
 
     // Kometa's drawing logic:
     // 1. Draw background rectangle (rounded if back_radius is set)
@@ -371,10 +380,7 @@ export function PosterPreview({
     ctx.fillText(textContent, element.x + ribbonWidth / 2, element.y + ribbonHeight / 2);
   };
 
-  const renderImageElement = async (
-    ctx: CanvasRenderingContext2D,
-    element: OverlayElement
-  ) => {
+  const renderImageElement = async (ctx: CanvasRenderingContext2D, element: OverlayElement) => {
     const imageUrl = element.imageUrl || element.content;
     if (!imageUrl) return;
     if (!element.x || !element.y) return;
@@ -413,12 +419,7 @@ export function PosterPreview({
     <div className={styles.container}>
       {loading && <div className={styles.loading}>Loading preview...</div>}
       {error && <div className={styles.error}>Error: {error}</div>}
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        className={styles.canvas}
-      />
+      <canvas ref={canvasRef} width={width} height={height} className={styles.canvas} />
     </div>
   );
 }

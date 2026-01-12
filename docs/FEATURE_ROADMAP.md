@@ -29,7 +29,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 | **Code View Editing** | Allow users to edit YAML in code view and sync back to visual editor | TODO in code |
 | **More Preset Templates** | Add templates for: Dolby Vision, IMAX, Awards, Streaming Services | ✅ Complete (30+ presets) |
 | **Template Variable Editor** | UI for editing template variables before applying to overlays | Partial |
-| **Preview Scale Options** | Allow zooming in/out on poster preview | Not started |
+| **Preview Scale Options** | Allow zooming in/out on poster preview | ✅ Complete |
 
 ### 🟡 Medium
 
@@ -273,3 +273,4 @@ When implementing a feature:
 - ✅ Dark/light theme toggle with system preference detection
 - ✅ Verified TypeScript build and YAML parser tests pass
 - ✅ Added 30+ overlay preset templates across 11 categories
+- ✅ Preview zoom controls (50%-150%)

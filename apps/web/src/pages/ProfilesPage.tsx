@@ -1,21 +1,51 @@
 import { useState, useEffect } from 'react';
 import styles from './ProfilesPage.module.css';
-import { profileApi } from '../api/client';
+import { profileApi, proxyApi } from '../api/client';
+import { ConfirmDialog } from '../components/shared/ConfirmDialog';
+import type { MaskedProfile, ProfileSecrets } from '@kometa-studio/shared';
+
+// Valid service names for secrets
+type ServiceName = 'plex' | 'tmdb' | 'tautulli' | 'mdblist' | 'radarr' | 'sonarr' | 'trakt';
+
+// Form data for creating/editing profiles
+interface ProfileFormData {
+  name: string;
+  description?: string;
+  secrets: ProfileSecrets;
+}
+
+// Helper to safely access nested secret values
+function getNestedSecretValue(
+  secrets: ProfileSecrets | undefined,
+  service: ServiceName,
+  field: string
+): string | undefined {
+  if (!secrets) return undefined;
+  const serviceSecrets = secrets[service];
+  if (!serviceSecrets || typeof serviceSecrets !== 'object') return undefined;
+  return (serviceSecrets as Record<string, string | undefined>)[field];
+}
 
 export function ProfilesPage() {
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [profiles, setProfiles] = useState<MaskedProfile[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<MaskedProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNewForm, setShowNewForm] = useState(false);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     description: '',
     secrets: {},
   });
-  const [unmaskedSecrets, setUnmaskedSecrets] = useState<any>({});
+  const [unmaskedSecrets, setUnmaskedSecrets] = useState<ProfileSecrets>({});
   const [testing, setTesting] = useState<Record<string, boolean>>({});
   const [showSecrets, setShowSecrets] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; profileId: string | null }>(
+    { isOpen: false, profileId: null }
+  );
 
   useEffect(() => {
     loadProfiles();
@@ -60,27 +90,37 @@ export function ProfilesPage() {
 
     try {
       // Merge unmasked secrets into formData before saving
-      const dataToSave = {
-        ...formData,
-        secrets: {
-          ...formData.secrets,
-        },
-      };
+      const mergedSecrets: ProfileSecrets = { ...formData.secrets };
 
       // Override with unmasked values where available
-      Object.keys(unmaskedSecrets).forEach((service) => {
-        if (unmaskedSecrets[service]) {
-          dataToSave.secrets[service] = {
-            ...dataToSave.secrets[service],
-            ...unmaskedSecrets[service],
-          };
+      const services: ServiceName[] = [
+        'plex',
+        'tmdb',
+        'tautulli',
+        'mdblist',
+        'radarr',
+        'sonarr',
+        'trakt',
+      ];
+      for (const service of services) {
+        const unmasked = unmaskedSecrets[service];
+        if (unmasked) {
+          mergedSecrets[service] = {
+            ...mergedSecrets[service],
+            ...unmasked,
+          } as ProfileSecrets[typeof service];
         }
-      });
+      }
 
-      if (selectedProfile) {
+      const dataToSave = {
+        ...formData,
+        secrets: mergedSecrets,
+      };
+
+      if (selectedProfile?.id) {
         await profileApi.update(selectedProfile.id, dataToSave);
         setNotification({ message: 'Profile updated successfully', type: 'success' });
-      } else {
+      } else if (!selectedProfile) {
         await profileApi.create(dataToSave);
         setNotification({ message: 'Profile created successfully', type: 'success' });
         setShowNewForm(false);
@@ -92,7 +132,15 @@ export function ProfilesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirm({ isOpen: true, profileId: id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const id = deleteConfirm.profileId;
+    if (!id) return;
+
+    setDeleteConfirm({ isOpen: false, profileId: null });
     setNotification({ message: 'Deleting profile...', type: 'info' });
 
     try {
@@ -106,7 +154,11 @@ export function ProfilesPage() {
     }
   };
 
-  const handleSecretChange = (service: string, field: string, value: string) => {
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ isOpen: false, profileId: null });
+  };
+
+  const handleSecretChange = (service: ServiceName, field: string, value: string) => {
     setFormData({
       ...formData,
       secrets: {
@@ -114,7 +166,7 @@ export function ProfilesPage() {
         [service]: {
           ...formData.secrets?.[service],
           [field]: value || undefined,
-        },
+        } as ProfileSecrets[typeof service],
       },
     });
 
@@ -124,7 +176,7 @@ export function ProfilesPage() {
       [service]: {
         ...unmaskedSecrets?.[service],
         [field]: value || undefined,
-      },
+      } as ProfileSecrets[typeof service],
     });
   };
 
@@ -133,8 +185,12 @@ export function ProfilesPage() {
   };
 
   // Get the value to display (unmasked if available, otherwise masked from formData)
-  const getSecretValue = (service: string, field: string): string => {
-    return unmaskedSecrets?.[service]?.[field] || formData.secrets?.[service]?.[field] || '';
+  const getSecretValue = (service: ServiceName, field: string): string => {
+    return (
+      getNestedSecretValue(unmaskedSecrets, service, field) ||
+      getNestedSecretValue(formData.secrets, service, field) ||
+      ''
+    );
   };
 
   // Check if a value is masked (format: XXXX****YYYY)
@@ -159,7 +215,7 @@ export function ProfilesPage() {
     return false;
   };
 
-  const testConnection = async (service: string) => {
+  const testConnection = async (service: ServiceName) => {
     setTesting({ ...testing, [service]: true });
 
     try {
@@ -170,88 +226,16 @@ export function ProfilesPage() {
         return;
       }
 
-      switch (service) {
-        case 'tmdb':
-          if (!secrets.apikey) {
-            showNotification('TMDB API key is required', 'error');
-            return;
-          }
-          const tmdbResponse = await fetch(
-            `https://api.themoviedb.org/3/movie/603?api_key=${secrets.apikey}`
-          );
-          if (tmdbResponse.ok) {
-            showNotification('TMDB connection successful!', 'success');
-          } else {
-            const error = await tmdbResponse.json();
-            showNotification(`TMDB connection failed: ${error.status_message || tmdbResponse.statusText}`, 'error');
-          }
-          break;
+      // Use proxy API to test connection (keeps secrets on backend)
+      const result = await proxyApi.testConnection(service, secrets);
 
-        case 'plex':
-          if (!secrets.url || !secrets.token) {
-            showNotification('Plex URL and token are required', 'error');
-            return;
-          }
-          const plexResponse = await fetch(`${secrets.url}/identity`, {
-            headers: { 'X-Plex-Token': secrets.token },
-          });
-          if (plexResponse.ok) {
-            showNotification('Plex connection successful!', 'success');
-          } else {
-            showNotification(`Plex connection failed: ${plexResponse.statusText}`, 'error');
-          }
-          break;
-
-        case 'radarr':
-        case 'sonarr':
-          if (!secrets.url || !secrets.token) {
-            showNotification(`${service.charAt(0).toUpperCase() + service.slice(1)} URL and token are required`, 'error');
-            return;
-          }
-          const arrResponse = await fetch(`${secrets.url}/api/v3/system/status`, {
-            headers: { 'X-Api-Key': secrets.token },
-          });
-          if (arrResponse.ok) {
-            const data = await arrResponse.json();
-            showNotification(`${service.charAt(0).toUpperCase() + service.slice(1)} connection successful! Version: ${data.version}`, 'success');
-          } else {
-            showNotification(`${service.charAt(0).toUpperCase() + service.slice(1)} connection failed: ${arrResponse.statusText}`, 'error');
-          }
-          break;
-
-        case 'tautulli':
-          if (!secrets.url || !secrets.apikey) {
-            showNotification('Tautulli URL and API key are required', 'error');
-            return;
-          }
-          const tautulliResponse = await fetch(
-            `${secrets.url}/api/v2?apikey=${secrets.apikey}&cmd=get_server_info`
-          );
-          if (tautulliResponse.ok) {
-            showNotification('Tautulli connection successful!', 'success');
-          } else {
-            showNotification(`Tautulli connection failed: ${tautulliResponse.statusText}`, 'error');
-          }
-          break;
-
-        case 'mdblist':
-          if (!secrets.apikey) {
-            showNotification('MDBList API key is required', 'error');
-            return;
-          }
-          showNotification('MDBList test not yet implemented - key saved', 'info');
-          break;
-
-        case 'trakt':
-          if (!secrets.client_id || !secrets.client_secret) {
-            showNotification('Trakt client ID and secret are required', 'error');
-            return;
-          }
-          showNotification('Trakt test not yet implemented - credentials saved', 'info');
-          break;
-
-        default:
-          showNotification('Test not implemented for this service', 'info');
+      if (result.success) {
+        const message = result.version
+          ? `${result.message} Version: ${result.version}`
+          : result.message || `${service} connection successful!`;
+        showNotification(message, 'success');
+      } else {
+        showNotification(result.error || `${service} connection failed`, 'error');
       }
     } catch (error) {
       console.error(`Test ${service} failed:`, error);
@@ -283,26 +267,26 @@ export function ProfilesPage() {
           </button>
         </div>
         <div className={styles.profileList}>
-          {profiles.map(profile => (
-            <div
-              key={profile.id}
-              className={`${styles.profileItem} ${selectedProfile?.id === profile.id ? styles.active : ''}`}
-              onClick={() => loadProfile(profile.id)}
-            >
-              <div className={styles.profileName}>{profile.name}</div>
-              {profile.description && (
-                <div className={styles.profileDescription}>{profile.description}</div>
-              )}
-            </div>
-          ))}
+          {profiles
+            .filter((p) => p.id)
+            .map((profile) => (
+              <div
+                key={profile.id}
+                className={`${styles.profileItem} ${selectedProfile?.id === profile.id ? styles.active : ''}`}
+                onClick={() => profile.id && loadProfile(profile.id)}
+              >
+                <div className={styles.profileName}>{profile.name}</div>
+                {profile.description && (
+                  <div className={styles.profileDescription}>{profile.description}</div>
+                )}
+              </div>
+            ))}
         </div>
       </div>
 
       <div className={styles.content}>
         {!selectedProfile && !showNewForm ? (
-          <div className={styles.emptyState}>
-            Select a profile or create a new one
-          </div>
+          <div className={styles.emptyState}>Select a profile or create a new one</div>
         ) : (
           <form onSubmit={handleSave} className={styles.form}>
             {notification && (
@@ -318,14 +302,16 @@ export function ProfilesPage() {
               </div>
             )}
 
-            <h1 className={styles.title}>
-              {selectedProfile ? formData.name : 'New Profile'}
-            </h1>
+            <h1 className={styles.title}>{selectedProfile ? formData.name : 'New Profile'}</h1>
 
             {hasMaskedSecrets() && (
-              <div className={`${styles.notification} ${styles.info}`} style={{ marginTop: '16px' }}>
+              <div
+                className={`${styles.notification} ${styles.info}`}
+                style={{ marginTop: '16px' }}
+              >
                 <span>
-                  ⚠️ This profile contains masked secrets. To use them, re-enter the actual API keys/tokens in the fields below and save.
+                  ⚠️ This profile contains masked secrets. To use them, re-enter the actual API
+                  keys/tokens in the fields below and save.
                 </span>
               </div>
             )}
@@ -590,19 +576,35 @@ export function ProfilesPage() {
               <button type="submit" className={styles.saveButton}>
                 Save Profile
               </button>
-              {selectedProfile && (
-                <button
-                  type="button"
-                  onClick={() => handleDelete(selectedProfile.id)}
-                  className={styles.deleteButton}
-                >
-                  Delete Profile
-                </button>
-              )}
+              {selectedProfile?.id &&
+                (() => {
+                  const profileId = selectedProfile.id;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteClick(profileId)}
+                      className={styles.deleteButton}
+                    >
+                      Delete Profile
+                    </button>
+                  );
+                })()}
             </div>
           </form>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Profile"
+        message={`Are you sure you want to delete the profile "${selectedProfile?.name || 'this profile'}"?`}
+        warning="This will permanently delete the profile and all its stored secrets. This action cannot be undone."
+        confirmText="Delete Profile"
+        cancelText="Cancel"
+        isDanger={true}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }

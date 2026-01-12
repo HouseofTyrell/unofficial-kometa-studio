@@ -65,9 +65,7 @@ export function IntegrationsEditor({ config, onChange }: IntegrationsEditorProps
           <div className={styles.integrationHeader}>
             <div>
               <div className={styles.integrationName}>Tautulli</div>
-              <div className={styles.integrationDescription}>
-                Plex analytics and statistics
-              </div>
+              <div className={styles.integrationDescription}>Plex analytics and statistics</div>
             </div>
             <label className={styles.toggle}>
               <input
@@ -103,9 +101,7 @@ export function IntegrationsEditor({ config, onChange }: IntegrationsEditorProps
           <div className={styles.integrationHeader}>
             <div>
               <div className={styles.integrationName}>Radarr</div>
-              <div className={styles.integrationDescription}>
-                Movie collection manager
-              </div>
+              <div className={styles.integrationDescription}>Movie collection manager</div>
             </div>
             <label className={styles.toggle}>
               <input
@@ -122,9 +118,7 @@ export function IntegrationsEditor({ config, onChange }: IntegrationsEditorProps
           <div className={styles.integrationHeader}>
             <div>
               <div className={styles.integrationName}>Sonarr</div>
-              <div className={styles.integrationDescription}>
-                TV show collection manager
-              </div>
+              <div className={styles.integrationDescription}>TV show collection manager</div>
             </div>
             <label className={styles.toggle}>
               <input

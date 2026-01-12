@@ -5,6 +5,7 @@ Get up and running with Kometa Studio in 5 minutes!
 ## Prerequisites
 
 You need:
+
 - **Node.js 18+** - [Download here](https://nodejs.org/)
 - **pnpm** - Install with: `npm install -g pnpm`
 
@@ -23,6 +24,7 @@ pnpm dev
 ```
 
 That's it! The app will open at:
+
 - **Frontend**: http://localhost:5176
 - **Backend**: http://localhost:3001
 
@@ -76,6 +78,7 @@ Create visual overlays with live preview!
 ## Next Steps
 
 ### Learn More
+
 - Read the full [README](../README.md)
 - Check [Development Guide](./DEVELOPMENT.md) if contributing
 - Review [Contributing Guidelines](../CONTRIBUTING.md)
@@ -83,30 +86,37 @@ Create visual overlays with live preview!
 ### Common Tasks
 
 **Add more profiles:**
+
 - Profiles → Create New Profile
 
 **Reset everything:**
+
 - Import / Export → Reset All Local Data
 
 **Export your config:**
+
 - Open config → Choose mode → Download
 
 **Share configs without secrets:**
+
 - Use "Template" mode when exporting
 
 ## Tips & Tricks
 
 ### Keyboard Shortcuts
+
 - Press `Enter` in search fields to search
 - Use browser's Find (Ctrl/Cmd+F) in code view
 
 ### Best Practices
+
 1. **Create separate profiles** for dev/staging/production
 2. **Use Template mode** when sharing configs
 3. **Backup regularly** by exporting configs
 4. **Test configs** before deploying to Kometa
 
 ### Overlay Builder Tips
+
 - Start with presets, then customize
 - Use X/Y inputs for precise positioning
 - Toggle to Code view to understand YAML structure
@@ -115,21 +125,25 @@ Create visual overlays with live preview!
 ## Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 npx kill-port 3001  # Backend
 npx kill-port 5176  # Frontend
 ```
 
 ### Can't See My Changes
+
 - Hard refresh browser (Ctrl/Cmd+Shift+R)
 - Restart dev server
 
 ### TMDB Search Not Working
+
 - Verify API key in your profile
 - Check browser console for errors
 - Ensure internet connection
 
 ### Import Failed
+
 - Check YAML syntax is valid
 - Some Kometa features may not be supported yet
 - Check console for specific error

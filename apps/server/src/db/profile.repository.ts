@@ -16,11 +16,15 @@ export class ProfileRepository {
 
   findAll(): Omit<ProfileRecord, 'secrets'>[] {
     const db = getDatabase();
-    const rows = db.prepare(`
+    const rows = db
+      .prepare(
+        `
       SELECT id, name, description, created_at, updated_at
       FROM profiles
       ORDER BY updated_at DESC
-    `).all();
+    `
+      )
+      .all();
 
     return rows.map((row: any) => ({
       id: row.id,
@@ -33,11 +37,15 @@ export class ProfileRepository {
 
   findById(id: string): ProfileRecord | null {
     const db = getDatabase();
-    const row: any = db.prepare(`
+    const row: any = db
+      .prepare(
+        `
       SELECT id, name, description, secrets_encrypted, created_at, updated_at
       FROM profiles
       WHERE id = ?
-    `).get(id);
+    `
+      )
+      .get(id);
 
     if (!row) return null;
 
@@ -59,17 +67,12 @@ export class ProfileRepository {
 
     const secretsEncrypted = encrypt(JSON.stringify(profile.secrets), this.masterKey);
 
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO profiles (id, name, description, secrets_encrypted, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(
-      profile.id,
-      profile.name,
-      profile.description || null,
-      secretsEncrypted,
-      now,
-      now
-    );
+    `
+    ).run(profile.id, profile.name, profile.description || null, secretsEncrypted, now, now);
 
     return {
       ...profile,
@@ -78,7 +81,10 @@ export class ProfileRepository {
     };
   }
 
-  update(id: string, updates: Partial<Omit<ProfileRecord, 'id' | 'createdAt' | 'updatedAt'>>): ProfileRecord | null {
+  update(
+    id: string,
+    updates: Partial<Omit<ProfileRecord, 'id' | 'createdAt' | 'updatedAt'>>
+  ): ProfileRecord | null {
     const existing = this.findById(id);
     if (!existing) return null;
 
@@ -86,22 +92,19 @@ export class ProfileRepository {
     const now = new Date().toISOString();
 
     const name = updates.name ?? existing.name;
-    const description = updates.description !== undefined ? updates.description : existing.description;
+    const description =
+      updates.description !== undefined ? updates.description : existing.description;
     const secrets = updates.secrets ?? existing.secrets;
 
     const secretsEncrypted = encrypt(JSON.stringify(secrets), this.masterKey);
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE profiles
       SET name = ?, description = ?, secrets_encrypted = ?, updated_at = ?
       WHERE id = ?
-    `).run(
-      name,
-      description || null,
-      secretsEncrypted,
-      now,
-      id
-    );
+    `
+    ).run(name, description || null, secretsEncrypted, now, id);
 
     return {
       id,

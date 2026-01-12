@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ImportExportPage.module.css';
 import { configApi, profileApi } from '../api/client';
+import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 
 export function ImportExportPage() {
   const [yamlInput, setYamlInput] = useState('');
   const [importing, setImporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const navigate = useNavigate();
 
   const handleImportYaml = async () => {
@@ -39,6 +41,24 @@ export function ImportExportPage() {
     }
   };
 
+  const handleResetConfirm = async () => {
+    setShowResetConfirm(false);
+    setDeleting(true);
+    try {
+      const configResult = await configApi.deleteAll();
+      const profileResult = await profileApi.deleteAll();
+      alert(
+        `Deleted ${configResult.deletedCount} configurations and ${profileResult.deletedCount} profiles`
+      );
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to delete data:', error);
+      alert(`Failed to delete data: ${(error as Error).message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -52,8 +72,8 @@ export function ImportExportPage() {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Import YAML Configuration</h2>
           <p className={styles.sectionDescription}>
-            Paste your existing config.yml content below to import it into Kometa Studio.
-            Unknown keys will be preserved in extras.
+            Paste your existing config.yml content below to import it into Kometa Studio. Unknown
+            keys will be preserved in extras.
           </p>
 
           <textarea
@@ -74,9 +94,7 @@ export function ImportExportPage() {
 
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Export Configurations</h2>
-          <p className={styles.sectionDescription}>
-            To export a configuration:
-          </p>
+          <p className={styles.sectionDescription}>To export a configuration:</p>
           <ol className={styles.instructions}>
             <li>Open the configuration you want to export</li>
             <li>Use the YAML preview panel on the right</li>
@@ -85,9 +103,9 @@ export function ImportExportPage() {
           </ol>
 
           <div className={styles.warning}>
-            <strong>⚠️ Security Warning:</strong> When using "Full" mode, your secrets
-            will be included in the exported YAML. Only use this for actual deployment.
-            Use "Template" or "Masked" modes for sharing or backup.
+            <strong>&#9888; Security Warning:</strong> When using "Full" mode, your secrets will be
+            included in the exported YAML. Only use this for actual deployment. Use "Template" or
+            "Masked" modes for sharing or backup.
           </div>
         </div>
 
@@ -97,24 +115,7 @@ export function ImportExportPage() {
             This will delete all configurations and profiles. This cannot be undone.
           </p>
           <button
-            onClick={async () => {
-              if (!confirm('Delete ALL configurations and profiles? This cannot be undone!')) {
-                return;
-              }
-
-              setDeleting(true);
-              try {
-                const configResult = await configApi.deleteAll();
-                const profileResult = await profileApi.deleteAll();
-                alert(`Deleted ${configResult.deletedCount} configurations and ${profileResult.deletedCount} profiles`);
-                navigate('/');
-              } catch (error) {
-                console.error('Failed to delete data:', error);
-                alert(`Failed to delete data: ${(error as Error).message}`);
-              } finally {
-                setDeleting(false);
-              }
-            }}
+            onClick={() => setShowResetConfirm(true)}
             disabled={deleting}
             className={styles.dangerButton}
           >
@@ -122,6 +123,19 @@ export function ImportExportPage() {
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        title="Reset All Data"
+        message="This will permanently delete ALL configurations and profiles stored in Kometa Studio."
+        warning="All your saved configs, profiles, and encrypted secrets will be permanently deleted. This action cannot be undone."
+        confirmText="Delete Everything"
+        cancelText="Cancel"
+        isDanger={true}
+        confirmPhrase="delete all"
+        onConfirm={handleResetConfirm}
+        onCancel={() => setShowResetConfirm(false)}
+      />
     </div>
   );
 }

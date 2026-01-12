@@ -5,6 +5,7 @@
 Comparing Kometa's output vs Studio's current implementation:
 
 ### Kometa Output (Screenshot 2)
+
 - ✅ 4K resolution badge (top-left)
 - ✅ "DOLBY DV" badge (top-left, next to 4K)
 - ✅ "TRUE HD ATMOS" audio badge (top-left)
@@ -14,6 +15,7 @@ Comparing Kometa's output vs Studio's current implementation:
 - ✅ "WATCHED" verified badge (bottom-right corner)
 
 ### Studio Output (Screenshot 1)
+
 - ✅ "4K" resolution badge (top-left) - sizing off
 - ❌ Missing "DOLBY DV" badge
 - ❌ Missing "TRUE HD ATMOS" badge
@@ -40,20 +42,23 @@ Comparing Kometa's output vs Studio's current implementation:
 **Goal**: Ensure all images (logos, badges, etc.) are loaded from the correct sources.
 
 **Asset Resolution Priority**:
+
 1. Config template_variables (`rating1_image_url`, custom URLs)
 2. Kometa defaults repository (GitHub URLs for IMDb, TMDB, RT logos)
 3. Fallback to placeholder/text-only
 
 **Files to Update**:
+
 - ✅ `apps/server/src/routes/config.routes.ts` - Extract assets from config
 - ✅ `apps/web/src/api/client.ts` - API method to fetch assets
 - ✅ `apps/web/src/pages/OverlayBuilderPage.tsx` - Load and cache assets
 - ✅ `apps/web/src/services/kometa-defaults.service.ts` - Use assets in overlay generation
-- ⚠️  `apps/web/src/components/overlay/PosterPreview.tsx` - Render images correctly
+- ⚠️ `apps/web/src/components/overlay/PosterPreview.tsx` - Render images correctly
 
 **Current Status**: Asset extraction implemented, but images not rendering correctly.
 
 **Next Steps**:
+
 1. Debug why logos aren't showing in badges
 2. Verify GitHub URLs are accessible
 3. Add CORS handling for external images
@@ -66,6 +71,7 @@ Comparing Kometa's output vs Studio's current implementation:
 **Goal**: Match Kometa's exact badge dimensions and positions.
 
 **Kometa Specifications** (1000x1500 canvas):
+
 ```
 Resolution Badge:
   - back_width: 305
@@ -92,10 +98,12 @@ Audio/Video Codec Badge:
 ```
 
 **Files to Update**:
+
 - `apps/web/src/services/kometa-defaults.service.ts` - Verify all dimensions match Kometa
 - `apps/web/src/components/overlay/PosterPreview.tsx` - Verify rendering uses correct dimensions
 
 **Tasks**:
+
 1. Audit all badge dimensions against Kometa defaults files
 2. Fix resolution badge sizing (currently showing too small)
 3. Ensure rating badges stack correctly with 95px spacing
@@ -143,6 +151,7 @@ Audio/Video Codec Badge:
    - Position: configurable
 
 **Implementation Steps**:
+
 1. Add overlay type handlers to `kometa-defaults.service.ts`
 2. Define template_variables for each type
 3. Add asset URLs for logos (studio, network)
@@ -155,6 +164,7 @@ Audio/Video Codec Badge:
 **Goal**: Correctly parse and apply all Kometa template_variables.
 
 **Common Issues**:
+
 - Not all template_variables are being extracted from config
 - Some variables have default values that aren't being applied
 - Rating image types (imdb, tmdb, rt_tomato) not mapping to correct logos
@@ -210,10 +220,12 @@ status (TV shows):
 ```
 
 **Files to Update**:
+
 - `apps/web/src/services/kometa-defaults.service.ts` - Parse template_variables correctly
 - `apps/server/src/routes/config.routes.ts` - Extract all template_variables from overlay files
 
 **Tasks**:
+
 1. Verify template_variables extraction from config
 2. Apply default values when variables not specified
 3. Test with various config combinations
@@ -226,22 +238,26 @@ status (TV shows):
 **Goal**: Get comprehensive metadata from all sources (TMDB, Plex, config).
 
 **Metadata Sources**:
+
 1. **TMDB API**: Basic info, ratings
 2. **Plex Server**: Resolution, codecs, audio, ratings (if populated by Kometa)
 3. **Config**: Manual overrides, custom values
 
 **Issues**:
+
 - TMDB doesn't provide resolution, codecs, or audio info
 - Plex integration requires credentials
 - Some metadata is missing for demo/test media
 
 **Enhancements**:
+
 1. Add OMDb API integration for IMDb ratings (requires API key)
 2. Improve Plex rating extraction (handle all rating sources)
 3. Add metadata override UI (manual input for testing)
 4. Cache metadata to reduce API calls
 
 **Files to Update**:
+
 - `apps/web/src/services/tmdb.service.ts` - Add OMDb integration
 - `apps/web/src/services/plex.service.ts` - Improve rating extraction
 - `apps/web/src/pages/OverlayBuilderPage.tsx` - Add metadata override UI
@@ -253,6 +269,7 @@ status (TV shows):
 **Goal**: Allow users to manually edit overlay elements (position, size, styling).
 
 **Editor Features**:
+
 1. **Element List**: Show all overlay elements with type and position
 2. **Property Editor**: Edit position, size, colors, fonts for selected element
 3. **Add/Remove**: Add new elements, delete existing ones
@@ -261,18 +278,21 @@ status (TV shows):
 6. **YAML Export**: Generate YAML code for overlay configuration
 
 **UI Components**:
+
 - ✅ Element list (already implemented)
-- ⚠️  Property editor (partially implemented, needs refinement)
+- ⚠️ Property editor (partially implemented, needs refinement)
 - ❌ Visual drag & drop
 - ✅ Preset selector (already implemented)
-- ⚠️  YAML code view (implemented but needs template_variables support)
+- ⚠️ YAML code view (implemented but needs template_variables support)
 
 **Files to Update**:
+
 - `apps/web/src/components/overlay/OverlayElementEditor.tsx` - Enhance property editor
 - `apps/web/src/components/overlay/PosterPreview.tsx` - Add drag & drop support
 - `apps/web/src/components/overlay/OverlayCodeView.tsx` - Generate proper YAML with template_variables
 
 **Tasks**:
+
 1. Add visual drag & drop to canvas
 2. Improve property editor UI (better organization, validation)
 3. Add element naming/labeling
@@ -286,6 +306,7 @@ status (TV shows):
 **Goal**: Save user-created overlays back to Kometa config.
 
 **Save Workflow**:
+
 1. User creates/edits overlay elements
 2. Click "Save to Config"
 3. Select target library (Movies, TV Shows, etc.)
@@ -293,11 +314,13 @@ status (TV shows):
 5. Add to config YAML
 
 **Files to Update**:
+
 - `apps/web/src/components/overlay/SaveOverlayDialog.tsx` - Save dialog UI
 - `apps/server/src/yaml/generator.ts` - Generate overlay YAML
 - `apps/server/src/routes/config.routes.ts` - Update config with overlays
 
 **Tasks**:
+
 1. Implement SaveOverlayDialog (UI for selecting library, naming overlay)
 2. Convert overlay elements to template_variables format
 3. Generate YAML with proper structure
@@ -352,18 +375,21 @@ status (TV shows):
 ## Implementation Priority
 
 ### Immediate (Blocking Issues)
+
 1. ✅ Fix asset resolution pipeline (logos not showing)
 2. ✅ Fix badge sizing to match Kometa exactly
 3. ✅ Add audio_codec and video_codec overlay types
 4. ✅ Fix rating badge duplication issue
 
 ### Short-term (Usability)
+
 1. ⏳ Improve template_variables parsing
 2. ⏳ Add missing overlay types (content_rating, studio, network)
 3. ⏳ Enhance element editor UI
 4. ⏳ Add visual drag & drop
 
 ### Long-term (Polish)
+
 1. ⏳ OMDb API integration for IMDb ratings
 2. ⏳ Metadata override UI
 3. ⏳ Undo/redo functionality
@@ -373,16 +399,16 @@ status (TV shows):
 
 ## Key Files Reference
 
-| Component | File Path |
-|---|---|
-| Overlay generation | `apps/web/src/services/kometa-defaults.service.ts` |
-| Canvas rendering | `apps/web/src/components/overlay/PosterPreview.tsx` |
-| Element editor | `apps/web/src/components/overlay/OverlayElementEditor.tsx` |
-| Asset extraction | `apps/server/src/routes/config.routes.ts` |
-| Plex integration | `apps/web/src/services/plex.service.ts` |
-| TMDB integration | `apps/web/src/services/tmdb.service.ts` |
-| Config schema | `packages/shared/src/schemas/config.schema.ts` |
-| Main page | `apps/web/src/pages/OverlayBuilderPage.tsx` |
+| Component          | File Path                                                  |
+| ------------------ | ---------------------------------------------------------- |
+| Overlay generation | `apps/web/src/services/kometa-defaults.service.ts`         |
+| Canvas rendering   | `apps/web/src/components/overlay/PosterPreview.tsx`        |
+| Element editor     | `apps/web/src/components/overlay/OverlayElementEditor.tsx` |
+| Asset extraction   | `apps/server/src/routes/config.routes.ts`                  |
+| Plex integration   | `apps/web/src/services/plex.service.ts`                    |
+| TMDB integration   | `apps/web/src/services/tmdb.service.ts`                    |
+| Config schema      | `packages/shared/src/schemas/config.schema.ts`             |
+| Main page          | `apps/web/src/pages/OverlayBuilderPage.tsx`                |
 
 ---
 

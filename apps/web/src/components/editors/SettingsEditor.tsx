@@ -22,7 +22,12 @@ export function SettingsEditor({ settings, onChange }: SettingsEditorProps) {
           <label className={styles.label}>Cache</label>
           <select
             value={settings.cache === undefined ? 'default' : settings.cache ? 'true' : 'false'}
-            onChange={(e) => handleChange('cache', e.target.value === 'default' ? undefined : e.target.value === 'true')}
+            onChange={(e) =>
+              handleChange(
+                'cache',
+                e.target.value === 'default' ? undefined : e.target.value === 'true'
+              )
+            }
             className={styles.select}
           >
             <option value="default">Default</option>
@@ -36,7 +41,12 @@ export function SettingsEditor({ settings, onChange }: SettingsEditorProps) {
           <input
             type="number"
             value={settings.cache_expiration || ''}
-            onChange={(e) => handleChange('cache_expiration', e.target.value ? parseInt(e.target.value) : undefined)}
+            onChange={(e) =>
+              handleChange(
+                'cache_expiration',
+                e.target.value ? parseInt(e.target.value) : undefined
+              )
+            }
             className={styles.input}
             placeholder="60"
           />
@@ -71,7 +81,9 @@ export function SettingsEditor({ settings, onChange }: SettingsEditorProps) {
           <input
             type="number"
             value={settings.run_again_delay || ''}
-            onChange={(e) => handleChange('run_again_delay', e.target.value ? parseInt(e.target.value) : undefined)}
+            onChange={(e) =>
+              handleChange('run_again_delay', e.target.value ? parseInt(e.target.value) : undefined)
+            }
             className={styles.input}
             placeholder="2"
           />
@@ -80,8 +92,19 @@ export function SettingsEditor({ settings, onChange }: SettingsEditorProps) {
         <div className={styles.field}>
           <label className={styles.label}>Delete Below Minimum</label>
           <select
-            value={settings.delete_below_minimum === undefined ? 'default' : settings.delete_below_minimum ? 'true' : 'false'}
-            onChange={(e) => handleChange('delete_below_minimum', e.target.value === 'default' ? undefined : e.target.value === 'true')}
+            value={
+              settings.delete_below_minimum === undefined
+                ? 'default'
+                : settings.delete_below_minimum
+                  ? 'true'
+                  : 'false'
+            }
+            onChange={(e) =>
+              handleChange(
+                'delete_below_minimum',
+                e.target.value === 'default' ? undefined : e.target.value === 'true'
+              )
+            }
             className={styles.select}
           >
             <option value="default">Default</option>

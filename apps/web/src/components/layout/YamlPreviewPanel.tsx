@@ -102,9 +102,7 @@ export function YamlPreviewPanel() {
   if (!configId) {
     return (
       <div className={styles.panel}>
-        <div className={styles.emptyState}>
-          Select a configuration to preview
-        </div>
+        <div className={styles.emptyState}>Select a configuration to preview</div>
       </div>
     );
   }
@@ -121,7 +119,7 @@ export function YamlPreviewPanel() {
           className={styles.select}
         >
           <option value="">No Profile</option>
-          {profiles.map(profile => (
+          {profiles.map((profile) => (
             <option key={profile.id} value={profile.id}>
               {profile.name}
             </option>
@@ -159,18 +157,13 @@ export function YamlPreviewPanel() {
           <div className={styles.validationSection}>
             <div className={styles.sectionHeader}>
               <span>Validation</span>
-              <button
-                onClick={() => setShowValidation(false)}
-                className={styles.closeButton}
-              >
+              <button onClick={() => setShowValidation(false)} className={styles.closeButton}>
                 ×
               </button>
             </div>
             <div className={styles.validationContent}>
               {!hasErrors && !hasWarnings && (
-                <div className={styles.validationSuccess}>
-                  ✓ No issues found
-                </div>
+                <div className={styles.validationSuccess}>✓ No issues found</div>
               )}
 
               {hasErrors && (
@@ -180,12 +173,8 @@ export function YamlPreviewPanel() {
                   </div>
                   {validation.errors.map((error: any, i: number) => (
                     <div key={i} className={styles.validationError}>
-                      <div className={styles.validationPath}>
-                        {error.path.join(' > ')}
-                      </div>
-                      <div className={styles.validationMessage}>
-                        {error.message}
-                      </div>
+                      <div className={styles.validationPath}>{error.path.join(' > ')}</div>
+                      <div className={styles.validationMessage}>{error.message}</div>
                     </div>
                   ))}
                 </div>
@@ -198,12 +187,8 @@ export function YamlPreviewPanel() {
                   </div>
                   {validation.warnings.map((warning: any, i: number) => (
                     <div key={i} className={styles.validationWarning}>
-                      <div className={styles.validationPath}>
-                        {warning.path.join(' > ')}
-                      </div>
-                      <div className={styles.validationMessage}>
-                        {warning.message}
-                      </div>
+                      <div className={styles.validationPath}>{warning.path.join(' > ')}</div>
+                      <div className={styles.validationMessage}>{warning.message}</div>
                     </div>
                   ))}
                 </div>
@@ -213,10 +198,7 @@ export function YamlPreviewPanel() {
         )}
 
         {!showValidation && (
-          <button
-            onClick={() => setShowValidation(true)}
-            className={styles.showValidationButton}
-          >
+          <button onClick={() => setShowValidation(true)} className={styles.showValidationButton}>
             Show Validation
           </button>
         )}

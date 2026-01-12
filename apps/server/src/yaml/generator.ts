@@ -33,8 +33,16 @@ function maskSecrets(obj: any): any {
   const masked: any = {};
   for (const [key, value] of Object.entries(obj)) {
     // Keys that contain secrets
-    const secretKeys = ['token', 'apikey', 'api_key', 'secret', 'password', 'access_token', 'refresh_token'];
-    const isSecret = secretKeys.some(sk => key.toLowerCase().includes(sk));
+    const secretKeys = [
+      'token',
+      'apikey',
+      'api_key',
+      'secret',
+      'password',
+      'access_token',
+      'refresh_token',
+    ];
+    const isSecret = secretKeys.some((sk) => key.toLowerCase().includes(sk));
 
     if (isSecret && typeof value === 'string') {
       masked[key] = maskSecret(value);
@@ -74,9 +82,8 @@ export function generateYaml(options: GenerateOptions): string {
         plexConfig.url = profile.secrets.plex.url;
       }
       if (profile.secrets.plex.token) {
-        plexConfig.token = mode === 'masked'
-          ? maskSecret(profile.secrets.plex.token)
-          : profile.secrets.plex.token;
+        plexConfig.token =
+          mode === 'masked' ? maskSecret(profile.secrets.plex.token) : profile.secrets.plex.token;
       }
     }
 
@@ -89,9 +96,8 @@ export function generateYaml(options: GenerateOptions): string {
     delete tmdbConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.tmdb?.apikey) {
-      tmdbConfig.apikey = mode === 'masked'
-        ? maskSecret(profile.secrets.tmdb.apikey)
-        : profile.secrets.tmdb.apikey;
+      tmdbConfig.apikey =
+        mode === 'masked' ? maskSecret(profile.secrets.tmdb.apikey) : profile.secrets.tmdb.apikey;
     }
 
     output.tmdb = mergeExtras(tmdbConfig, config.tmdb.extras);
@@ -107,9 +113,10 @@ export function generateYaml(options: GenerateOptions): string {
         tautulliConfig.url = profile.secrets.tautulli.url;
       }
       if (profile.secrets.tautulli.apikey) {
-        tautulliConfig.apikey = mode === 'masked'
-          ? maskSecret(profile.secrets.tautulli.apikey)
-          : profile.secrets.tautulli.apikey;
+        tautulliConfig.apikey =
+          mode === 'masked'
+            ? maskSecret(profile.secrets.tautulli.apikey)
+            : profile.secrets.tautulli.apikey;
       }
     }
 
@@ -122,9 +129,10 @@ export function generateYaml(options: GenerateOptions): string {
     delete mdblistConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.mdblist?.apikey) {
-      mdblistConfig.apikey = mode === 'masked'
-        ? maskSecret(profile.secrets.mdblist.apikey)
-        : profile.secrets.mdblist.apikey;
+      mdblistConfig.apikey =
+        mode === 'masked'
+          ? maskSecret(profile.secrets.mdblist.apikey)
+          : profile.secrets.mdblist.apikey;
     }
 
     output.mdblist = mergeExtras(mdblistConfig, config.mdblist.extras);
@@ -140,9 +148,10 @@ export function generateYaml(options: GenerateOptions): string {
         radarrConfig.url = profile.secrets.radarr.url;
       }
       if (profile.secrets.radarr.token) {
-        radarrConfig.token = mode === 'masked'
-          ? maskSecret(profile.secrets.radarr.token)
-          : profile.secrets.radarr.token;
+        radarrConfig.token =
+          mode === 'masked'
+            ? maskSecret(profile.secrets.radarr.token)
+            : profile.secrets.radarr.token;
       }
     }
 
@@ -159,9 +168,10 @@ export function generateYaml(options: GenerateOptions): string {
         sonarrConfig.url = profile.secrets.sonarr.url;
       }
       if (profile.secrets.sonarr.token) {
-        sonarrConfig.token = mode === 'masked'
-          ? maskSecret(profile.secrets.sonarr.token)
-          : profile.secrets.sonarr.token;
+        sonarrConfig.token =
+          mode === 'masked'
+            ? maskSecret(profile.secrets.sonarr.token)
+            : profile.secrets.sonarr.token;
       }
     }
 
@@ -175,18 +185,21 @@ export function generateYaml(options: GenerateOptions): string {
 
     if (mode !== 'template' && profile?.secrets.trakt) {
       if (profile.secrets.trakt.client_secret) {
-        traktConfig.client_secret = mode === 'masked'
-          ? maskSecret(profile.secrets.trakt.client_secret)
-          : profile.secrets.trakt.client_secret;
+        traktConfig.client_secret =
+          mode === 'masked'
+            ? maskSecret(profile.secrets.trakt.client_secret)
+            : profile.secrets.trakt.client_secret;
       }
       if (profile.secrets.trakt.authorization) {
         traktConfig.authorization = {
-          access_token: mode === 'masked'
-            ? maskSecret(profile.secrets.trakt.authorization.access_token || '')
-            : profile.secrets.trakt.authorization.access_token,
-          refresh_token: mode === 'masked'
-            ? maskSecret(profile.secrets.trakt.authorization.refresh_token || '')
-            : profile.secrets.trakt.authorization.refresh_token,
+          access_token:
+            mode === 'masked'
+              ? maskSecret(profile.secrets.trakt.authorization.access_token || '')
+              : profile.secrets.trakt.authorization.access_token,
+          refresh_token:
+            mode === 'masked'
+              ? maskSecret(profile.secrets.trakt.authorization.refresh_token || '')
+              : profile.secrets.trakt.authorization.refresh_token,
         };
       }
     }
@@ -244,11 +257,12 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Add comment at the top
   if (includeComment) {
-    const comment = mode === 'template'
-      ? '# Kometa Configuration Template (no secrets)\n# Generated by Kometa Studio\n\n'
-      : mode === 'masked'
-      ? '# Kometa Configuration (secrets masked)\n# Generated by Kometa Studio\n\n'
-      : '# Kometa Configuration\n# Generated by Kometa Studio\n# WARNING: This file contains secrets!\n\n';
+    const comment =
+      mode === 'template'
+        ? '# Kometa Configuration Template (no secrets)\n# Generated by Kometa Studio\n\n'
+        : mode === 'masked'
+          ? '# Kometa Configuration (secrets masked)\n# Generated by Kometa Studio\n\n'
+          : '# Kometa Configuration\n# Generated by Kometa Studio\n# WARNING: This file contains secrets!\n\n';
     yamlStr = comment + yamlStr;
   }
 

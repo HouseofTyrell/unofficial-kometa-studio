@@ -67,9 +67,7 @@ export function FileListEditor({ files, onChange }: FileListEditorProps) {
   return (
     <div className={styles.container}>
       {files.length === 0 ? (
-        <div className={styles.emptyState}>
-          No files configured. Add one to get started.
-        </div>
+        <div className={styles.emptyState}>No files configured. Add one to get started.</div>
       ) : (
         <div className={styles.fileList}>
           {files.map((file, index) => {

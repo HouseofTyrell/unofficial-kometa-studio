@@ -13,11 +13,15 @@ export interface ConfigRecord {
 export class ConfigRepository {
   findAll(): ConfigRecord[] {
     const db = getDatabase();
-    const rows = db.prepare(`
+    const rows = db
+      .prepare(
+        `
       SELECT id, name, description, config, created_at, updated_at
       FROM configs
       ORDER BY updated_at DESC
-    `).all();
+    `
+      )
+      .all();
 
     return rows.map((row: any) => ({
       id: row.id,
@@ -31,11 +35,15 @@ export class ConfigRepository {
 
   findById(id: string): ConfigRecord | null {
     const db = getDatabase();
-    const row: any = db.prepare(`
+    const row: any = db
+      .prepare(
+        `
       SELECT id, name, description, config, created_at, updated_at
       FROM configs
       WHERE id = ?
-    `).get(id);
+    `
+      )
+      .get(id);
 
     if (!row) return null;
 
@@ -53,10 +61,12 @@ export class ConfigRepository {
     const db = getDatabase();
     const now = new Date().toISOString();
 
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO configs (id, name, description, config, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(
+    `
+    ).run(
       config.id,
       config.name,
       config.description || null,
@@ -72,7 +82,10 @@ export class ConfigRepository {
     };
   }
 
-  update(id: string, updates: Partial<Omit<ConfigRecord, 'id' | 'createdAt' | 'updatedAt'>>): ConfigRecord | null {
+  update(
+    id: string,
+    updates: Partial<Omit<ConfigRecord, 'id' | 'createdAt' | 'updatedAt'>>
+  ): ConfigRecord | null {
     const existing = this.findById(id);
     if (!existing) return null;
 
@@ -80,20 +93,17 @@ export class ConfigRepository {
     const now = new Date().toISOString();
 
     const name = updates.name ?? existing.name;
-    const description = updates.description !== undefined ? updates.description : existing.description;
+    const description =
+      updates.description !== undefined ? updates.description : existing.description;
     const config = updates.config ?? existing.config;
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE configs
       SET name = ?, description = ?, config = ?, updated_at = ?
       WHERE id = ?
-    `).run(
-      name,
-      description || null,
-      JSON.stringify(config),
-      now,
-      id
-    );
+    `
+    ).run(name, description || null, JSON.stringify(config), now, id);
 
     return {
       id,

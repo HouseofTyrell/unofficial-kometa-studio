@@ -147,7 +147,8 @@ export function OverlayElementEditor({
                 >
                   <div className={styles.elementInfo}>
                     <span className={styles.elementType}>
-                      {element.type.toUpperCase()}{getPositionInfo()}
+                      {element.type.toUpperCase()}
+                      {getPositionInfo()}
                     </span>
                     <span className={styles.elementText}>{getElementLabel()}</span>
                   </div>
@@ -172,267 +173,271 @@ export function OverlayElementEditor({
         {/* Edit form */}
         {selectedElement !== null && selectedElementIndex !== null ? (
           <div className={styles.editorFormSection}>
-            <h3 className={styles.sectionTitle}>
-              Edit {selectedElement.type.toUpperCase()}
-            </h3>
+            <h3 className={styles.sectionTitle}>Edit {selectedElement.type.toUpperCase()}</h3>
 
             <div className={styles.form}>
-            {selectedElement.position ? (
-              <>
-                {/* Position-based layout (Kometa style) */}
-                <div className={styles.formRow}>
-                  <label>Horizontal Align:</label>
-                  <select
-                    value={selectedElement.position.horizontal || 'left'}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        position: { ...selectedElement.position, horizontal: e.target.value as any }
-                      })
-                    }
-                    className={styles.input}
-                  >
-                    <option value="left">Left</option>
-                    <option value="center">Center</option>
-                    <option value="right">Right</option>
-                  </select>
-                </div>
-
-                <div className={styles.formRow}>
-                  <label>Vertical Align:</label>
-                  <select
-                    value={selectedElement.position.vertical || 'top'}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        position: { ...selectedElement.position, vertical: e.target.value as any }
-                      })
-                    }
-                    className={styles.input}
-                  >
-                    <option value="top">Top</option>
-                    <option value="center">Center</option>
-                    <option value="bottom">Bottom</option>
-                  </select>
-                </div>
-
-                <div className={styles.formRow}>
-                  <label>Horizontal Offset:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.offset?.horizontal || 0}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        offset: { ...selectedElement.offset, horizontal: Number(e.target.value) }
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.formRow}>
-                  <label>Vertical Offset:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.offset?.vertical || 0}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        offset: { ...selectedElement.offset, vertical: Number(e.target.value) }
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Absolute positioning */}
-                <div className={styles.formRow}>
-                  <label>X Position:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.x || 0}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, { x: Number(e.target.value) })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.formRow}>
-                  <label>Y Position:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.y || 0}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, { y: Number(e.target.value) })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              </>
-            )}
-
-            {(selectedElement.type === 'badge' ||
-              selectedElement.type === 'ribbon' ||
-              selectedElement.type === 'image') && (
-              <>
-                <div className={styles.formRow}>
-                  <label>Width:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.width || ''}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        width: Number(e.target.value),
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.formRow}>
-                  <label>Height:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.height || ''}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        height: Number(e.target.value),
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              </>
-            )}
-
-            {(selectedElement.type === 'text' ||
-              selectedElement.type === 'badge' ||
-              selectedElement.type === 'ribbon') && (
-              <>
-                <div className={styles.formRow}>
-                  <label>Text:</label>
-                  <input
-                    type="text"
-                    value={selectedElement.text || selectedElement.content || ''}
-                    onChange={(e) => {
-                      // Update both text and content to stay in sync
-                      const updates: any = { text: e.target.value };
-                      if (selectedElement.content !== undefined) {
-                        updates.content = e.target.value;
+              {selectedElement.position ? (
+                <>
+                  {/* Position-based layout (Kometa style) */}
+                  <div className={styles.formRow}>
+                    <label>Horizontal Align:</label>
+                    <select
+                      value={selectedElement.position.horizontal || 'left'}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          position: {
+                            ...selectedElement.position,
+                            horizontal: e.target.value as any,
+                          },
+                        })
                       }
-                      updateElement(selectedElementIndex, updates);
-                    }}
-                    className={styles.input}
-                  />
-                </div>
+                      className={styles.input}
+                    >
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
 
+                  <div className={styles.formRow}>
+                    <label>Vertical Align:</label>
+                    <select
+                      value={selectedElement.position.vertical || 'top'}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          position: {
+                            ...selectedElement.position,
+                            vertical: e.target.value as any,
+                          },
+                        })
+                      }
+                      className={styles.input}
+                    >
+                      <option value="top">Top</option>
+                      <option value="center">Center</option>
+                      <option value="bottom">Bottom</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Horizontal Offset:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.offset?.horizontal || 0}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          offset: { ...selectedElement.offset, horizontal: Number(e.target.value) },
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Vertical Offset:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.offset?.vertical || 0}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          offset: { ...selectedElement.offset, vertical: Number(e.target.value) },
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Absolute positioning */}
+                  <div className={styles.formRow}>
+                    <label>X Position:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.x || 0}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, { x: Number(e.target.value) })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Y Position:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.y || 0}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, { y: Number(e.target.value) })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+                </>
+              )}
+
+              {(selectedElement.type === 'badge' ||
+                selectedElement.type === 'ribbon' ||
+                selectedElement.type === 'image') && (
+                <>
+                  <div className={styles.formRow}>
+                    <label>Width:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.width || ''}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          width: Number(e.target.value),
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Height:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.height || ''}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          height: Number(e.target.value),
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+                </>
+              )}
+
+              {(selectedElement.type === 'text' ||
+                selectedElement.type === 'badge' ||
+                selectedElement.type === 'ribbon') && (
+                <>
+                  <div className={styles.formRow}>
+                    <label>Text:</label>
+                    <input
+                      type="text"
+                      value={selectedElement.text || selectedElement.content || ''}
+                      onChange={(e) => {
+                        // Update both text and content to stay in sync
+                        const updates: any = { text: e.target.value };
+                        if (selectedElement.content !== undefined) {
+                          updates.content = e.target.value;
+                        }
+                        updateElement(selectedElementIndex, updates);
+                      }}
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Font Size:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.fontSize || 24}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          fontSize: Number(e.target.value),
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Text Color:</label>
+                    <input
+                      type="text"
+                      value={selectedElement.color || '#ffffff'}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, { color: e.target.value })
+                      }
+                      className={styles.input}
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </>
+              )}
+
+              {(selectedElement.type === 'badge' || selectedElement.type === 'ribbon') && (
                 <div className={styles.formRow}>
-                  <label>Font Size:</label>
+                  <label>Background:</label>
                   <input
-                    type="number"
-                    value={selectedElement.fontSize || 24}
+                    type="text"
+                    value={selectedElement.backgroundColor || ''}
                     onChange={(e) =>
                       updateElement(selectedElementIndex, {
-                        fontSize: Number(e.target.value),
+                        backgroundColor: e.target.value,
                       })
                     }
                     className={styles.input}
+                    placeholder="rgba(0, 0, 0, 0.8)"
                   />
                 </div>
+              )}
 
+              {selectedElement.type === 'badge' && (
+                <>
+                  <div className={styles.formRow}>
+                    <label>Border Radius:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.borderRadius || 0}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          borderRadius: Number(e.target.value),
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <label>Padding:</label>
+                    <input
+                      type="number"
+                      value={selectedElement.padding || 0}
+                      onChange={(e) =>
+                        updateElement(selectedElementIndex, {
+                          padding: Number(e.target.value),
+                        })
+                      }
+                      className={styles.input}
+                    />
+                  </div>
+                </>
+              )}
+
+              {selectedElement.type === 'image' && (
                 <div className={styles.formRow}>
-                  <label>Text Color:</label>
+                  <label>Image URL:</label>
                   <input
                     type="text"
-                    value={selectedElement.color || '#ffffff'}
+                    value={selectedElement.imageUrl || ''}
                     onChange={(e) =>
-                      updateElement(selectedElementIndex, { color: e.target.value })
+                      updateElement(selectedElementIndex, { imageUrl: e.target.value })
                     }
                     className={styles.input}
-                    placeholder="#ffffff"
+                    placeholder="https://..."
                   />
                 </div>
-              </>
-            )}
+              )}
 
-            {(selectedElement.type === 'badge' || selectedElement.type === 'ribbon') && (
               <div className={styles.formRow}>
-                <label>Background:</label>
+                <label>Rotation (deg):</label>
                 <input
-                  type="text"
-                  value={selectedElement.backgroundColor || ''}
+                  type="number"
+                  value={selectedElement.rotation || 0}
                   onChange={(e) =>
                     updateElement(selectedElementIndex, {
-                      backgroundColor: e.target.value,
+                      rotation: Number(e.target.value),
                     })
                   }
                   className={styles.input}
-                  placeholder="rgba(0, 0, 0, 0.8)"
                 />
               </div>
-            )}
-
-            {selectedElement.type === 'badge' && (
-              <>
-                <div className={styles.formRow}>
-                  <label>Border Radius:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.borderRadius || 0}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        borderRadius: Number(e.target.value),
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.formRow}>
-                  <label>Padding:</label>
-                  <input
-                    type="number"
-                    value={selectedElement.padding || 0}
-                    onChange={(e) =>
-                      updateElement(selectedElementIndex, {
-                        padding: Number(e.target.value),
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              </>
-            )}
-
-            {selectedElement.type === 'image' && (
-              <div className={styles.formRow}>
-                <label>Image URL:</label>
-                <input
-                  type="text"
-                  value={selectedElement.imageUrl || ''}
-                  onChange={(e) =>
-                    updateElement(selectedElementIndex, { imageUrl: e.target.value })
-                  }
-                  className={styles.input}
-                  placeholder="https://..."
-                />
-              </div>
-            )}
-
-            <div className={styles.formRow}>
-              <label>Rotation (deg):</label>
-              <input
-                type="number"
-                value={selectedElement.rotation || 0}
-                onChange={(e) =>
-                  updateElement(selectedElementIndex, {
-                    rotation: Number(e.target.value),
-                  })
-                }
-                className={styles.input}
-              />
             </div>
-          </div>
           </div>
         ) : (
           <div className={styles.editorFormSection}>

@@ -20,35 +20,51 @@ function maskProfileSecrets(profile: any): any {
   if (masked.secrets) {
     masked.secrets = {
       ...masked.secrets,
-      plex: masked.secrets.plex ? {
-        url: masked.secrets.plex.url,
-        token: maskSecret(masked.secrets.plex.token),
-      } : undefined,
-      tmdb: masked.secrets.tmdb ? {
-        apikey: maskSecret(masked.secrets.tmdb.apikey),
-      } : undefined,
-      tautulli: masked.secrets.tautulli ? {
-        url: masked.secrets.tautulli.url,
-        apikey: maskSecret(masked.secrets.tautulli.apikey),
-      } : undefined,
-      mdblist: masked.secrets.mdblist ? {
-        apikey: maskSecret(masked.secrets.mdblist.apikey),
-      } : undefined,
-      radarr: masked.secrets.radarr ? {
-        url: masked.secrets.radarr.url,
-        token: maskSecret(masked.secrets.radarr.token),
-      } : undefined,
-      sonarr: masked.secrets.sonarr ? {
-        url: masked.secrets.sonarr.url,
-        token: maskSecret(masked.secrets.sonarr.token),
-      } : undefined,
-      trakt: masked.secrets.trakt ? {
-        client_secret: maskSecret(masked.secrets.trakt.client_secret),
-        authorization: masked.secrets.trakt.authorization ? {
-          access_token: maskSecret(masked.secrets.trakt.authorization.access_token),
-          refresh_token: maskSecret(masked.secrets.trakt.authorization.refresh_token),
-        } : undefined,
-      } : undefined,
+      plex: masked.secrets.plex
+        ? {
+            url: masked.secrets.plex.url,
+            token: maskSecret(masked.secrets.plex.token),
+          }
+        : undefined,
+      tmdb: masked.secrets.tmdb
+        ? {
+            apikey: maskSecret(masked.secrets.tmdb.apikey),
+          }
+        : undefined,
+      tautulli: masked.secrets.tautulli
+        ? {
+            url: masked.secrets.tautulli.url,
+            apikey: maskSecret(masked.secrets.tautulli.apikey),
+          }
+        : undefined,
+      mdblist: masked.secrets.mdblist
+        ? {
+            apikey: maskSecret(masked.secrets.mdblist.apikey),
+          }
+        : undefined,
+      radarr: masked.secrets.radarr
+        ? {
+            url: masked.secrets.radarr.url,
+            token: maskSecret(masked.secrets.radarr.token),
+          }
+        : undefined,
+      sonarr: masked.secrets.sonarr
+        ? {
+            url: masked.secrets.sonarr.url,
+            token: maskSecret(masked.secrets.sonarr.token),
+          }
+        : undefined,
+      trakt: masked.secrets.trakt
+        ? {
+            client_secret: maskSecret(masked.secrets.trakt.client_secret),
+            authorization: masked.secrets.trakt.authorization
+              ? {
+                  access_token: maskSecret(masked.secrets.trakt.authorization.access_token),
+                  refresh_token: maskSecret(masked.secrets.trakt.authorization.refresh_token),
+                }
+              : undefined,
+          }
+        : undefined,
       extras: masked.secrets.extras,
     };
   }
@@ -107,28 +123,31 @@ export async function profileRoutes(
   });
 
   // Update profile
-  fastify.put<{ Params: { id: string }; Body: UpdateProfileInput }>('/api/profiles/:id', async (request, reply) => {
-    const id = await validateIdParam(request, reply);
-    if (!id) return;
+  fastify.put<{ Params: { id: string }; Body: UpdateProfileInput }>(
+    '/api/profiles/:id',
+    async (request, reply) => {
+      const id = await validateIdParam(request, reply);
+      if (!id) return;
 
-    const body = await validateBody(request, reply, UpdateProfileSchema);
-    if (!body) return;
+      const body = await validateBody(request, reply, UpdateProfileSchema);
+      if (!body) return;
 
-    try {
-      const updated = profileRepo.update(id, body);
-      if (!updated) {
-        reply.status(404);
-        return { error: 'Profile not found' };
+      try {
+        const updated = profileRepo.update(id, body);
+        if (!updated) {
+          reply.status(404);
+          return { error: 'Profile not found' };
+        }
+        return updated;
+      } catch (error) {
+        reply.status(400);
+        return {
+          error: 'Failed to update profile',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        };
       }
-      return updated;
-    } catch (error) {
-      reply.status(400);
-      return {
-        error: 'Failed to update profile',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      };
     }
-  });
+  );
 
   // Delete profile
   fastify.delete<{ Params: { id: string } }>('/api/profiles/:id', async (request, reply) => {
@@ -168,26 +187,29 @@ export async function profileRoutes(
   );
 
   // Import profile
-  fastify.post<{ Body: ImportProfileRequestInput }>('/api/profiles/import', async (request, reply) => {
-    const body = await validateBody(request, reply, ImportProfileRequestSchema);
-    if (!body) return;
+  fastify.post<{ Body: ImportProfileRequestInput }>(
+    '/api/profiles/import',
+    async (request, reply) => {
+      const body = await validateBody(request, reply, ImportProfileRequestSchema);
+      if (!body) return;
 
-    try {
-      const newProfile = profileRepo.create({
-        id: randomUUID(),
-        name: body.name,
-        description: body.description,
-        secrets: body.secrets,
-      });
+      try {
+        const newProfile = profileRepo.create({
+          id: randomUUID(),
+          name: body.name,
+          description: body.description,
+          secrets: body.secrets,
+        });
 
-      reply.status(201);
-      return newProfile;
-    } catch (error) {
-      reply.status(400);
-      return {
-        error: 'Failed to import profile',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      };
+        reply.status(201);
+        return newProfile;
+      } catch (error) {
+        reply.status(400);
+        return {
+          error: 'Failed to import profile',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
     }
-  });
+  );
 }

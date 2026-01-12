@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { KometaConfigSchema } from './config.schema.js';
-import { ProfileSchema, ProfileSecretsSchema } from './profile.schema.js';
+import { ProfileSecretsSchema } from './profile.schema.js';
 
 // Common parameter schemas
 export const IdParamSchema = z.object({

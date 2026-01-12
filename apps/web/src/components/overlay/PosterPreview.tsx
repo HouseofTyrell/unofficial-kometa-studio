@@ -21,7 +21,7 @@ export interface OverlayElement {
   content?: string;
   fontSize?: number;
   fontFamily?: string;
-  fontColor?: string;  // Add support for fontColor (used by Kometa)
+  fontColor?: string; // Add support for fontColor (used by Kometa)
   color?: string;
   backgroundColor?: string;
   borderRadius?: number;
@@ -83,7 +83,10 @@ export function PosterPreview({
         x = offset.horizontal || 0;
         break;
       case 'center':
-        x = Math.floor(KOMETA_CANVAS_WIDTH / 2) - Math.floor(elementWidth / 2) + (offset.horizontal || 0);
+        x =
+          Math.floor(KOMETA_CANVAS_WIDTH / 2) -
+          Math.floor(elementWidth / 2) +
+          (offset.horizontal || 0);
         break;
       case 'right':
         // Kometa: image_value - over_value - value
@@ -99,7 +102,10 @@ export function PosterPreview({
         y = offset.vertical || 0;
         break;
       case 'center':
-        y = Math.floor(KOMETA_CANVAS_HEIGHT / 2) - Math.floor(elementHeight / 2) + (offset.vertical || 0);
+        y =
+          Math.floor(KOMETA_CANVAS_HEIGHT / 2) -
+          Math.floor(elementHeight / 2) +
+          (offset.vertical || 0);
         break;
       case 'bottom':
         // Kometa: image_value - over_value - value
@@ -108,14 +114,6 @@ export function PosterPreview({
       default:
         y = offset.vertical || 0;
     }
-
-    console.log(`📍 Position calc for ${element.text || element.content}:`, {
-      position,
-      offset,
-      size: { w: elementWidth, h: elementHeight },
-      kometaCanvas: { w: KOMETA_CANVAS_WIDTH, h: KOMETA_CANVAS_HEIGHT },
-      result: { x, y }
-    });
 
     return { x, y };
   };
@@ -270,37 +268,26 @@ export function PosterPreview({
     let addonHeight = 0;
 
     if (element.addonImage) {
-      console.log(`🖼️  Loading addon image for badge "${textContent}":`, element.addonImage);
       try {
         addonImg = new Image();
         addonImg.crossOrigin = 'anonymous';
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve) => {
           addonImg!.onload = () => {
             // Kometa scales addon images to match badge height (with some padding)
             const targetHeight = (element.height || 80) - backPadding * 2;
             const aspectRatio = addonImg!.width / addonImg!.height;
             addonHeight = targetHeight;
             addonWidth = targetHeight * aspectRatio;
-            console.log(`  ✅ Addon image loaded successfully! Size: ${addonImg!.width}x${addonImg!.height}, scaled to: ${addonWidth}x${addonHeight}`);
             resolve();
           };
-          addonImg!.onerror = (e) => {
-            console.error(`  ❌ Failed to load addon image`);
-            console.error(`     Full URL: ${element.addonImage}`);
-            console.error(`     Error event:`, e);
-            // Try to get more error details
-            const img = e.target as HTMLImageElement;
-            if (img) {
-              console.error(`     Image src: ${img.src}`);
-              console.error(`     Image complete: ${img.complete}`);
-              console.error(`     Image naturalWidth: ${img.naturalWidth}`);
-            }
-            resolve(); // Continue without logo if failed
+          addonImg!.onerror = () => {
+            // Continue without logo if failed
+            resolve();
           };
           addonImg!.src = element.addonImage!;
         });
-      } catch (error) {
-        console.warn('Failed to load addon image:', error);
+      } catch {
+        // Continue without addon image
       }
     }
 
@@ -310,7 +297,8 @@ export function PosterPreview({
     // Use element's fixed width/height if provided (Kometa's back_width/back_height)
     // Otherwise calculate from content size + padding
     const badgeWidth = element.width || Math.ceil(contentWidth + backPadding * 2);
-    const badgeHeight = element.height || Math.ceil(Math.max(textHeight, addonHeight) + backPadding * 2);
+    const badgeHeight =
+      element.height || Math.ceil(Math.max(textHeight, addonHeight) + backPadding * 2);
 
     // Kometa's drawing logic:
     // 1. Draw background rectangle (rounded if back_radius is set)
@@ -371,37 +359,35 @@ export function PosterPreview({
     ctx.fillText(textContent, element.x + ribbonWidth / 2, element.y + ribbonHeight / 2);
   };
 
-  const renderImageElement = async (
-    ctx: CanvasRenderingContext2D,
-    element: OverlayElement
-  ) => {
+  const renderImageElement = async (ctx: CanvasRenderingContext2D, element: OverlayElement) => {
     const imageUrl = element.imageUrl || element.content;
     if (!imageUrl) return;
-    if (!element.x || !element.y) return;
+    if (element.x === undefined || element.y === undefined) return;
 
+    const elementX = element.x;
+    const elementY = element.y;
     const img = new Image();
     img.crossOrigin = 'anonymous';
 
-    await new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve) => {
       img.onload = () => {
         const w = element.width || img.width;
         const h = element.height || img.height;
-        ctx.drawImage(img, element.x, element.y, w, h);
+        ctx.drawImage(img, elementX, elementY, w, h);
         resolve();
       };
       img.onerror = () => {
         // If image fails to load, show a placeholder
-        console.warn(`Failed to load image: ${imageUrl}`);
         ctx.fillStyle = '#333';
-        ctx.fillRect(element.x, element.y, element.width || 200, element.height || 100);
+        ctx.fillRect(elementX, elementY, element.width || 200, element.height || 100);
         ctx.fillStyle = '#999';
         ctx.font = '14px system-ui';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
           imageUrl.split('/').pop() || 'Image',
-          element.x + (element.width || 200) / 2,
-          element.y + (element.height || 100) / 2
+          elementX + (element.width || 200) / 2,
+          elementY + (element.height || 100) / 2
         );
         resolve();
       };
@@ -413,12 +399,7 @@ export function PosterPreview({
     <div className={styles.container}>
       {loading && <div className={styles.loading}>Loading preview...</div>}
       {error && <div className={styles.error}>Error: {error}</div>}
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        className={styles.canvas}
-      />
+      <canvas ref={canvasRef} width={width} height={height} className={styles.canvas} />
     </div>
   );
 }

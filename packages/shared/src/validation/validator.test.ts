@@ -13,7 +13,7 @@ describe('Config Validator', () => {
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
     expect(result.warnings.length).toBeGreaterThan(0);
-    expect(result.warnings.some(w => w.path.includes('plex'))).toBe(true);
+    expect(result.warnings.some((w) => w.path.includes('plex'))).toBe(true);
   });
 
   it('should not warn when plex enabled with credentials', () => {
@@ -33,8 +33,8 @@ describe('Config Validator', () => {
 
     const result = validateConfig(config, profile);
 
-    const plexWarnings = result.warnings.filter(w =>
-      w.path.includes('plex') && w.path.includes('url')
+    const plexWarnings = result.warnings.filter(
+      (w) => w.path.includes('plex') && w.path.includes('url')
     );
     expect(plexWarnings).toHaveLength(0);
   });
@@ -42,21 +42,19 @@ describe('Config Validator', () => {
   it('should warn when library has no files', () => {
     const config: KometaConfig = {
       libraries: {
-        'Movies': {},
+        Movies: {},
       },
     };
 
     const result = validateConfig(config);
 
-    expect(result.warnings.some(w =>
-      w.path.includes('Movies')
-    )).toBe(true);
+    expect(result.warnings.some((w) => w.path.includes('Movies'))).toBe(true);
   });
 
   it('should not warn when library has collection files', () => {
     const config: KometaConfig = {
       libraries: {
-        'Movies': {
+        Movies: {
           collection_files: [{ default: 'imdb' }],
         },
       },
@@ -64,8 +62,8 @@ describe('Config Validator', () => {
 
     const result = validateConfig(config);
 
-    const libraryWarnings = result.warnings.filter(w =>
-      w.path.includes('Movies') && w.message.includes('no collection_files')
+    const libraryWarnings = result.warnings.filter(
+      (w) => w.path.includes('Movies') && w.message.includes('no collection_files')
     );
     expect(libraryWarnings).toHaveLength(0);
   });
@@ -77,6 +75,6 @@ describe('Config Validator', () => {
 
     const result = validateConfig(config);
 
-    expect(result.warnings.some(w => w.path.includes('radarr'))).toBe(true);
+    expect(result.warnings.some((w) => w.path.includes('radarr'))).toBe(true);
   });
 });

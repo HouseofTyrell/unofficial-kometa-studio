@@ -479,15 +479,6 @@ export class KometaDefaultsService {
         const kometaAddonOffset = 15; // from ratings.yml
 
         // Get rating logo from config assets or use Kometa defaults
-        // Map rating label to Kometa's image naming convention
-        const ratingImageMap: Record<string, string> = {
-          IMDb: 'imdb',
-          TMDB: 'tmdb',
-          RT: 'rt_tomato',
-        };
-
-        const imageKey = ratingImageMap[ratingLabel] || ratingLabel.toLowerCase();
-
         // Try to get image from config template_variables (rating1_image_url, etc.)
         let logoUrl =
           configAssets?.[`rating${ratingNum}_image_url`] ||

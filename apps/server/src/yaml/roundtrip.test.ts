@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseKometaYaml, extractSecretsFromYaml } from './parser';
 import { generateYaml } from './generator';
-import type { KometaConfig } from '@kometa-studio/shared';
 
 /**
  * YAML Round-Trip Test Suite

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { ProfileRepository } from '../db/profile.repository.js';
 import { z } from 'zod';
-import { validateBody, validateIdParam } from '../middleware/validation.js';
+import { validateBody } from '../middleware/validation.js';
 
 // Validation schemas
 const TmdbSearchSchema = z.object({

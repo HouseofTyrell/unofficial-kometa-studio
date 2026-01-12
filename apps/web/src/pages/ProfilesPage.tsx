@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './ProfilesPage.module.css';
 import { profileApi, proxyApi } from '../api/client';
 import { ConfirmDialog } from '../components/shared/ConfirmDialog';
@@ -47,32 +47,6 @@ export function ProfilesPage() {
     { isOpen: false, profileId: null }
   );
 
-  useEffect(() => {
-    loadProfiles();
-  }, []);
-
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => setNotification(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
-
-  const loadProfiles = async () => {
-    setLoading(true);
-    try {
-      const { profiles: profileList } = await profileApi.list();
-      setProfiles(profileList);
-      if (profileList.length > 0 && !selectedProfile) {
-        loadProfile(profileList[0].id);
-      }
-    } catch (error) {
-      console.error('Failed to load profiles:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadProfile = async (id: string) => {
     try {
       const profile = await profileApi.get(id);
@@ -84,6 +58,32 @@ export function ProfilesPage() {
       console.error('Failed to load profile:', error);
     }
   };
+
+  const loadProfiles = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { profiles: profileList } = await profileApi.list();
+      setProfiles(profileList);
+      if (profileList.length > 0) {
+        loadProfile(profileList[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to load profiles:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProfiles();
+  }, [loadProfiles]);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

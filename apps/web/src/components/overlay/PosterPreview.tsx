@@ -102,9 +102,9 @@ export function PosterPreview({
   const scaleFactor = width / KOMETA_CANVAS_WIDTH;
 
   // Re-render preview when relevant props change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     renderPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- renderPreview is defined later but stable; deps are the actual triggers
   }, [
     posterUrl,
     overlayElements,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as yaml from 'js-yaml';
 import styles from './CommunityOverlaysPage.module.css';
@@ -231,14 +231,7 @@ export function CommunityOverlaysPage() {
     }
   };
 
-  // Load default poster when profile is ready
-  useEffect(() => {
-    if (selectedProfile) {
-      loadDefaultPoster();
-    }
-  }, [selectedProfile]);
-
-  const loadDefaultPoster = async () => {
+  const loadDefaultPoster = useCallback(async () => {
     if (!selectedProfile) return;
 
     try {
@@ -249,7 +242,14 @@ export function CommunityOverlaysPage() {
     } catch (err) {
       console.error('Failed to load default poster:', err);
     }
-  };
+  }, [selectedProfile]);
+
+  // Load default poster when profile is ready
+  useEffect(() => {
+    if (selectedProfile) {
+      loadDefaultPoster();
+    }
+  }, [selectedProfile, loadDefaultPoster]);
 
   // Filter overlays based on search and category
   const filteredOverlays = COMMUNITY_OVERLAYS.filter((overlay) => {

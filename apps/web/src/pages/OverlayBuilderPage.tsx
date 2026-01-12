@@ -8,8 +8,6 @@ import {
   DEFAULT_PREVIEW_TITLES,
   TmdbMovie,
   TmdbTVShow,
-  TmdbSeason,
-  TmdbEpisode,
   TmdbRatings,
 } from '../services/tmdb.service';
 import { KometaDefaultsService } from '../services/kometa-defaults.service';
@@ -146,6 +144,7 @@ export function OverlayBuilderPage() {
         sessionStorage.removeItem('communityOverlay');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Run once on mount to check for imported overlay
   }, []);
 
   useEffect(() => {
@@ -159,6 +158,7 @@ export function OverlayBuilderPage() {
     if (profileReady && selectedProfile) {
       loadDefaultPreview();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadDefaultPreview changes would cause infinite loops
   }, [profileReady, selectedProfile, mediaType]);
 
   // Load seasons when a TV show is selected
@@ -166,6 +166,7 @@ export function OverlayBuilderPage() {
     if (mediaType === 'tv' && currentMedia && profileReady && selectedProfile) {
       loadSeasons();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadSeasons is stable, deps are the triggers
   }, [currentMedia, mediaType, profileReady, selectedProfile]);
 
   // Load poster when poster type or season/episode changes
@@ -173,6 +174,7 @@ export function OverlayBuilderPage() {
     if (profileReady && selectedProfile && currentMedia) {
       loadPosterForType();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only trigger on poster selection changes, not function changes
   }, [posterType, selectedSeason, selectedEpisode]);
 
   // Load overlay files when config is selected
@@ -180,6 +182,7 @@ export function OverlayBuilderPage() {
     if (selectedConfig) {
       loadOverlayFiles();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadOverlayFiles is stable, selectedConfig is the trigger
   }, [selectedConfig]);
 
   // Auto-load all overlays when media metadata changes or poster type changes (replicating Kometa behavior)
@@ -187,6 +190,7 @@ export function OverlayBuilderPage() {
     if (mediaMetadata && selectedConfig && overlayFiles.length > 0) {
       autoLoadOverlaysForMedia(mediaMetadata);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only trigger on metadata/overlay changes, function is stable
   }, [mediaMetadata, overlayFiles, posterType]);
 
   const loadProfiles = async () => {

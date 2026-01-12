@@ -21,41 +21,6 @@ function mergeExtras(obj: any, extras?: Record<string, unknown>): any {
 }
 
 /**
- * Masks sensitive values in an object
- */
-function maskSecrets(obj: any): any {
-  if (typeof obj !== 'object' || obj === null) return obj;
-
-  if (Array.isArray(obj)) {
-    return obj.map(maskSecrets);
-  }
-
-  const masked: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    // Keys that contain secrets
-    const secretKeys = [
-      'token',
-      'apikey',
-      'api_key',
-      'secret',
-      'password',
-      'access_token',
-      'refresh_token',
-    ];
-    const isSecret = secretKeys.some((sk) => key.toLowerCase().includes(sk));
-
-    if (isSecret && typeof value === 'string') {
-      masked[key] = maskSecret(value);
-    } else if (typeof value === 'object' && value !== null) {
-      masked[key] = maskSecrets(value);
-    } else {
-      masked[key] = value;
-    }
-  }
-  return masked;
-}
-
-/**
  * Generates a complete Kometa YAML from config and profile
  */
 export function generateYaml(options: GenerateOptions): string {

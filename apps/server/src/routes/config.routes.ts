@@ -137,7 +137,7 @@ export async function configRoutes(
         if (Object.keys(secrets).length > 0) {
           const profileName = `${updated.name} - Imported`;
           profileId = randomUUID();
-          const newProfile = profileRepo.create({
+          profileRepo.create({
             id: profileId,
             name: profileName,
             description: `Auto-generated profile from importing ${updated.name}`,

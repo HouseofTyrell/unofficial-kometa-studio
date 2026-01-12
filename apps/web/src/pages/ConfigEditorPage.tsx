@@ -195,21 +195,7 @@ export function ConfigEditorPage() {
     }
   }, [config, profile]);
 
-  // Load config and profile when configId changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (configId) {
-      loadConfig();
-      loadActiveProfile();
-    }
-  }, [configId]);
-
-  // Re-run validation when config or profile changes
-  useEffect(() => {
-    runValidation();
-  }, [runValidation]);
-
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     if (!configId) return;
 
     setLoading(true);
@@ -222,9 +208,9 @@ export function ConfigEditorPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [configId]);
 
-  const loadActiveProfile = async () => {
+  const loadActiveProfile = useCallback(async () => {
     try {
       const { profiles } = await profileApi.list();
       if (profiles.length > 0) {
@@ -234,7 +220,20 @@ export function ConfigEditorPage() {
     } catch (error) {
       console.error('Failed to load profile for validation:', error);
     }
-  };
+  }, []);
+
+  // Load config and profile when configId changes
+  useEffect(() => {
+    if (configId) {
+      loadConfig();
+      loadActiveProfile();
+    }
+  }, [configId, loadConfig, loadActiveProfile]);
+
+  // Re-run validation when config or profile changes
+  useEffect(() => {
+    runValidation();
+  }, [runValidation]);
 
   const saveConfig = async (updatedConfig: any) => {
     if (!configId) return;

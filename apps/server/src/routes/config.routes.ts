@@ -324,9 +324,9 @@ export async function configRoutes(
             if (Array.isArray(files)) {
               files.forEach((file, index) => {
                 // Parse overlay file to extract type and level
-                let overlayType = file.default;
-                let overlayPath = file.git || file.pmm;
-                let customFilePath = file.file;
+                const overlayType = file.default;
+                const overlayPath = file.git || file.pmm;
+                const customFilePath = file.file;
                 let level: string | undefined;
 
                 // Infer level from path or file structure

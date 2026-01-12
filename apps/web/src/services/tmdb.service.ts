@@ -129,7 +129,21 @@ export class TmdbService {
     tvId: number,
     seasonNumber: number
   ): Promise<TmdbSeason & { episodes: TmdbEpisode[] }> {
-    return proxyApi.tmdb.getSeason(this.profileId, tvId, seasonNumber);
+    const data = await proxyApi.tmdb.getSeason(this.profileId, tvId, seasonNumber);
+    return {
+      id: data.id,
+      season_number: data.season_number,
+      name: data.name,
+      poster_path: data.poster_path,
+      overview: data.overview,
+      air_date: '',
+      episode_count: data.episodes?.length ?? 0,
+      episodes: (data.episodes || []).map((ep) => ({
+        ...ep,
+        season_number: data.season_number,
+        vote_average: 0,
+      })),
+    };
   }
 
   /**
@@ -140,7 +154,11 @@ export class TmdbService {
     seasonNumber: number,
     episodeNumber: number
   ): Promise<TmdbEpisode> {
-    return proxyApi.tmdb.getEpisode(this.profileId, tvId, seasonNumber, episodeNumber);
+    const data = await proxyApi.tmdb.getEpisode(this.profileId, tvId, seasonNumber, episodeNumber);
+    return {
+      ...data,
+      air_date: data.air_date || '',
+    };
   }
 
   /**
@@ -150,7 +168,21 @@ export class TmdbService {
     const data = await proxyApi.tmdb.find(this.profileId, imdbId, 'imdb_id');
     const movie = data.movie_results?.[0];
     const tv = data.tv_results?.[0];
-    return movie || tv || null;
+    if (movie) {
+      return {
+        ...movie,
+        title: movie.title || '',
+        release_date: movie.release_date || '',
+      };
+    }
+    if (tv) {
+      return {
+        ...tv,
+        title: tv.name || '',
+        release_date: tv.first_air_date || '',
+      } as TmdbMovie;
+    }
+    return null;
   }
 
   /**

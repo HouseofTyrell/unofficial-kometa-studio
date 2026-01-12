@@ -70,11 +70,93 @@
   gap: 12px;
 }
 
+.posterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
 .posterTitle {
   font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overlayCount {
+  font-size: 14px;
+  font-weight: normal;
+  margin-left: 12px;
+  opacity: 0.7;
+}
+
+.posterLevel {
+  font-size: 12px;
+  font-weight: normal;
+  margin-left: 12px;
+  opacity: 0.5;
+  text-transform: uppercase;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.zoomButton {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zoomButton:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.zoomButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.zoomSelect {
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 60px;
   text-align: center;
+}
+
+.zoomSelect:hover {
+  border-color: var(--accent);
+}
+
+.posterWrapper {
+  overflow: auto;
+  display: flex;
+  justify-content: center;
   width: 100%;
 }
 

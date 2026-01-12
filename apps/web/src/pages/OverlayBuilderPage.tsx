@@ -98,6 +98,14 @@ export function OverlayBuilderPage() {
   // View mode - now supports split view
   const [showCode, setShowCode] = useState(false);
 
+  // Preview zoom level (percentage)
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const ZOOM_LEVELS = [50, 75, 100, 125, 150];
+  const baseWidth = 500;
+  const baseHeight = 750;
+  const previewWidth = Math.round(baseWidth * (zoomLevel / 100));
+  const previewHeight = Math.round(baseHeight * (zoomLevel / 100));
+
   // Save dialog
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
@@ -779,44 +787,61 @@ export function OverlayBuilderPage() {
               )}
 
               <div className={styles.posterContainer}>
-                <h2 className={styles.posterTitle}>
-                  {'title' in currentMedia ? currentMedia.title : currentMedia.name}
-                  {overlayElements.length > 0 && (
-                    <span
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 'normal',
-                        marginLeft: '12px',
-                        opacity: 0.7,
-                      }}
+                <div className={styles.posterHeader}>
+                  <h2 className={styles.posterTitle}>
+                    {'title' in currentMedia ? currentMedia.title : currentMedia.name}
+                    {overlayElements.length > 0 && (
+                      <span className={styles.overlayCount}>
+                        ({overlayElements.length} overlay{overlayElements.length !== 1 ? 's' : ''})
+                      </span>
+                    )}
+                    {mediaType === 'tv' && (
+                      <span className={styles.posterLevel}>• {posterType} Level</span>
+                    )}
+                  </h2>
+                  <div className={styles.zoomControls}>
+                    <button
+                      className={styles.zoomButton}
+                      onClick={() => setZoomLevel((prev) => Math.max(50, prev - 25))}
+                      disabled={zoomLevel <= 50}
+                      title="Zoom out"
                     >
-                      ({overlayElements.length} overlay{overlayElements.length !== 1 ? 's' : ''})
-                    </span>
-                  )}
-                  {mediaType === 'tv' && (
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        fontWeight: 'normal',
-                        marginLeft: '12px',
-                        opacity: 0.5,
-                        textTransform: 'uppercase',
-                      }}
+                      −
+                    </button>
+                    <select
+                      className={styles.zoomSelect}
+                      value={zoomLevel}
+                      onChange={(e) => setZoomLevel(Number(e.target.value))}
+                      title="Zoom level"
                     >
-                      • {posterType} Level
-                    </span>
-                  )}
-                </h2>
-                <PosterPreview
-                  posterUrl={posterUrl}
-                  overlayElements={overlayElements}
-                  width={500}
-                  height={750}
-                  interactive={true}
-                  selectedElementIndex={selectedElementIndex}
-                  onElementSelect={setSelectedElementIndex}
-                  onElementMove={handleElementMove}
-                />
+                      {ZOOM_LEVELS.map((level) => (
+                        <option key={level} value={level}>
+                          {level}%
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className={styles.zoomButton}
+                      onClick={() => setZoomLevel((prev) => Math.min(150, prev + 25))}
+                      disabled={zoomLevel >= 150}
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.posterWrapper} style={{ maxHeight: zoomLevel > 100 ? '600px' : 'auto' }}>
+                  <PosterPreview
+                    posterUrl={posterUrl}
+                    overlayElements={overlayElements}
+                    width={previewWidth}
+                    height={previewHeight}
+                    interactive={true}
+                    selectedElementIndex={selectedElementIndex}
+                    onElementSelect={setSelectedElementIndex}
+                    onElementMove={handleElementMove}
+                  />
+                </div>
               </div>
             </>
           ) : (

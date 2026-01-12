@@ -187,7 +187,15 @@ export function useMediaSelection(
     if (profileReady && selectedProfile && currentMedia) {
       loadPosterForType();
     }
-  }, [posterType, selectedSeason, selectedEpisode, profileReady, selectedProfile, currentMedia, loadPosterForType]);
+  }, [
+    posterType,
+    selectedSeason,
+    selectedEpisode,
+    profileReady,
+    selectedProfile,
+    currentMedia,
+    loadPosterForType,
+  ]);
 
   // Load media metadata
   const loadMediaMetadata = useCallback(

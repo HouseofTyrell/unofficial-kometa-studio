@@ -195,7 +195,15 @@ export function OverlayBuilderPage() {
         );
       }
     },
-    [selectedConfig, overlayFiles, overlayAssets, mediaType, posterType, setOverlayElements, showNotification]
+    [
+      selectedConfig,
+      overlayFiles,
+      overlayAssets,
+      mediaType,
+      posterType,
+      setOverlayElements,
+      showNotification,
+    ]
   );
 
   // Load overlays when metadata changes

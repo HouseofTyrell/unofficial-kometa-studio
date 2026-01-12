@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from './ProfilesPage.module.css';
 import { profileApi, proxyApi } from '../api/client';
+import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 
 export function ProfilesPage() {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -19,6 +20,9 @@ export function ProfilesPage() {
     message: string;
     type: 'success' | 'error' | 'info';
   } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; profileId: string | null }>(
+    { isOpen: false, profileId: null }
+  );
 
   useEffect(() => {
     loadProfiles();
@@ -95,7 +99,15 @@ export function ProfilesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirm({ isOpen: true, profileId: id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const id = deleteConfirm.profileId;
+    if (!id) return;
+
+    setDeleteConfirm({ isOpen: false, profileId: null });
     setNotification({ message: 'Deleting profile...', type: 'info' });
 
     try {
@@ -107,6 +119,10 @@ export function ProfilesPage() {
       console.error('Failed to delete profile:', error);
       setNotification({ message: 'Failed to delete profile', type: 'error' });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ isOpen: false, profileId: null });
   };
 
   const handleSecretChange = (service: string, field: string, value: string) => {
@@ -542,7 +558,7 @@ export function ProfilesPage() {
               {selectedProfile && (
                 <button
                   type="button"
-                  onClick={() => handleDelete(selectedProfile.id)}
+                  onClick={() => handleDeleteClick(selectedProfile.id)}
                   className={styles.deleteButton}
                 >
                   Delete Profile
@@ -552,6 +568,18 @@ export function ProfilesPage() {
           </form>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Profile"
+        message={`Are you sure you want to delete the profile "${selectedProfile?.name || 'this profile'}"?`}
+        warning="This will permanently delete the profile and all its stored secrets. This action cannot be undone."
+        confirmText="Delete Profile"
+        cancelText="Cancel"
+        isDanger={true}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './PosterPreview.module.css';
 
 export interface OverlayElement {
@@ -34,26 +34,55 @@ export interface OverlayElement {
   addonOffset?: number; // Spacing between addon and text
 }
 
+// Bounding box for hit detection
+interface ElementBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface PosterPreviewProps {
   posterUrl: string | null;
   overlayElements?: OverlayElement[];
   width?: number;
   height?: number;
+  // Drag & drop support
+  selectedElementIndex?: number | null;
+  onElementSelect?: (index: number | null) => void;
+  onElementMove?: (index: number, x: number, y: number) => void;
+  interactive?: boolean;
 }
+
+// Kometa's canvas size for movies (portrait)
+const KOMETA_CANVAS_WIDTH = 1000;
+const KOMETA_CANVAS_HEIGHT = 1500;
 
 export function PosterPreview({
   posterUrl,
   overlayElements = [],
   width = 500,
   height = 750,
+  selectedElementIndex = null,
+  onElementSelect,
+  onElementMove,
+  interactive = false,
 }: PosterPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ mouseX: number; mouseY: number; elementX: number; elementY: number } | null>(null);
+  const elementBoundsRef = useRef<ElementBounds[]>([]);
+
+  // Scale factor for converting between display and Kometa coordinates
+  const scaleFactor = width / KOMETA_CANVAS_WIDTH;
+
   useEffect(() => {
     renderPreview();
-  }, [posterUrl, overlayElements]);
+  }, [posterUrl, overlayElements, selectedElementIndex]);
 
   // Convert position-based coordinates to absolute x/y
   // Kometa uses 1000x1500 coordinate system for movies (portrait)
@@ -63,10 +92,6 @@ export function PosterPreview({
     if (element.x !== undefined && element.y !== undefined) {
       return { x: element.x, y: element.y };
     }
-
-    // Kometa's canvas size for movies (portrait)
-    const KOMETA_CANVAS_WIDTH = 1000;
-    const KOMETA_CANVAS_HEIGHT = 1500;
 
     // Otherwise, calculate from position and offset using Kometa's coordinate system
     const position = element.position || { horizontal: 'left', vertical: 'top' };
@@ -165,12 +190,26 @@ export function PosterPreview({
         ctx.fillText('No Poster Available', KOMETA_WIDTH / 2, KOMETA_HEIGHT / 2);
       }
 
+      // Track element bounds for hit detection
+      const bounds: ElementBounds[] = [];
+
       // Draw overlay elements
-      for (const element of overlayElements) {
+      for (let i = 0; i < overlayElements.length; i++) {
+        const element = overlayElements[i];
         ctx.save();
 
         // Calculate absolute position
         const pos = calculateAbsolutePosition(element);
+
+        // Calculate element bounds for hit detection
+        const elementWidth = element.width || getDefaultWidth(element);
+        const elementHeight = element.height || getDefaultHeight(element);
+        bounds.push({
+          x: pos.x,
+          y: pos.y,
+          width: elementWidth,
+          height: elementHeight,
+        });
 
         if (element.rotation) {
           const centerX = pos.x + (element.width || 0) / 2;
@@ -197,6 +236,36 @@ export function PosterPreview({
 
         ctx.restore();
       }
+
+      // Draw selection highlight around selected element
+      if (interactive && selectedElementIndex !== null && selectedElementIndex < bounds.length) {
+        const selectedBounds = bounds[selectedElementIndex];
+        ctx.strokeStyle = '#4dabf7';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 4]);
+        ctx.strokeRect(
+          selectedBounds.x - 4,
+          selectedBounds.y - 4,
+          selectedBounds.width + 8,
+          selectedBounds.height + 8
+        );
+        ctx.setLineDash([]);
+
+        // Draw corner handles for resizing (visual only for now)
+        const handleSize = 12;
+        ctx.fillStyle = '#4dabf7';
+        // Top-left
+        ctx.fillRect(selectedBounds.x - handleSize / 2 - 4, selectedBounds.y - handleSize / 2 - 4, handleSize, handleSize);
+        // Top-right
+        ctx.fillRect(selectedBounds.x + selectedBounds.width - handleSize / 2 + 4, selectedBounds.y - handleSize / 2 - 4, handleSize, handleSize);
+        // Bottom-left
+        ctx.fillRect(selectedBounds.x - handleSize / 2 - 4, selectedBounds.y + selectedBounds.height - handleSize / 2 + 4, handleSize, handleSize);
+        // Bottom-right
+        ctx.fillRect(selectedBounds.x + selectedBounds.width - handleSize / 2 + 4, selectedBounds.y + selectedBounds.height - handleSize / 2 + 4, handleSize, handleSize);
+      }
+
+      // Store bounds for hit detection
+      elementBoundsRef.current = bounds;
 
       // Restore the scaling transform
       ctx.restore();
@@ -395,11 +464,138 @@ export function PosterPreview({
     });
   };
 
+  // Helper functions for default element dimensions
+  const getDefaultWidth = (element: OverlayElement): number => {
+    switch (element.type) {
+      case 'text':
+        return (element.fontSize || 24) * ((element.text || element.content || '').length * 0.6);
+      case 'badge':
+        return 200;
+      case 'ribbon':
+        return KOMETA_CANVAS_WIDTH;
+      case 'image':
+        return 200;
+      default:
+        return 100;
+    }
+  };
+
+  const getDefaultHeight = (element: OverlayElement): number => {
+    switch (element.type) {
+      case 'text':
+        return (element.fontSize || 24) * 1.5;
+      case 'badge':
+        return 80;
+      case 'ribbon':
+        return 60;
+      case 'image':
+        return 100;
+      default:
+        return 50;
+    }
+  };
+
+  // Convert screen coordinates to Kometa canvas coordinates
+  const screenToCanvas = useCallback((screenX: number, screenY: number): { x: number; y: number } => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+
+    const rect = canvas.getBoundingClientRect();
+    const x = (screenX - rect.left) / scaleFactor;
+    const y = (screenY - rect.top) / scaleFactor;
+    return { x, y };
+  }, [scaleFactor]);
+
+  // Hit test to find element at position
+  const hitTest = useCallback((canvasX: number, canvasY: number): number | null => {
+    // Check elements in reverse order (top-most first)
+    for (let i = elementBoundsRef.current.length - 1; i >= 0; i--) {
+      const bounds = elementBoundsRef.current[i];
+      if (
+        canvasX >= bounds.x &&
+        canvasX <= bounds.x + bounds.width &&
+        canvasY >= bounds.y &&
+        canvasY <= bounds.y + bounds.height
+      ) {
+        return i;
+      }
+    }
+    return null;
+  }, []);
+
+  // Mouse event handlers for drag & drop
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!interactive) return;
+
+    const { x, y } = screenToCanvas(e.clientX, e.clientY);
+    const hitIndex = hitTest(x, y);
+
+    if (hitIndex !== null) {
+      onElementSelect?.(hitIndex);
+
+      // Start dragging
+      const element = overlayElements[hitIndex];
+      const pos = calculateAbsolutePosition(element);
+      dragStartRef.current = {
+        mouseX: x,
+        mouseY: y,
+        elementX: pos.x,
+        elementY: pos.y,
+      };
+      setIsDragging(true);
+    } else {
+      // Clicked on empty space - deselect
+      onElementSelect?.(null);
+    }
+  }, [interactive, screenToCanvas, hitTest, onElementSelect, overlayElements]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!interactive || !isDragging || selectedElementIndex === null || !dragStartRef.current) return;
+
+    const { x, y } = screenToCanvas(e.clientX, e.clientY);
+    const deltaX = x - dragStartRef.current.mouseX;
+    const deltaY = y - dragStartRef.current.mouseY;
+
+    const newX = Math.max(0, Math.min(KOMETA_CANVAS_WIDTH - 50, dragStartRef.current.elementX + deltaX));
+    const newY = Math.max(0, Math.min(KOMETA_CANVAS_HEIGHT - 50, dragStartRef.current.elementY + deltaY));
+
+    onElementMove?.(selectedElementIndex, Math.round(newX), Math.round(newY));
+  }, [interactive, isDragging, selectedElementIndex, screenToCanvas, onElementMove]);
+
+  const handleMouseUp = useCallback(() => {
+    if (!interactive) return;
+    setIsDragging(false);
+    dragStartRef.current = null;
+  }, [interactive]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!interactive) return;
+    setIsDragging(false);
+    dragStartRef.current = null;
+  }, [interactive]);
+
+  // Determine cursor style
+  const getCursorStyle = (): string => {
+    if (!interactive) return 'default';
+    if (isDragging) return 'grabbing';
+    return 'crosshair';
+  };
+
   return (
     <div className={styles.container}>
       {loading && <div className={styles.loading}>Loading preview...</div>}
       {error && <div className={styles.error}>Error: {error}</div>}
-      <canvas ref={canvasRef} width={width} height={height} className={styles.canvas} />
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        className={styles.canvas}
+        style={{ cursor: getCursorStyle() }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      />
     </div>
   );
 }

@@ -296,6 +296,22 @@ export function OverlayBuilderPage() {
     }
   };
 
+  // Handle drag & drop element positioning
+  const handleElementMove = (index: number, x: number, y: number) => {
+    setOverlayElements((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        x,
+        y,
+        // Clear relative positioning when using absolute positioning
+        position: undefined,
+        offset: undefined,
+      };
+      return updated;
+    });
+  };
+
   const loadSeasons = async () => {
     if (!currentMedia || !('name' in currentMedia)) return;
 
@@ -785,6 +801,10 @@ export function OverlayBuilderPage() {
                   overlayElements={overlayElements}
                   width={500}
                   height={750}
+                  interactive={true}
+                  selectedElementIndex={selectedElementIndex}
+                  onElementSelect={setSelectedElementIndex}
+                  onElementMove={handleElementMove}
                 />
               </div>
             </>

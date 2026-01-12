@@ -18,9 +18,10 @@ export function FileListEditor({ files, onChange }: FileListEditorProps) {
     e.preventDefault();
     if (!newFileValue.trim()) return;
 
+    // Cast through unknown since FileEntry is a union type
     const newFile = {
       [newFileType]: newFileValue,
-    } as FileEntry;
+    } as unknown as FileEntry;
 
     onChange([...files, newFile]);
     setNewFileValue('');

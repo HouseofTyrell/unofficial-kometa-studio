@@ -126,29 +126,55 @@ export interface TmdbFindResult {
   tv_results: TmdbSearchResult[];
 }
 
-// Plex Types
-export interface PlexSearchResult {
+// Plex Types - Raw Plex API response structure
+export interface PlexMetadata {
   ratingKey: string;
+  key: string;
   title: string;
   type: string;
   year?: number;
+  index?: number;
+  parentIndex?: number;
   thumb?: string;
   art?: string;
+  rating?: number;
+  audienceRating?: number;
+  duration?: number;
+  Media?: PlexMedia[];
+  Rating?: PlexRating[];
+  [key: string]: unknown;
 }
 
-export interface PlexSeasonInfo {
-  ratingKey: string;
-  title: string;
-  index: number;
-  leafCount: number;
+export interface PlexMedia {
+  height?: number;
+  width?: number;
+  videoCodec?: string;
+  container?: string;
+  bitrate?: number;
+  Part?: PlexPart[];
 }
 
-export interface PlexEpisodeInfo {
-  ratingKey: string;
-  title: string;
-  index: number;
-  parentIndex: number;
-  thumb?: string;
+export interface PlexPart {
+  size?: number;
+  Stream?: PlexStream[];
+}
+
+export interface PlexStream {
+  streamType: number;
+  codec?: string;
+  channels?: number;
+}
+
+export interface PlexRating {
+  image?: string;
+  type?: string;
+  value: string;
+}
+
+export interface PlexMediaContainer {
+  MediaContainer?: {
+    Metadata?: PlexMetadata[];
+  };
 }
 
 // API Error
@@ -325,22 +351,22 @@ export const proxyApi = {
       }),
   },
 
-  // Plex
+  // Plex - returns raw Plex MediaContainer responses
   plex: {
     search: (profileId: string, query: string, type: 'movie' | 'show') =>
-      request<{ results: PlexSearchResult[] }>('/api/proxy/plex/search', {
+      request<PlexMediaContainer>('/api/proxy/plex/search', {
         method: 'POST',
         body: JSON.stringify({ profileId, query, type }),
       }),
 
     getSeasons: (profileId: string, showKey: string) =>
-      request<{ seasons: PlexSeasonInfo[] }>('/api/proxy/plex/seasons', {
+      request<PlexMediaContainer>('/api/proxy/plex/seasons', {
         method: 'POST',
         body: JSON.stringify({ profileId, showKey }),
       }),
 
     getEpisodes: (profileId: string, seasonKey: string) =>
-      request<{ episodes: PlexEpisodeInfo[] }>('/api/proxy/plex/episodes', {
+      request<PlexMediaContainer>('/api/proxy/plex/episodes', {
         method: 'POST',
         body: JSON.stringify({ profileId, seasonKey }),
       }),

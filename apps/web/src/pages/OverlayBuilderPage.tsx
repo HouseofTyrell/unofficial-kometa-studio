@@ -27,6 +27,7 @@ import { GitHubImport } from '../components/overlay/GitHubImport';
 // Services
 import { KometaDefaultsService } from '../services/kometa-defaults.service';
 import { OVERLAY_PRESETS } from '../components/overlay/OverlayPresetSelector';
+import { ELEMENT_BOUNDS } from '../constants/overlay.constants';
 import type { OverlayElement } from '../components/overlay/PosterPreview';
 
 // Re-export MediaMetadata type for external use
@@ -242,8 +243,8 @@ export function OverlayBuilderPage() {
           const element = updated[index];
           const currentX = element.x || 0;
           const currentY = element.y || 0;
-          const newX = Math.max(0, Math.min(950, currentX + deltaX));
-          const newY = Math.max(0, Math.min(1450, currentY + deltaY));
+          const newX = Math.max(0, Math.min(ELEMENT_BOUNDS.MAX_X, currentX + deltaX));
+          const newY = Math.max(0, Math.min(ELEMENT_BOUNDS.MAX_Y, currentY + deltaY));
 
           updated[index] = {
             ...element,

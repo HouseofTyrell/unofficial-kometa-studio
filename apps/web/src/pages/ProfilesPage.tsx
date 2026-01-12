@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import styles from './ProfilesPage.module.css';
 import { profileApi, proxyApi } from '../api/client';
 import { ConfirmDialog } from '../components/shared/ConfirmDialog';
+import { TIMING } from '../constants/overlay.constants';
 import type { MaskedProfile, ProfileSecrets } from '@kometa-studio/shared';
 
 // Valid service names for secrets
@@ -80,7 +81,7 @@ export function ProfilesPage() {
 
   useEffect(() => {
     if (notification) {
-      const timer = setTimeout(() => setNotification(null), 5000);
+      const timer = setTimeout(() => setNotification(null), TIMING.NOTIFICATION_DURATION_MS);
       return () => clearTimeout(timer);
     }
   }, [notification]);

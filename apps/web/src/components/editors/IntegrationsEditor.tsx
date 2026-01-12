@@ -6,11 +6,14 @@ interface IntegrationsEditorProps {
   onChange: (updates: Partial<KometaConfig>) => void;
 }
 
+type IntegrationKey = 'plex' | 'tmdb' | 'tautulli' | 'mdblist' | 'radarr' | 'sonarr' | 'trakt';
+
 export function IntegrationsEditor({ config, onChange }: IntegrationsEditorProps) {
-  const handleToggle = (integration: string, enabled: boolean) => {
+  const handleToggle = (integration: IntegrationKey, enabled: boolean) => {
+    const currentConfig = config[integration] ?? {};
     onChange({
       [integration]: {
-        ...config[integration],
+        ...currentConfig,
         enabled,
       },
     });

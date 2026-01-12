@@ -16,7 +16,7 @@ import {
 type EditorSection = 'settings' | 'libraries' | 'integrations';
 
 // Client-side validation function (mirrors the shared validator)
-function validateConfig(config: KometaConfig, profile?: ProfileEntity): ValidationResult {
+function validateConfig(config: KometaConfig, profile?: ProfileEntity | null): ValidationResult {
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
 
@@ -252,15 +252,16 @@ export function ConfigEditorPage() {
   };
 
   const handleConfigChange = (updates: Partial<KometaConfig>) => {
-    const updatedConfig = {
-      ...config,
-      config: {
-        ...config.config,
-        ...updates,
-      },
+    if (!config) return;
+    const newKometaConfig = {
+      ...config.config,
+      ...updates,
     };
-    setConfig(updatedConfig);
-    saveConfig(updatedConfig.config);
+    setConfig({
+      ...config,
+      config: newKometaConfig,
+    });
+    saveConfig(newKometaConfig);
   };
 
   // Handle clicking on a validation issue to navigate to the relevant section

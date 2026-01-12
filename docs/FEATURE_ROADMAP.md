@@ -16,7 +16,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Drag & Drop Positioning** | Allow users to visually drag overlay elements on the canvas instead of manual x/y input | Not started |
+| **Drag & Drop Positioning** | Allow users to visually drag overlay elements on the canvas instead of manual x/y input | ✅ Complete |
 | **Missing Overlay Types** | Implement remaining Kometa overlay types: `content_rating`, `studio`, `network`, `versions`, `mediastinger` | Not started |
 | **Badge Size Accuracy** | Audit and correct badge dimensions to match Kometa's actual rendering | Partial |
 | **Asset Resolution Fixes** | Ensure logos and assets render consistently with proper fallbacks | Partial |
@@ -25,7 +25,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Undo/Redo Support** | Add history tracking for overlay changes | Not started |
+| **Undo/Redo Support** | Add history tracking for overlay changes | ✅ Complete |
 | **Code View Editing** | Allow users to edit YAML in code view and sync back to visual editor | TODO in code |
 | **More Preset Templates** | Add templates for: Dolby Vision, IMAX, Awards, Streaming Services | 5 presets exist |
 | **Template Variable Editor** | UI for editing template variables before applying to overlays | Partial |
@@ -128,8 +128,8 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Dark/Light Theme Toggle** | User-selectable theme | Not started |
-| **Keyboard Shortcuts** | Power-user shortcuts for common actions | Not started |
+| **Dark/Light Theme Toggle** | User-selectable theme | ✅ Complete |
+| **Keyboard Shortcuts** | Power-user shortcuts for common actions | Partial (Undo/Redo) |
 | **Guided Setup Wizard** | First-time setup wizard for profiles and initial config | Not started |
 | **In-app Help/Docs** | Contextual help and links to Kometa documentation | Not started |
 
@@ -220,22 +220,22 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 ## Implementation Priorities (Recommended Order)
 
-### Phase 1: Stability & Critical Fixes
-1. Fix TypeScript build errors in web app
-2. Fix YAML parser test failures
+### Phase 1: Stability & Critical Fixes ✅
+1. ~~Fix TypeScript build errors in web app~~ ✅
+2. ~~Fix YAML parser test failures~~ ✅
 3. Complete asset resolution for overlay builder
 4. Accurate badge sizing
 
-### Phase 2: Core Feature Completion
-1. Drag & drop overlay positioning
+### Phase 2: Core Feature Completion (In Progress)
+1. ~~Drag & drop overlay positioning~~ ✅
 2. Missing overlay types (content_rating, studio, network, etc.)
-3. Undo/redo in overlay builder
+3. ~~Undo/redo in overlay builder~~ ✅
 4. Code view editing for overlays
 
-### Phase 3: UX Polish
-1. Dark/light theme
+### Phase 3: UX Polish (In Progress)
+1. ~~Dark/light theme~~ ✅
 2. Validation feedback UI
-3. Keyboard shortcuts
+3. ~~Keyboard shortcuts~~ Partial (Undo/Redo done)
 4. Guided setup wizard
 
 ### Phase 4: Expanded Functionality
@@ -264,3 +264,11 @@ When implementing a feature:
 ---
 
 *Last updated: 2026-01-12*
+
+## Changelog
+
+### 2026-01-12
+- ✅ Drag & drop positioning for overlay elements
+- ✅ Undo/redo support with keyboard shortcuts (Ctrl+Z, Ctrl+Shift+Z)
+- ✅ Dark/light theme toggle with system preference detection
+- ✅ Verified TypeScript build and YAML parser tests pass

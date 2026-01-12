@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Kometa Studio! This document prov
 
 ### Reporting Bugs
 
-1. **Check Existing Issues**: Search [existing issues](https://github.com/yourusername/kometa-studio/issues) first
+1. **Check Existing Issues**: Search [existing issues](https://github.com/HouseofTyrell/unofficial-kometa-studio/issues) first
 2. **Create Detailed Report**: Include:
    - Clear description of the issue
    - Steps to reproduce
@@ -17,7 +17,7 @@ Thank you for your interest in contributing to Kometa Studio! This document prov
 ### Suggesting Features
 
 1. **Check Roadmap**: Review the README roadmap first
-2. **Open Discussion**: Use [GitHub Discussions](https://github.com/yourusername/kometa-studio/discussions)
+2. **Open Discussion**: Use [GitHub Discussions](https://github.com/HouseofTyrell/unofficial-kometa-studio/discussions)
 3. **Provide Context**: Explain the use case and benefit
 
 ### Pull Requests
@@ -25,8 +25,8 @@ Thank you for your interest in contributing to Kometa Studio! This document prov
 1. **Fork and Clone**:
 
    ```bash
-   git clone https://github.com/yourusername/kometa-studio.git
-   cd kometa-studio
+   git clone https://github.com/HouseofTyrell/unofficial-kometa-studio.git
+   cd unofficial-kometa-studio
    ```
 
 2. **Create Branch**:
@@ -162,7 +162,27 @@ export function extractSecretsFromYaml(yaml: string): Profile {
 
 ## 🧪 Testing
 
-Currently, the project doesn't have automated tests (contributions welcome!). Manual testing guidelines:
+### Running Tests
+
+The project uses Vitest for testing. Run tests before submitting PRs:
+
+```bash
+# Run all tests
+pnpm test
+
+# Run server tests
+pnpm --filter @kometa-studio/server test
+
+# Run shared package tests
+pnpm --filter @kometa-studio/shared test
+
+# Watch mode for development
+pnpm --filter @kometa-studio/server test:watch
+```
+
+### Manual Testing Guidelines
+
+In addition to automated tests, please verify:
 
 1. **Test all user flows** affected by your changes
 2. **Check responsiveness** on different screen sizes
@@ -188,7 +208,7 @@ Currently, the project doesn't have automated tests (contributions welcome!). Ma
 
 1. Update schema in `packages/shared/src/schemas/`
 2. Update parser in `apps/server/src/yaml/parser.ts`
-3. Update renderer in `apps/server/src/yaml/renderer.ts`
+3. Update generator in `apps/server/src/yaml/generator.ts`
 
 ## 📋 Commit Message Guidelines
 
@@ -233,8 +253,8 @@ refactor(api): simplify error handling
 
 ## ❓ Questions?
 
-- **General Questions**: Use [GitHub Discussions](https://github.com/yourusername/kometa-studio/discussions)
-- **Bug Reports**: Open an [Issue](https://github.com/yourusername/kometa-studio/issues)
+- **General Questions**: Use [GitHub Discussions](https://github.com/HouseofTyrell/unofficial-kometa-studio/discussions)
+- **Bug Reports**: Open an [Issue](https://github.com/HouseofTyrell/unofficial-kometa-studio/issues)
 - **Security Issues**: Email directly (don't open public issue)
 
 ## 📜 Code of Conduct

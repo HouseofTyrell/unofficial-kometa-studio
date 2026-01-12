@@ -6,12 +6,12 @@
   "description": "A modern, local-first IDE for creating and managing Kometa configurations with visual overlay builder, profile management, and secure secret handling",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/kometa-studio.git"
+    "url": "https://github.com/HouseofTyrell/unofficial-kometa-studio.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/kometa-studio/issues"
+    "url": "https://github.com/HouseofTyrell/unofficial-kometa-studio/issues"
   },
-  "homepage": "https://github.com/yourusername/kometa-studio#readme",
+  "homepage": "https://github.com/HouseofTyrell/unofficial-kometa-studio#readme",
   "scripts": {
     "dev": "pnpm --parallel -r dev",
     "build": "pnpm -r build",

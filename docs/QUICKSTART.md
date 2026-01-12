@@ -13,19 +13,37 @@ You need:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/kometa-studio.git
-cd kometa-studio
+git clone https://github.com/HouseofTyrell/unofficial-kometa-studio.git
+cd unofficial-kometa-studio
 
 # 2. Install dependencies
 pnpm install
 
-# 3. Start the application
+# 3. Set up environment
+cp apps/server/.env.example apps/server/.env
+# Edit apps/server/.env and add your master key (see below)
+
+# 4. Start the application
 pnpm dev
+```
+
+### Generate Master Key
+
+The server requires an encryption key for secure secret storage:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Add the generated key to `apps/server/.env`:
+
+```
+KOMETA_STUDIO_MASTER_KEY=your-generated-key-here
 ```
 
 That's it! The app will open at:
 
-- **Frontend**: http://localhost:5176
+- **Frontend**: http://localhost:5173
 - **Backend**: http://localhost:3001
 
 ## First Steps
@@ -128,7 +146,7 @@ Create visual overlays with live preview!
 
 ```bash
 npx kill-port 3001  # Backend
-npx kill-port 5176  # Frontend
+npx kill-port 5173  # Frontend
 ```
 
 ### Can't See My Changes
@@ -150,9 +168,9 @@ npx kill-port 5176  # Frontend
 
 ## Getting Help
 
-- **Bug?** Open an [issue](https://github.com/yourusername/kometa-studio/issues)
-- **Question?** Start a [discussion](https://github.com/yourusername/kometa-studio/discussions)
-- **Feature idea?** Use [feature request template](https://github.com/yourusername/kometa-studio/issues/new?template=feature_request.md)
+- **Bug?** Open an [issue](https://github.com/HouseofTyrell/unofficial-kometa-studio/issues)
+- **Question?** Start a [discussion](https://github.com/HouseofTyrell/unofficial-kometa-studio/discussions)
+- **Feature idea?** Use [feature request template](https://github.com/HouseofTyrell/unofficial-kometa-studio/issues/new?template=feature_request.md)
 
 ## What's Next?
 

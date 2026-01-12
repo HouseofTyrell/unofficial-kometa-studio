@@ -1,0 +1,57 @@
+{
+  "name": "@kometa-studio/core",
+  "version": "0.1.0",
+  "description": "Core library for parsing, generating, and validating Kometa (Plex-Meta-Manager) YAML configurations",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HouseofTyrell/unofficial-kometa-studio.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/HouseofTyrell/unofficial-kometa-studio/issues"
+  },
+  "homepage": "https://github.com/HouseofTyrell/unofficial-kometa-studio/tree/main/packages/core#readme",
+  "keywords": [
+    "kometa",
+    "plex-meta-manager",
+    "yaml",
+    "parser",
+    "config",
+    "validation",
+    "plex"
+  ],
+  "author": "HouseofTyrell",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "yaml": "^2.3.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  }
+}

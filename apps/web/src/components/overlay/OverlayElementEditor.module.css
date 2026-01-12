@@ -182,3 +182,240 @@
   flex: 1;
   min-width: 300px;
 }
+
+/* Multi-selection styles */
+.elementItem.multiSelected {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.elementItem.multiSelected .elementType {
+  color: #ff9800;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.selectAllButton {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selectAllButton:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.multiSelectActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: 4px;
+}
+
+.multiSelectLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ff9800;
+  flex: 1;
+}
+
+.multiActionButton {
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.multiActionButton:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary-color);
+}
+
+.multiActionButtonDanger {
+  padding: 4px 8px;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 4px;
+  color: #f44336;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.multiActionButtonDanger:hover {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: #f44336;
+}
+
+/* Layer controls */
+.elementActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.layerButton {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.layerButton:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.layerButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.elementIndex {
+  color: var(--text-secondary);
+  margin-right: 4px;
+  font-weight: 400;
+}
+
+.layerHint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.editorFormHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.layerControls {
+  display: flex;
+  gap: 6px;
+}
+
+.layerControlButton {
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.layerControlButton:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.layerControlButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Multi-select info panel */
+.multiSelectInfo {
+  padding: 12px;
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.multiSelectInfo p {
+  margin: 0 0 6px 0;
+}
+
+.multiSelectInfo p:last-child {
+  margin-bottom: 0;
+}
+
+.bulkActions {
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.bulkActionsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.bulkButtonGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.bulkButton {
+  flex: 1;
+  padding: 10px 16px;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bulkButton:hover {
+  background: var(--primary-hover);
+}
+
+.bulkButtonDanger {
+  flex: 1;
+  padding: 10px 16px;
+  background: #f44336;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bulkButtonDanger:hover {
+  background: #d32f2f;
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './OverlayBuilderPage.module.css';
 import { profileApi, configApi } from '../api/client';
+import { useHistory, useHistoryKeyboard } from '../hooks/useHistory';
 import {
   TmdbService,
   DEFAULT_PREVIEW_TITLES,
@@ -41,6 +42,7 @@ import { OverlayElementEditor } from '../components/overlay/OverlayElementEditor
 import { OverlayCodeView } from '../components/overlay/OverlayCodeView';
 import { MediaSearch } from '../components/overlay/MediaSearch';
 import { SaveOverlayDialog } from '../components/overlay/SaveOverlayDialog';
+import { GitHubImport } from '../components/overlay/GitHubImport';
 
 export function OverlayBuilderPage() {
   const navigate = useNavigate();
@@ -79,16 +81,39 @@ export function OverlayBuilderPage() {
   const [availableEpisodes, setAvailableEpisodes] = useState<number[]>([]);
   const [selectedEpisode, setSelectedEpisode] = useState<number>(1);
 
-  // Overlay configuration
+  // Overlay configuration with undo/redo support
   const [selectedPresetId, setSelectedPresetId] = useState<string>('none');
-  const [overlayElements, setOverlayElements] = useState<OverlayElement[]>([]);
+  const {
+    state: overlayElements,
+    setState: setOverlayElements,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useHistory<OverlayElement[]>([]);
   const [selectedElementIndex, setSelectedElementIndex] = useState<number | null>(null);
+  const [selectedElementIndices, setSelectedElementIndices] = useState<number[]>([]);
+
+  // Enable keyboard shortcuts for undo/redo
+  useHistoryKeyboard(undo, redo, canUndo, canRedo);
 
   // View mode - now supports split view
   const [showCode, setShowCode] = useState(false);
 
+  // Preview zoom level (percentage)
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const ZOOM_LEVELS = [50, 75, 100, 125, 150];
+  const baseWidth = 500;
+  const baseHeight = 750;
+  const previewWidth = Math.round(baseWidth * (zoomLevel / 100));
+  const previewHeight = Math.round(baseHeight * (zoomLevel / 100));
+
   // Save dialog
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+
+  // Import dialog
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [_importSource, setImportSource] = useState<string | null>(null);
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -99,6 +124,28 @@ export function OverlayBuilderPage() {
   useEffect(() => {
     loadProfiles();
     loadConfigs();
+
+    // Check for community overlay from gallery
+    const communityData = sessionStorage.getItem('communityOverlay');
+    if (communityData) {
+      try {
+        const { elements, source, name } = JSON.parse(communityData);
+        if (elements && elements.length > 0) {
+          setOverlayElements(elements);
+          setImportSource(source);
+          setSelectedPresetId('none');
+          setNotification({
+            message: `Loaded "${name}" overlay from Community Gallery`,
+            type: 'success',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load community overlay:', err);
+      } finally {
+        // Clear the data so it doesn't reload on next visit
+        sessionStorage.removeItem('communityOverlay');
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -294,6 +341,47 @@ export function OverlayBuilderPage() {
     if (preset) {
       setOverlayElements([...preset.elements]);
     }
+  };
+
+  // Handle drag & drop element positioning
+  const handleElementMove = (index: number, x: number, y: number) => {
+    setOverlayElements((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        x,
+        y,
+        // Clear relative positioning when using absolute positioning
+        position: undefined,
+        offset: undefined,
+      };
+      return updated;
+    });
+  };
+
+  // Handle multi-element move (for dragging multiple selected elements)
+  const handleElementsMove = (indices: number[], deltaX: number, deltaY: number) => {
+    setOverlayElements((prev) => {
+      const updated = [...prev];
+      for (const index of indices) {
+        const element = updated[index];
+        // Calculate new position based on delta
+        const currentX = element.x || 0;
+        const currentY = element.y || 0;
+        const newX = Math.max(0, Math.min(950, currentX + deltaX));
+        const newY = Math.max(0, Math.min(1450, currentY + deltaY));
+
+        updated[index] = {
+          ...element,
+          x: Math.round(newX),
+          y: Math.round(newY),
+          // Clear relative positioning when using absolute positioning
+          position: undefined,
+          offset: undefined,
+        };
+      }
+      return updated;
+    });
   };
 
   const loadSeasons = async () => {
@@ -562,6 +650,22 @@ export function OverlayBuilderPage() {
     }
   };
 
+  // Handle import from GitHub
+  const handleGitHubImport = (
+    elements: OverlayElement[],
+    _yamlContent: string,
+    sourceUrl: string
+  ) => {
+    setOverlayElements(elements);
+    setImportSource(sourceUrl);
+    setSelectedPresetId('none');
+    setShowImportDialog(false);
+    setNotification({
+      message: `Imported ${elements.length} overlay element(s) from GitHub`,
+      type: 'success',
+    });
+  };
+
   const handleSeasonChange = (seasonNumber: number) => {
     setSelectedSeason(seasonNumber);
     loadEpisodesForSeason(seasonNumber);
@@ -752,40 +856,67 @@ export function OverlayBuilderPage() {
               )}
 
               <div className={styles.posterContainer}>
-                <h2 className={styles.posterTitle}>
-                  {'title' in currentMedia ? currentMedia.title : currentMedia.name}
-                  {overlayElements.length > 0 && (
-                    <span
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 'normal',
-                        marginLeft: '12px',
-                        opacity: 0.7,
-                      }}
+                <div className={styles.posterHeader}>
+                  <h2 className={styles.posterTitle}>
+                    {'title' in currentMedia ? currentMedia.title : currentMedia.name}
+                    {overlayElements.length > 0 && (
+                      <span className={styles.overlayCount}>
+                        ({overlayElements.length} overlay{overlayElements.length !== 1 ? 's' : ''})
+                      </span>
+                    )}
+                    {mediaType === 'tv' && (
+                      <span className={styles.posterLevel}>• {posterType} Level</span>
+                    )}
+                  </h2>
+                  <div className={styles.zoomControls}>
+                    <button
+                      className={styles.zoomButton}
+                      onClick={() => setZoomLevel((prev) => Math.max(50, prev - 25))}
+                      disabled={zoomLevel <= 50}
+                      title="Zoom out"
                     >
-                      ({overlayElements.length} overlay{overlayElements.length !== 1 ? 's' : ''})
-                    </span>
-                  )}
-                  {mediaType === 'tv' && (
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        fontWeight: 'normal',
-                        marginLeft: '12px',
-                        opacity: 0.5,
-                        textTransform: 'uppercase',
-                      }}
+                      −
+                    </button>
+                    <select
+                      className={styles.zoomSelect}
+                      value={zoomLevel}
+                      onChange={(e) => setZoomLevel(Number(e.target.value))}
+                      title="Zoom level"
                     >
-                      • {posterType} Level
-                    </span>
-                  )}
-                </h2>
-                <PosterPreview
-                  posterUrl={posterUrl}
-                  overlayElements={overlayElements}
-                  width={500}
-                  height={750}
-                />
+                      {ZOOM_LEVELS.map((level) => (
+                        <option key={level} value={level}>
+                          {level}%
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className={styles.zoomButton}
+                      onClick={() => setZoomLevel((prev) => Math.min(150, prev + 25))}
+                      disabled={zoomLevel >= 150}
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div
+                  className={styles.posterWrapper}
+                  style={{ maxHeight: zoomLevel > 100 ? '600px' : 'auto' }}
+                >
+                  <PosterPreview
+                    posterUrl={posterUrl}
+                    overlayElements={overlayElements}
+                    width={previewWidth}
+                    height={previewHeight}
+                    interactive={true}
+                    selectedElementIndex={selectedElementIndex}
+                    selectedElementIndices={selectedElementIndices}
+                    onElementSelect={setSelectedElementIndex}
+                    onElementsSelect={setSelectedElementIndices}
+                    onElementMove={handleElementMove}
+                    onElementsMove={handleElementsMove}
+                  />
+                </div>
               </div>
             </>
           ) : (
@@ -805,10 +936,35 @@ export function OverlayBuilderPage() {
               )}
             </div>
             <div className={styles.editorActions}>
+              <div className={styles.historyButtons}>
+                <button
+                  className={styles.iconButton}
+                  onClick={undo}
+                  disabled={!canUndo}
+                  title="Undo (Ctrl+Z)"
+                >
+                  ↩
+                </button>
+                <button
+                  className={styles.iconButton}
+                  onClick={redo}
+                  disabled={!canRedo}
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  ↪
+                </button>
+              </div>
               <OverlayPresetSelector
                 selectedPresetId={selectedPresetId}
                 onPresetChange={handlePresetChange}
               />
+              <button
+                className={styles.importButton}
+                onClick={() => setShowImportDialog(true)}
+                title="Import from GitHub"
+              >
+                Import
+              </button>
               <button className={styles.button} onClick={() => setShowCode(!showCode)}>
                 {showCode ? 'Hide Code' : 'Show Code'}
               </button>
@@ -819,8 +975,10 @@ export function OverlayBuilderPage() {
             <OverlayElementEditor
               elements={overlayElements}
               selectedElementIndex={selectedElementIndex}
+              selectedElementIndices={selectedElementIndices}
               onElementsChange={setOverlayElements}
               onSelectedElementChange={setSelectedElementIndex}
+              onSelectedElementsChange={setSelectedElementIndices}
             />
 
             {showCode && (
@@ -854,6 +1012,10 @@ export function OverlayBuilderPage() {
           mediaType={mediaType}
           onClose={() => setShowSaveDialog(false)}
         />
+      )}
+
+      {showImportDialog && (
+        <GitHubImport onImport={handleGitHubImport} onClose={() => setShowImportDialog(false)} />
       )}
     </div>
   );

@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import { configApi } from '../../api/client';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export function Sidebar() {
   const location = useLocation();
   const { configId } = useParams();
+  const { theme, toggleTheme } = useTheme();
   const [configs, setConfigs] = useState<any[]>([]);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     configs: true,
@@ -83,6 +85,13 @@ export function Sidebar() {
         </Link>
 
         <Link
+          to="/community-overlays"
+          className={`${styles.navItem} ${isActive('/community-overlays') ? styles.active : ''}`}
+        >
+          Community Overlays
+        </Link>
+
+        <Link
           to="/import-export"
           className={`${styles.navItem} ${isActive('/import-export') ? styles.active : ''}`}
         >
@@ -91,6 +100,14 @@ export function Sidebar() {
       </nav>
 
       <div className={styles.footer}>
+        <button
+          className={styles.themeToggle}
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
         <div className={styles.disclaimer}>Unofficial project</div>
       </div>
     </div>

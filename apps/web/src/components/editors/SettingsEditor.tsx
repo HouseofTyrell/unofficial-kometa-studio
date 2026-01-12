@@ -1,12 +1,13 @@
+import type { Settings } from '@kometa-studio/shared';
 import styles from './SettingsEditor.module.css';
 
 interface SettingsEditorProps {
-  settings: any;
-  onChange: (settings: any) => void;
+  settings: Settings;
+  onChange: (settings: Settings) => void;
 }
 
 export function SettingsEditor({ settings, onChange }: SettingsEditorProps) {
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: keyof Settings, value: Settings[keyof Settings]) => {
     onChange({
       ...settings,
       [field]: value === '' ? undefined : value,

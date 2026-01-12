@@ -1,16 +1,17 @@
 import { useState } from 'react';
+import type { Library } from '@kometa-studio/shared';
 import styles from './LibraryEditor.module.css';
 import { FileListEditor } from './FileListEditor';
 
 interface LibraryEditorProps {
-  library: any;
-  onChange: (library: any) => void;
+  library: Library;
+  onChange: (library: Library) => void;
 }
 
 export function LibraryEditor({ library, onChange }: LibraryEditorProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'filters' | 'settings'>('files');
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: keyof Library, value: Library[keyof Library]) => {
     onChange({
       ...library,
       [field]: value,

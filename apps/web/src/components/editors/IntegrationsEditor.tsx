@@ -1,8 +1,9 @@
+import type { KometaConfig } from '@kometa-studio/shared';
 import styles from './IntegrationsEditor.module.css';
 
 interface IntegrationsEditorProps {
-  config: any;
-  onChange: (updates: any) => void;
+  config: KometaConfig;
+  onChange: (updates: Partial<KometaConfig>) => void;
 }
 
 export function IntegrationsEditor({ config, onChange }: IntegrationsEditorProps) {

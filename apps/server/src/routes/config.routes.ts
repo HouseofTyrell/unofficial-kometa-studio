@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { ConfigRepository } from '../db/config.repository.js';
 import { ProfileRepository } from '../db/profile.repository.js';
+import { logger } from '../utils/logger.js';
 import { parseKometaYaml, extractSecretsFromYaml } from '../yaml/parser.js';
 import { generateYaml } from '../yaml/generator.js';
 import {
@@ -378,29 +379,17 @@ export async function configRoutes(
           }
         }
 
-        // Enhanced debug logging
-        console.log('\n📄 Overlay Files Detection Summary:');
-        console.log(`Total overlays found: ${overlayFiles.length}`);
-
-        // Group by library
-        const byLibrary = overlayFiles.reduce((acc: any, f) => {
-          if (!acc[f.libraryName]) acc[f.libraryName] = [];
-          acc[f.libraryName].push(f);
-          return acc;
-        }, {});
-
-        Object.entries(byLibrary).forEach(([library, files]: [string, any]) => {
-          console.log(`\n  📚 ${library}: ${files.length} overlays`);
-          files.forEach((f: any) => {
-            console.log(
-              `    - ${f.overlayType || 'unknown'} (${f.level}) ${f.overlayPath ? `[${f.overlayPath}]` : ''}`
-            );
-            if (f.file.template_variables) {
-              console.log(`      Template vars:`, Object.keys(f.file.template_variables));
-            }
-          });
+        // Debug logging for overlay files detection
+        logger.debug('Overlay files detection complete', {
+          total: overlayFiles.length,
+          byLibrary: overlayFiles.reduce(
+            (acc: Record<string, number>, f) => {
+              acc[f.libraryName] = (acc[f.libraryName] || 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>
+          ),
         });
-        console.log('\n');
 
         return { overlayFiles };
       } catch (error) {
@@ -476,10 +465,7 @@ export async function configRoutes(
           }
         }
 
-        console.log('\n🖼️  Overlay Assets Extracted:', Object.keys(assets).length, 'assets');
-        Object.entries(assets).forEach(([key, url]) => {
-          console.log(`  - ${key}: ${url.substring(0, 80)}...`);
-        });
+        logger.debug('Overlay assets extracted', { count: Object.keys(assets).length });
 
         return { assets };
       } catch (error) {

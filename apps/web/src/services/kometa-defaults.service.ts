@@ -424,16 +424,6 @@ export class KometaDefaultsService {
       const baseOffset = templateVars?.horizontal_offset || 15;
       const vOffset = templateVars?.vertical_offset || 15;
 
-      console.log('🎯 Generating ratings overlay with template vars:', {
-        rating1: templateVars?.rating1,
-        rating1_image: templateVars?.rating1_image,
-        rating2: templateVars?.rating2,
-        rating2_image: templateVars?.rating2_image,
-        rating3: templateVars?.rating3,
-        rating3_image: templateVars?.rating3_image,
-        availableRatings: metadata.ratings,
-      });
-
       // Helper to create rating badge
       const createRatingBadge = (ratingNum: 1 | 2 | 3, yOffset: number): OverlayElement | null => {
         const ratingType = templateVars?.[`rating${ratingNum}`];
@@ -469,13 +459,8 @@ export class KometaDefaultsService {
         }
 
         if (!ratingValue) {
-          console.log(`  ❌ Rating ${ratingNum} skipped: no value for ${ratingLabel}`);
           return null;
         }
-
-        console.log(
-          `  ✅ Rating ${ratingNum}: ${ratingLabel} ${ratingValue.toFixed(1)} at offset ${yOffset}`
-        );
 
         // Kometa EXACT values from ratings.yml for 1000x1500 canvas
         // rating_alignment: horizontal (default layout)
@@ -548,8 +533,6 @@ export class KometaDefaultsService {
           };
           logoUrl = kometaDefaults[ratingLabel];
         }
-
-        console.log(`  🖼️  Rating ${ratingNum} logo: ${logoUrl}`);
 
         // Format rating text based on label
         // Kometa shows: "TMDB 78%", "IMDb 8.0", "FRESH 83%"
@@ -637,8 +620,6 @@ export class KometaDefaultsService {
         if (!usedSources.has(source)) {
           badges.push(rating2);
           usedSources.add(source);
-        } else {
-          console.log(`  ⚠️  Skipping rating2 - duplicate source: ${source}`);
         }
       }
 
@@ -654,8 +635,6 @@ export class KometaDefaultsService {
         if (!usedSources.has(source)) {
           badges.push(rating3);
           usedSources.add(source);
-        } else {
-          console.log(`  ⚠️  Skipping rating3 - duplicate source: ${source}`);
         }
       }
 
@@ -666,13 +645,10 @@ export class KometaDefaultsService {
       });
 
       elements.push(...badges);
-      console.log(`  ✅ Generated ${badges.length} unique rating badges`);
     }
 
     // Status overlay - show banner for show status (airing, ended, canceled)
     if (overlayType === 'status' && metadata.status) {
-      console.log('🎬 Generating status overlay for:', metadata.status);
-
       const statusColors: Record<string, string> = {
         airing: templateVars?.back_color_airing || '#016920',
         'returning series': templateVars?.back_color_returning || '#81007F',
@@ -684,8 +660,6 @@ export class KometaDefaultsService {
 
       const statusText = metadata.status.toUpperCase();
       const bgColor = statusColors[metadata.status.toLowerCase()] || statusColors.ended;
-
-      console.log(`  Status text: "${statusText}", Color: ${bgColor}`);
 
       // Use canvas-appropriate width (500 for standard poster preview)
       const ribbonWidth = templateVars?.back_width || 500;

@@ -115,14 +115,6 @@ export function PosterPreview({
         y = offset.vertical || 0;
     }
 
-    console.log(`📍 Position calc for ${element.text || element.content}:`, {
-      position,
-      offset,
-      size: { w: elementWidth, h: elementHeight },
-      kometaCanvas: { w: KOMETA_CANVAS_WIDTH, h: KOMETA_CANVAS_HEIGHT },
-      result: { x, y },
-    });
-
     return { x, y };
   };
 
@@ -276,39 +268,26 @@ export function PosterPreview({
     let addonHeight = 0;
 
     if (element.addonImage) {
-      console.log(`🖼️  Loading addon image for badge "${textContent}":`, element.addonImage);
       try {
         addonImg = new Image();
         addonImg.crossOrigin = 'anonymous';
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve) => {
           addonImg!.onload = () => {
             // Kometa scales addon images to match badge height (with some padding)
             const targetHeight = (element.height || 80) - backPadding * 2;
             const aspectRatio = addonImg!.width / addonImg!.height;
             addonHeight = targetHeight;
             addonWidth = targetHeight * aspectRatio;
-            console.log(
-              `  ✅ Addon image loaded successfully! Size: ${addonImg!.width}x${addonImg!.height}, scaled to: ${addonWidth}x${addonHeight}`
-            );
             resolve();
           };
-          addonImg!.onerror = (e) => {
-            console.error(`  ❌ Failed to load addon image`);
-            console.error(`     Full URL: ${element.addonImage}`);
-            console.error(`     Error event:`, e);
-            // Try to get more error details
-            const img = e.target as HTMLImageElement;
-            if (img) {
-              console.error(`     Image src: ${img.src}`);
-              console.error(`     Image complete: ${img.complete}`);
-              console.error(`     Image naturalWidth: ${img.naturalWidth}`);
-            }
-            resolve(); // Continue without logo if failed
+          addonImg!.onerror = () => {
+            // Continue without logo if failed
+            resolve();
           };
           addonImg!.src = element.addonImage!;
         });
-      } catch (error) {
-        console.warn('Failed to load addon image:', error);
+      } catch {
+        // Continue without addon image
       }
     }
 

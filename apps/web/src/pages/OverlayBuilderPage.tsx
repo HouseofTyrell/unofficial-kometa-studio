@@ -191,29 +191,10 @@ export function OverlayBuilderPage() {
     try {
       // Load overlay files
       const { overlayFiles: files } = await configApi.getOverlayFiles(selectedConfig);
-      console.log('📄 Loaded overlay files from config:', files);
-      console.log('📊 Overlay summary:', {
-        total: files.length,
-        byLibrary: files.reduce((acc: any, f) => {
-          acc[f.libraryName] = (acc[f.libraryName] || 0) + 1;
-          return acc;
-        }, {}),
-        byLevel: files.reduce((acc: any, f) => {
-          const level = f.level || 'unknown';
-          acc[level] = (acc[level] || 0) + 1;
-          return acc;
-        }, {}),
-        byType: files.reduce((acc: any, f) => {
-          const type = f.overlayType || 'unknown';
-          acc[type] = (acc[type] || 0) + 1;
-          return acc;
-        }, {}),
-      });
       setOverlayFiles(files);
 
       // Load overlay assets (images, logos, etc.)
       const { assets } = await configApi.getOverlayAssets(selectedConfig);
-      console.log('🖼️  Loaded overlay assets:', Object.keys(assets).length, 'assets');
       setOverlayAssets(assets);
     } catch (error) {
       console.error('Failed to load overlay files:', error);
@@ -404,7 +385,6 @@ export function OverlayBuilderPage() {
 
   const autoLoadOverlaysForMedia = async (metadata: MediaMetadata) => {
     if (!selectedConfig || overlayFiles.length === 0) {
-      console.log('No config or overlay files selected');
       return;
     }
 
@@ -442,20 +422,11 @@ export function OverlayBuilderPage() {
       return true;
     });
 
-    console.log(
-      `Loading ${overlaysToLoad.length} applicable overlays for ${libraryName} (level: ${currentLevel})`
-    );
-    console.log(
-      'Overlays to load:',
-      overlaysToLoad.map((o) => ({ type: o.overlayType, level: o.level }))
-    );
-
     // Generate overlays for each overlay file
     for (const overlayFile of overlaysToLoad) {
       try {
         const overlayName = overlayFile.file.default;
         if (!overlayName) {
-          console.log(`Skipping overlay file without default type`);
           continue;
         }
 
@@ -480,9 +451,6 @@ export function OverlayBuilderPage() {
           overlayAssets
         );
 
-        console.log(
-          `Generated ${elements.length} elements for ${overlayName} (${overlayFile.level || 'movie'})`
-        );
         allElements.push(...elements);
       } catch (error) {
         console.error(`Failed to generate overlay for ${overlayFile.file.default}:`, error);
@@ -490,7 +458,6 @@ export function OverlayBuilderPage() {
     }
 
     if (allElements.length > 0) {
-      console.log('🎨 Setting overlay elements:', JSON.stringify(allElements, null, 2));
       setOverlayElements(allElements);
       setSelectedPresetId('none');
       setNotification({
@@ -498,7 +465,6 @@ export function OverlayBuilderPage() {
         type: 'success',
       });
     } else {
-      console.log('No applicable overlays generated - metadata may be missing required fields');
       setNotification({
         message: `No overlays found for ${currentLevel} level. This media may not match the conditions, or may be missing required metadata (resolution, codecs, ratings). Try adding Plex credentials for more accurate data.`,
         type: 'info',
@@ -524,12 +490,11 @@ export function OverlayBuilderPage() {
       if (mediaType === 'tv') {
         try {
           const tvDetails = await tmdbService.getTVShow(media.id);
-          console.log('📺 TV Show details:', { status: tvDetails.status, name: tvDetails.name });
           if (tvDetails.status) {
             metadata.status = tvDetails.status;
           }
-        } catch (error) {
-          console.log('Could not fetch TV show status:', error);
+        } catch {
+          // Continue without status
         }
       }
 
@@ -577,7 +542,6 @@ export function OverlayBuilderPage() {
       }
 
       setMediaMetadata(metadata);
-      console.log('Loaded media metadata:', metadata);
 
       // Automatically load overlays based on the config
       await autoLoadOverlaysForMedia(metadata);

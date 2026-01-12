@@ -3,21 +3,36 @@ import styles from './OverlayElementEditor.module.css';
 
 export interface OverlayElementEditorProps {
   elements: OverlayElement[];
-  selectedElementIndex: number | null;
+  selectedElementIndex: number | null; // Legacy single selection
+  selectedElementIndices?: number[]; // Multi-selection
   onElementsChange: (elements: OverlayElement[]) => void;
   onSelectedElementChange: (index: number | null) => void;
+  onSelectedElementsChange?: (indices: number[]) => void;
 }
 
 export function OverlayElementEditor({
   elements,
   selectedElementIndex,
+  selectedElementIndices = [],
   onElementsChange,
   onSelectedElementChange,
+  onSelectedElementsChange,
 }: OverlayElementEditorProps) {
-  const selectedElement = selectedElementIndex !== null ? elements[selectedElementIndex] : null;
+  // Compute effective selected indices
+  const effectiveSelectedIndices =
+    selectedElementIndices.length > 0
+      ? selectedElementIndices
+      : selectedElementIndex !== null
+        ? [selectedElementIndex]
+        : [];
+
+  const isMultiSelect = effectiveSelectedIndices.length > 1;
+  const selectedElement =
+    effectiveSelectedIndices.length === 1 ? elements[effectiveSelectedIndices[0]] : null;
+  const primarySelectedIndex = effectiveSelectedIndices.length > 0 ? effectiveSelectedIndices[0] : null;
 
   // Helper to get display values for position
-  const getPositionDisplay = (element: OverlayElement) => {
+  const _getPositionDisplay = (element: OverlayElement) => {
     if (element.position) {
       return {
         horizontal: element.position.horizontal || 'left',
@@ -76,16 +91,159 @@ export function OverlayElementEditor({
     const newElements = [...elements, newElement];
     onElementsChange(newElements);
     onSelectedElementChange(newElements.length - 1);
+    onSelectedElementsChange?.([newElements.length - 1]);
   };
 
   const removeElement = (index: number) => {
     const newElements = elements.filter((_, i) => i !== index);
     onElementsChange(newElements);
-    if (selectedElementIndex === index) {
-      onSelectedElementChange(null);
-    } else if (selectedElementIndex !== null && selectedElementIndex > index) {
-      onSelectedElementChange(selectedElementIndex - 1);
+
+    // Update selection
+    if (effectiveSelectedIndices.includes(index)) {
+      const newSelection = effectiveSelectedIndices
+        .filter((i) => i !== index)
+        .map((i) => (i > index ? i - 1 : i));
+      if (newSelection.length > 0) {
+        onSelectedElementChange(newSelection[0]);
+        onSelectedElementsChange?.(newSelection);
+      } else {
+        onSelectedElementChange(null);
+        onSelectedElementsChange?.([]);
+      }
+    } else {
+      // Adjust indices for removed element
+      const newSelection = effectiveSelectedIndices.map((i) => (i > index ? i - 1 : i));
+      if (newSelection.length > 0) {
+        onSelectedElementChange(newSelection[0]);
+        onSelectedElementsChange?.(newSelection);
+      }
     }
+  };
+
+  // Remove all selected elements
+  const removeSelectedElements = () => {
+    if (effectiveSelectedIndices.length === 0) return;
+
+    const indicesToRemove = new Set(effectiveSelectedIndices);
+    const newElements = elements.filter((_, i) => !indicesToRemove.has(i));
+    onElementsChange(newElements);
+    onSelectedElementChange(null);
+    onSelectedElementsChange?.([]);
+  };
+
+  // Duplicate selected elements
+  const duplicateSelectedElements = () => {
+    if (effectiveSelectedIndices.length === 0) return;
+
+    const duplicates = effectiveSelectedIndices.map((idx) => {
+      const original = elements[idx];
+      return {
+        ...original,
+        x: (original.x || 0) + 20,
+        y: (original.y || 0) + 20,
+        offset: original.offset
+          ? {
+              horizontal: (original.offset.horizontal || 0) + 20,
+              vertical: (original.offset.vertical || 0) + 20,
+            }
+          : undefined,
+      };
+    });
+
+    const newElements = [...elements, ...duplicates];
+    const newIndices = duplicates.map((_, i) => elements.length + i);
+    onElementsChange(newElements);
+    onSelectedElementChange(newIndices[0]);
+    onSelectedElementsChange?.(newIndices);
+  };
+
+  // Layering controls
+  const moveElementUp = (index: number) => {
+    if (index >= elements.length - 1) return;
+    const newElements = [...elements];
+    [newElements[index], newElements[index + 1]] = [newElements[index + 1], newElements[index]];
+    onElementsChange(newElements);
+    onSelectedElementChange(index + 1);
+    onSelectedElementsChange?.(effectiveSelectedIndices.map((i) => (i === index ? index + 1 : i)));
+  };
+
+  const moveElementDown = (index: number) => {
+    if (index <= 0) return;
+    const newElements = [...elements];
+    [newElements[index], newElements[index - 1]] = [newElements[index - 1], newElements[index]];
+    onElementsChange(newElements);
+    onSelectedElementChange(index - 1);
+    onSelectedElementsChange?.(effectiveSelectedIndices.map((i) => (i === index ? index - 1 : i)));
+  };
+
+  const bringToFront = (index: number) => {
+    if (index >= elements.length - 1) return;
+    const newElements = [...elements];
+    const [element] = newElements.splice(index, 1);
+    newElements.push(element);
+    onElementsChange(newElements);
+    const newIndex = newElements.length - 1;
+    onSelectedElementChange(newIndex);
+    onSelectedElementsChange?.([newIndex]);
+  };
+
+  const sendToBack = (index: number) => {
+    if (index <= 0) return;
+    const newElements = [...elements];
+    const [element] = newElements.splice(index, 1);
+    newElements.unshift(element);
+    onElementsChange(newElements);
+    onSelectedElementChange(0);
+    onSelectedElementsChange?.([0]);
+  };
+
+  // Handle click on element item with multi-select support
+  const handleElementClick = (index: number, e: React.MouseEvent) => {
+    const isShiftKey = e.shiftKey;
+    const isCtrlKey = e.ctrlKey || e.metaKey;
+
+    if (onSelectedElementsChange && (isShiftKey || isCtrlKey)) {
+      const currentSelection = [...effectiveSelectedIndices];
+
+      if (isCtrlKey) {
+        // Toggle selection
+        const existingIdx = currentSelection.indexOf(index);
+        if (existingIdx >= 0) {
+          currentSelection.splice(existingIdx, 1);
+        } else {
+          currentSelection.push(index);
+        }
+        onSelectedElementsChange(currentSelection);
+        if (currentSelection.length > 0) {
+          onSelectedElementChange(currentSelection[0]);
+        } else {
+          onSelectedElementChange(null);
+        }
+      } else if (isShiftKey && currentSelection.length > 0) {
+        // Range selection
+        const lastSelected = currentSelection[currentSelection.length - 1];
+        const start = Math.min(lastSelected, index);
+        const end = Math.max(lastSelected, index);
+        const rangeSelection = new Set(currentSelection);
+        for (let i = start; i <= end; i++) {
+          rangeSelection.add(i);
+        }
+        const newSelection = Array.from(rangeSelection);
+        onSelectedElementsChange(newSelection);
+        onSelectedElementChange(newSelection[0]);
+      }
+    } else {
+      // Single selection
+      onSelectedElementChange(index);
+      onSelectedElementsChange?.([index]);
+    }
+  };
+
+  // Select all elements
+  const selectAll = () => {
+    const allIndices = elements.map((_, i) => i);
+    onSelectedElementChange(allIndices.length > 0 ? allIndices[0] : null);
+    onSelectedElementsChange?.(allIndices);
   };
 
   return (
@@ -113,7 +271,38 @@ export function OverlayElementEditor({
       <div className={styles.topSection}>
         {/* Element list */}
         <div className={styles.section} style={{ flex: '0 0 280px' }}>
-          <h3 className={styles.sectionTitle}>Elements ({elements.length})</h3>
+          <div className={styles.listHeader}>
+            <h3 className={styles.sectionTitle}>Elements ({elements.length})</h3>
+            {elements.length > 0 && (
+              <button className={styles.selectAllButton} onClick={selectAll} title="Select all (Ctrl+A)">
+                Select All
+              </button>
+            )}
+          </div>
+
+          {/* Multi-selection actions */}
+          {isMultiSelect && (
+            <div className={styles.multiSelectActions}>
+              <span className={styles.multiSelectLabel}>
+                {effectiveSelectedIndices.length} selected
+              </span>
+              <button
+                className={styles.multiActionButton}
+                onClick={duplicateSelectedElements}
+                title="Duplicate selected"
+              >
+                Duplicate
+              </button>
+              <button
+                className={styles.multiActionButtonDanger}
+                onClick={removeSelectedElements}
+                title="Delete selected"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
           <div className={styles.elementList}>
             {elements.map((element, index) => {
               // Create descriptive label for element
@@ -139,28 +328,57 @@ export function OverlayElementEditor({
                 return '';
               };
 
+              const isSelected = effectiveSelectedIndices.includes(index);
+
               return (
                 <div
                   key={index}
-                  className={`${styles.elementItem} ${selectedElementIndex === index ? styles.selected : ''}`}
-                  onClick={() => onSelectedElementChange(index)}
+                  className={`${styles.elementItem} ${isSelected ? styles.selected : ''} ${isSelected && isMultiSelect ? styles.multiSelected : ''}`}
+                  onClick={(e) => handleElementClick(index, e)}
                 >
                   <div className={styles.elementInfo}>
                     <span className={styles.elementType}>
+                      <span className={styles.elementIndex}>{index + 1}.</span>
                       {element.type.toUpperCase()}
                       {getPositionInfo()}
                     </span>
                     <span className={styles.elementText}>{getElementLabel()}</span>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeElement(index);
-                    }}
-                    className={styles.removeButton}
-                  >
-                    ×
-                  </button>
+                  <div className={styles.elementActions}>
+                    {/* Layering controls */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveElementUp(index);
+                      }}
+                      className={styles.layerButton}
+                      disabled={index >= elements.length - 1}
+                      title="Move up (render on top)"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveElementDown(index);
+                      }}
+                      className={styles.layerButton}
+                      disabled={index <= 0}
+                      title="Move down (render behind)"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeElement(index);
+                      }}
+                      className={styles.removeButton}
+                      title="Remove element"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -168,12 +386,66 @@ export function OverlayElementEditor({
               <div className={styles.emptyMessage}>No elements yet. Add one above.</div>
             )}
           </div>
+
+          {/* Layer ordering hint */}
+          {elements.length > 1 && (
+            <div className={styles.layerHint}>
+              Elements at the bottom of the list render on top.
+            </div>
+          )}
         </div>
 
         {/* Edit form */}
-        {selectedElement !== null && selectedElementIndex !== null ? (
+        {isMultiSelect ? (
           <div className={styles.editorFormSection}>
-            <h3 className={styles.sectionTitle}>Edit {selectedElement.type.toUpperCase()}</h3>
+            <h3 className={styles.sectionTitle}>
+              {effectiveSelectedIndices.length} Elements Selected
+            </h3>
+            <div className={styles.multiSelectInfo}>
+              <p>Select a single element to edit its properties.</p>
+              <p>Use Ctrl/Cmd+Click to toggle selection, Shift+Click for range.</p>
+            </div>
+            <div className={styles.bulkActions}>
+              <h4 className={styles.bulkActionsTitle}>Bulk Actions</h4>
+              <div className={styles.bulkButtonGroup}>
+                <button
+                  className={styles.bulkButton}
+                  onClick={duplicateSelectedElements}
+                >
+                  Duplicate All
+                </button>
+                <button
+                  className={styles.bulkButtonDanger}
+                  onClick={removeSelectedElements}
+                >
+                  Delete All
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : selectedElement !== null && primarySelectedIndex !== null ? (
+          <div className={styles.editorFormSection}>
+            <div className={styles.editorFormHeader}>
+              <h3 className={styles.sectionTitle}>Edit {selectedElement.type.toUpperCase()}</h3>
+              <div className={styles.layerControls}>
+                <button
+                  className={styles.layerControlButton}
+                  onClick={() => bringToFront(primarySelectedIndex)}
+                  disabled={primarySelectedIndex >= elements.length - 1}
+                  title="Bring to front"
+                >
+                  ⬆ Front
+                </button>
+                <button
+                  className={styles.layerControlButton}
+                  onClick={() => sendToBack(primarySelectedIndex)}
+                  disabled={primarySelectedIndex <= 0}
+                  title="Send to back"
+                >
+                  ⬇ Back
+                </button>
+              </div>
+            </div>
 
             <div className={styles.form}>
               {selectedElement.position ? (
@@ -184,10 +456,10 @@ export function OverlayElementEditor({
                     <select
                       value={selectedElement.position.horizontal || 'left'}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           position: {
                             ...selectedElement.position,
-                            horizontal: e.target.value as any,
+                            horizontal: e.target.value as 'left' | 'center' | 'right',
                           },
                         })
                       }
@@ -204,10 +476,10 @@ export function OverlayElementEditor({
                     <select
                       value={selectedElement.position.vertical || 'top'}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           position: {
                             ...selectedElement.position,
-                            vertical: e.target.value as any,
+                            vertical: e.target.value as 'top' | 'center' | 'bottom',
                           },
                         })
                       }
@@ -225,7 +497,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.offset?.horizontal || 0}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           offset: { ...selectedElement.offset, horizontal: Number(e.target.value) },
                         })
                       }
@@ -239,7 +511,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.offset?.vertical || 0}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           offset: { ...selectedElement.offset, vertical: Number(e.target.value) },
                         })
                       }
@@ -256,7 +528,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.x || 0}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, { x: Number(e.target.value) })
+                        updateElement(primarySelectedIndex, { x: Number(e.target.value) })
                       }
                       className={styles.input}
                     />
@@ -268,7 +540,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.y || 0}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, { y: Number(e.target.value) })
+                        updateElement(primarySelectedIndex, { y: Number(e.target.value) })
                       }
                       className={styles.input}
                     />
@@ -286,7 +558,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.width || ''}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           width: Number(e.target.value),
                         })
                       }
@@ -300,7 +572,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.height || ''}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           height: Number(e.target.value),
                         })
                       }
@@ -321,11 +593,11 @@ export function OverlayElementEditor({
                       value={selectedElement.text || selectedElement.content || ''}
                       onChange={(e) => {
                         // Update both text and content to stay in sync
-                        const updates: any = { text: e.target.value };
+                        const updates: Partial<OverlayElement> = { text: e.target.value };
                         if (selectedElement.content !== undefined) {
                           updates.content = e.target.value;
                         }
-                        updateElement(selectedElementIndex, updates);
+                        updateElement(primarySelectedIndex, updates);
                       }}
                       className={styles.input}
                     />
@@ -337,7 +609,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.fontSize || 24}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           fontSize: Number(e.target.value),
                         })
                       }
@@ -351,7 +623,7 @@ export function OverlayElementEditor({
                       type="text"
                       value={selectedElement.color || '#ffffff'}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, { color: e.target.value })
+                        updateElement(primarySelectedIndex, { color: e.target.value })
                       }
                       className={styles.input}
                       placeholder="#ffffff"
@@ -367,7 +639,7 @@ export function OverlayElementEditor({
                     type="text"
                     value={selectedElement.backgroundColor || ''}
                     onChange={(e) =>
-                      updateElement(selectedElementIndex, {
+                      updateElement(primarySelectedIndex, {
                         backgroundColor: e.target.value,
                       })
                     }
@@ -385,7 +657,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.borderRadius || 0}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           borderRadius: Number(e.target.value),
                         })
                       }
@@ -399,7 +671,7 @@ export function OverlayElementEditor({
                       type="number"
                       value={selectedElement.padding || 0}
                       onChange={(e) =>
-                        updateElement(selectedElementIndex, {
+                        updateElement(primarySelectedIndex, {
                           padding: Number(e.target.value),
                         })
                       }
@@ -416,7 +688,7 @@ export function OverlayElementEditor({
                     type="text"
                     value={selectedElement.imageUrl || ''}
                     onChange={(e) =>
-                      updateElement(selectedElementIndex, { imageUrl: e.target.value })
+                      updateElement(primarySelectedIndex, { imageUrl: e.target.value })
                     }
                     className={styles.input}
                     placeholder="https://..."
@@ -430,7 +702,7 @@ export function OverlayElementEditor({
                   type="number"
                   value={selectedElement.rotation || 0}
                   onChange={(e) =>
-                    updateElement(selectedElementIndex, {
+                    updateElement(primarySelectedIndex, {
                       rotation: Number(e.target.value),
                     })
                   }
@@ -442,7 +714,10 @@ export function OverlayElementEditor({
         ) : (
           <div className={styles.editorFormSection}>
             <div className={styles.emptyMessage} style={{ padding: '40px', textAlign: 'center' }}>
-              Select an element to edit its properties
+              <p>Select an element to edit its properties</p>
+              <p style={{ fontSize: '12px', opacity: 0.7, marginTop: '8px' }}>
+                Tip: Use Ctrl/Cmd+Click to select multiple elements
+              </p>
             </div>
           </div>
         )}

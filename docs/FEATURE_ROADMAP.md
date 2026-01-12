@@ -35,10 +35,10 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Multi-element Selection** | Select and move multiple overlay elements at once | Not started |
-| **Element Layering Controls** | Bring to front/back, layer order management | Not started |
+| **Multi-element Selection** | Select and move multiple overlay elements at once | ✅ Complete |
+| **Element Layering Controls** | Bring to front/back, layer order management | ✅ Complete |
 | **Element Snapping** | Snap to grid, guides, or other elements | Not started |
-| **Element Duplication** | Quick duplicate selected element | Not started |
+| **Element Duplication** | Quick duplicate selected element | ✅ Complete |
 | **Custom Badge Designer** | Create custom badges with color picker, font selector | Not started |
 
 ---
@@ -49,7 +49,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Validation Feedback UI** | Show validation errors inline in the editor with helpful messages | Not started |
+| **Validation Feedback UI** | Show validation errors inline in the editor with helpful messages | ✅ Complete |
 | **Collection Builder** | Visual interface for creating collections (like overlay builder) | Not started |
 | **Operations Editor** | UI for configuring operations (schedule, library_operation, etc.) | Not started |
 | **Metadata Editor** | Visual editor for metadata mappings and overrides | Not started |
@@ -234,7 +234,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 
 ### Phase 3: UX Polish (In Progress)
 1. ~~Dark/light theme~~ ✅
-2. Validation feedback UI
+2. ~~Validation feedback UI~~ ✅
 3. ~~Keyboard shortcuts~~ Partial (Undo/Redo done)
 4. Guided setup wizard
 
@@ -279,3 +279,8 @@ When implementing a feature:
 - ✅ Missing overlay types: content_rating, studio, network, versions, mediastinger
 - ✅ 17 new presets across 4 new categories (Studio, Network, Versions, MediaStinger)
 - ✅ Bidirectional YAML code view editing with real-time validation
+- ✅ Multi-element selection with Ctrl/Cmd+Click and Shift+Click
+- ✅ Element layering controls (Move Up/Down, Bring to Front, Send to Back)
+- ✅ Element duplication (single and bulk)
+- ✅ Validation feedback UI with inline errors/warnings in config editor
+- ✅ Tab badges showing validation issues per section

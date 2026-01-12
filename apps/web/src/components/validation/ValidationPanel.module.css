@@ -1,0 +1,239 @@
+.panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.header:hover {
+  background: var(--bg-hover);
+}
+
+.summary {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.errorCount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #f44336;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.warningCount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff9800;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.errorCount .icon {
+  background: #f44336;
+  color: white;
+}
+
+.warningCount .icon {
+  background: #ff9800;
+  color: white;
+}
+
+.expandIcon {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.issues {
+  border-top: 1px solid var(--border-color);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.issue {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.issue:last-child {
+  border-bottom: none;
+}
+
+.issue:hover {
+  background: var(--bg-hover);
+}
+
+.issue.error {
+  border-left: 3px solid #f44336;
+}
+
+.issue.warning {
+  border-left: 3px solid #ff9800;
+}
+
+.issueIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.error .issueIcon {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.warning .issueIcon {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.issueContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.issuePath {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+.issueMessage {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* Success state */
+.successPanel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 6px;
+  color: #4caf50;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.checkmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #4caf50;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Badge styles (compact mode) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.errorBadge {
+  background: #f44336;
+  color: white;
+}
+
+.warningBadge {
+  background: #ff9800;
+  color: white;
+}
+
+.successBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: #4caf50;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* Tab badge styles */
+.tabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.tabBadgeError {
+  background: #f44336;
+  color: white;
+}
+
+.tabBadgeWarning {
+  background: #ff9800;
+  color: white;
+}

@@ -76,3 +76,21 @@
 .error {
   color: var(--error);
 }
+
+/* Header layout with validation */
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.validationSection {
+  margin-top: 16px;
+}

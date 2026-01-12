@@ -92,6 +92,7 @@ export function OverlayBuilderPage() {
     canRedo,
   } = useHistory<OverlayElement[]>([]);
   const [selectedElementIndex, setSelectedElementIndex] = useState<number | null>(null);
+  const [selectedElementIndices, setSelectedElementIndices] = useState<number[]>([]);
 
   // Enable keyboard shortcuts for undo/redo
   useHistoryKeyboard(undo, redo, canUndo, canRedo);
@@ -354,6 +355,31 @@ export function OverlayBuilderPage() {
         position: undefined,
         offset: undefined,
       };
+      return updated;
+    });
+  };
+
+  // Handle multi-element move (for dragging multiple selected elements)
+  const handleElementsMove = (indices: number[], deltaX: number, deltaY: number) => {
+    setOverlayElements((prev) => {
+      const updated = [...prev];
+      for (const index of indices) {
+        const element = updated[index];
+        // Calculate new position based on delta
+        const currentX = element.x || 0;
+        const currentY = element.y || 0;
+        const newX = Math.max(0, Math.min(950, currentX + deltaX));
+        const newY = Math.max(0, Math.min(1450, currentY + deltaY));
+
+        updated[index] = {
+          ...element,
+          x: Math.round(newX),
+          y: Math.round(newY),
+          // Clear relative positioning when using absolute positioning
+          position: undefined,
+          offset: undefined,
+        };
+      }
       return updated;
     });
   };
@@ -877,8 +903,11 @@ export function OverlayBuilderPage() {
                     height={previewHeight}
                     interactive={true}
                     selectedElementIndex={selectedElementIndex}
+                    selectedElementIndices={selectedElementIndices}
                     onElementSelect={setSelectedElementIndex}
+                    onElementsSelect={setSelectedElementIndices}
                     onElementMove={handleElementMove}
+                    onElementsMove={handleElementsMove}
                   />
                 </div>
               </div>
@@ -939,8 +968,10 @@ export function OverlayBuilderPage() {
             <OverlayElementEditor
               elements={overlayElements}
               selectedElementIndex={selectedElementIndex}
+              selectedElementIndices={selectedElementIndices}
               onElementsChange={setOverlayElements}
               onSelectedElementChange={setSelectedElementIndex}
+              onSelectedElementsChange={setSelectedElementIndices}
             />
 
             {showCode && (

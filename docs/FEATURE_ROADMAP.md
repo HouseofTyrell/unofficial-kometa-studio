@@ -274,3 +274,5 @@ When implementing a feature:
 - ✅ Verified TypeScript build and YAML parser tests pass
 - ✅ Added 30+ overlay preset templates across 11 categories
 - ✅ Preview zoom controls (50%-150%)
+- ✅ Community Overlays gallery with popular Kometa presets
+- ✅ GitHub YAML import with live overlay preview

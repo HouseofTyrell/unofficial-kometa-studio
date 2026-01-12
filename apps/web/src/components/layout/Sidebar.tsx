@@ -85,6 +85,13 @@ export function Sidebar() {
         </Link>
 
         <Link
+          to="/community-overlays"
+          className={`${styles.navItem} ${isActive('/community-overlays') ? styles.active : ''}`}
+        >
+          Community Overlays
+        </Link>
+
+        <Link
           to="/import-export"
           className={`${styles.navItem} ${isActive('/import-export') ? styles.active : ''}`}
         >

@@ -295,6 +295,23 @@
   background: #45a049;
 }
 
+.importButton {
+  padding: 6px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.importButton:hover {
+  background: var(--accent);
+  color: white;
+}
+
 /* Notification - floating at top center */
 .notification {
   position: fixed;

@@ -42,6 +42,7 @@ import { OverlayElementEditor } from '../components/overlay/OverlayElementEditor
 import { OverlayCodeView } from '../components/overlay/OverlayCodeView';
 import { MediaSearch } from '../components/overlay/MediaSearch';
 import { SaveOverlayDialog } from '../components/overlay/SaveOverlayDialog';
+import { GitHubImport } from '../components/overlay/GitHubImport';
 
 export function OverlayBuilderPage() {
   const navigate = useNavigate();
@@ -109,6 +110,10 @@ export function OverlayBuilderPage() {
   // Save dialog
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
+  // Import dialog
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [_importSource, setImportSource] = useState<string | null>(null);
+
   // Notification state
   const [notification, setNotification] = useState<{
     message: string;
@@ -118,6 +123,28 @@ export function OverlayBuilderPage() {
   useEffect(() => {
     loadProfiles();
     loadConfigs();
+
+    // Check for community overlay from gallery
+    const communityData = sessionStorage.getItem('communityOverlay');
+    if (communityData) {
+      try {
+        const { elements, source, name } = JSON.parse(communityData);
+        if (elements && elements.length > 0) {
+          setOverlayElements(elements);
+          setImportSource(source);
+          setSelectedPresetId('none');
+          setNotification({
+            message: `Loaded "${name}" overlay from Community Gallery`,
+            type: 'success',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load community overlay:', err);
+      } finally {
+        // Clear the data so it doesn't reload on next visit
+        sessionStorage.removeItem('communityOverlay');
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -597,6 +624,18 @@ export function OverlayBuilderPage() {
     }
   };
 
+  // Handle import from GitHub
+  const handleGitHubImport = (elements: OverlayElement[], _yamlContent: string, sourceUrl: string) => {
+    setOverlayElements(elements);
+    setImportSource(sourceUrl);
+    setSelectedPresetId('none');
+    setShowImportDialog(false);
+    setNotification({
+      message: `Imported ${elements.length} overlay element(s) from GitHub`,
+      type: 'success',
+    });
+  };
+
   const handleSeasonChange = (seasonNumber: number) => {
     setSelectedSeason(seasonNumber);
     loadEpisodesForSeason(seasonNumber);
@@ -883,6 +922,13 @@ export function OverlayBuilderPage() {
                 selectedPresetId={selectedPresetId}
                 onPresetChange={handlePresetChange}
               />
+              <button
+                className={styles.importButton}
+                onClick={() => setShowImportDialog(true)}
+                title="Import from GitHub"
+              >
+                Import
+              </button>
               <button className={styles.button} onClick={() => setShowCode(!showCode)}>
                 {showCode ? 'Hide Code' : 'Show Code'}
               </button>
@@ -927,6 +973,13 @@ export function OverlayBuilderPage() {
           overlayElements={overlayElements}
           mediaType={mediaType}
           onClose={() => setShowSaveDialog(false)}
+        />
+      )}
+
+      {showImportDialog && (
+        <GitHubImport
+          onImport={handleGitHubImport}
+          onClose={() => setShowImportDialog(false)}
         />
       )}
     </div>

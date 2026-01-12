@@ -6,8 +6,8 @@ This guide covers common development tasks and workflows for Kometa Studio.
 
 ```bash
 # Clone and setup
-git clone https://github.com/yourusername/kometa-studio.git
-cd kometa-studio
+git clone https://github.com/HouseofTyrell/unofficial-kometa-studio.git
+cd unofficial-kometa-studio
 pnpm install
 
 # Start development
@@ -57,7 +57,7 @@ kometa-studio/
 # Start both frontend and backend
 pnpm dev
 
-# Frontend only (port 5176)
+# Frontend only (port 5173)
 pnpm --filter @kometa-studio/web dev
 
 # Backend only (port 3001)
@@ -122,10 +122,10 @@ export const PlexConfigSchema = z.object({
 const plexKnownKeys = ['timeout', 'clean_bundles', 'new_field'];
 ```
 
-3. Update renderer:
+3. Update generator:
 
 ```typescript
-// apps/server/src/yaml/renderer.ts
+// apps/server/src/yaml/generator.ts
 if (plex.new_field) {
   plexYaml['new_field'] = plex.new_field;
 }
@@ -274,8 +274,8 @@ Check server logs in terminal where `pnpm dev` is running.
 # Kill process on port 3001 (backend)
 npx kill-port 3001
 
-# Kill process on port 5176 (frontend)
-npx kill-port 5176
+# Kill process on port 5173 (frontend)
+npx kill-port 5173
 ```
 
 **Database locked:**
@@ -363,13 +363,39 @@ export function Button({ label, onClick }: ButtonProps) {
 
 ### Environment Variables
 
-Create `.env` in `apps/server/`:
+Both the server and web apps support environment configuration. Copy the example files to get started:
 
 ```bash
-PORT=3001
-DATABASE_PATH=./data/kometa-studio.db
-NODE_ENV=production
+# Server environment
+cp apps/server/.env.example apps/server/.env
+
+# Frontend environment (optional)
+cp apps/web/.env.example apps/web/.env
 ```
+
+#### Server Environment Variables (`apps/server/.env`)
+
+| Variable                   | Required | Default                   | Description                                 |
+| -------------------------- | -------- | ------------------------- | ------------------------------------------- |
+| `KOMETA_STUDIO_MASTER_KEY` | Yes      | -                         | AES-256 encryption key for secrets (base64) |
+| `PORT`                     | No       | `3001`                    | Server port                                 |
+| `HOST`                     | No       | `127.0.0.1`               | Server host                                 |
+| `DATABASE_PATH`            | No       | `./data/kometa-studio.db` | SQLite database path                        |
+| `CORS_ORIGIN`              | No       | `http://localhost:5173`   | Allowed CORS origin for frontend            |
+
+Generate a master key:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+#### Frontend Environment Variables (`apps/web/.env`)
+
+| Variable       | Required | Default                 | Description     |
+| -------------- | -------- | ----------------------- | --------------- |
+| `VITE_API_URL` | No       | `http://127.0.0.1:3001` | Backend API URL |
+
+**Note**: Frontend variables must be prefixed with `VITE_` to be accessible in the browser.
 
 ### Building
 
@@ -397,6 +423,6 @@ Docker support planned for future release.
 
 ## 💬 Getting Help
 
-- Check [GitHub Issues](https://github.com/yourusername/kometa-studio/issues)
-- Ask in [GitHub Discussions](https://github.com/yourusername/kometa-studio/discussions)
+- Check [GitHub Issues](https://github.com/HouseofTyrell/unofficial-kometa-studio/issues)
+- Ask in [GitHub Discussions](https://github.com/HouseofTyrell/unofficial-kometa-studio/discussions)
 - Review [Contributing Guide](../CONTRIBUTING.md)

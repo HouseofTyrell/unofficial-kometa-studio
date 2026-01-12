@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { configApi } from '../../api/client';
 import { OverlayElement } from './PosterPreview';
@@ -19,11 +19,7 @@ export function SaveOverlayDialog({ overlayElements, mediaType, onClose }: SaveO
   const [saving, setSaving] = useState(false);
   const [createNew, setCreateNew] = useState(false);
 
-  useEffect(() => {
-    loadConfigs();
-  }, []);
-
-  const loadConfigs = async () => {
+  const loadConfigs = useCallback(async () => {
     try {
       const { configs: configList } = await configApi.list();
       setConfigs(configList);
@@ -34,7 +30,11 @@ export function SaveOverlayDialog({ overlayElements, mediaType, onClose }: SaveO
     } catch (error) {
       console.error('Failed to load configs:', error);
     }
-  };
+  }, [createNew]);
+
+  useEffect(() => {
+    loadConfigs();
+  }, [loadConfigs]);
 
   const handleSave = async () => {
     if (!overlayName.trim()) {

@@ -3,7 +3,7 @@
  * Uses backend proxy to keep API tokens secure
  */
 
-import { proxyApi } from '../api/client';
+import { proxyApi, PlexMetadata, PlexStream } from '../api/client';
 
 export interface PlexMediaInfo {
   title: string;
@@ -47,7 +47,7 @@ export class PlexService {
       // Find best match
       let bestMatch = results[0];
       if (year) {
-        bestMatch = results.find((item: any) => item.year === year) || results[0];
+        bestMatch = results.find((item) => item.year === year) || results[0];
       }
 
       if (!bestMatch) {
@@ -92,7 +92,7 @@ export class PlexService {
       // Get the seasons for this show
       const seasonData = await proxyApi.plex.getSeasons(this.profileId, showKey);
       const seasons = seasonData.MediaContainer?.Metadata || [];
-      const season = seasons.find((s: any) => s.index === seasonNumber);
+      const season = seasons.find((s) => s.index === seasonNumber);
 
       if (!season) {
         return null;
@@ -101,7 +101,7 @@ export class PlexService {
       // Get episodes in that season
       const episodeData = await proxyApi.plex.getEpisodes(this.profileId, season.key);
       const episodes = episodeData.MediaContainer?.Metadata || [];
-      const episode = episodes.find((e: any) => e.index === episodeNumber);
+      const episode = episodes.find((e) => e.index === episodeNumber);
 
       if (!episode) {
         return null;
@@ -117,7 +117,7 @@ export class PlexService {
   /**
    * Extract media information from Plex metadata
    */
-  private extractMediaInfo(metadata: any): PlexMediaInfo {
+  private extractMediaInfo(metadata: PlexMetadata): PlexMediaInfo {
     const info: PlexMediaInfo = {
       title: metadata.title,
       year: metadata.year,
@@ -162,7 +162,7 @@ export class PlexService {
     const media = metadata.Media?.[0];
     if (media) {
       // Resolution
-      const height = media.height;
+      const height = media.height ?? 0;
       if (height >= 2160) {
         info.resolution = '4K';
       } else if (height >= 1080) {
@@ -184,7 +184,7 @@ export class PlexService {
       };
 
       // Audio information from first audio stream
-      const audioStream = media.Part?.[0]?.Stream?.find((s: any) => s.streamType === 2);
+      const audioStream = media.Part?.[0]?.Stream?.find((s: PlexStream) => s.streamType === 2);
       if (audioStream) {
         info.audioCodec = this.formatAudioCodec(audioStream.codec);
         info.audioChannels = this.formatAudioChannels(audioStream.channels);

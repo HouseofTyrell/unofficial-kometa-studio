@@ -15,44 +15,12 @@ interface GenerateOptions {
 /**
  * Merges config extras into the main object
  */
-function mergeExtras(obj: any, extras?: Record<string, unknown>): any {
+function mergeExtras<T extends Record<string, unknown>>(
+  obj: T,
+  extras?: Record<string, unknown>
+): T & Record<string, unknown> {
   if (!extras) return obj;
   return { ...obj, ...extras };
-}
-
-/**
- * Masks sensitive values in an object
- */
-function maskSecrets(obj: any): any {
-  if (typeof obj !== 'object' || obj === null) return obj;
-
-  if (Array.isArray(obj)) {
-    return obj.map(maskSecrets);
-  }
-
-  const masked: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    // Keys that contain secrets
-    const secretKeys = [
-      'token',
-      'apikey',
-      'api_key',
-      'secret',
-      'password',
-      'access_token',
-      'refresh_token',
-    ];
-    const isSecret = secretKeys.some((sk) => key.toLowerCase().includes(sk));
-
-    if (isSecret && typeof value === 'string') {
-      masked[key] = maskSecret(value);
-    } else if (typeof value === 'object' && value !== null) {
-      masked[key] = maskSecrets(value);
-    } else {
-      masked[key] = value;
-    }
-  }
-  return masked;
 }
 
 /**
@@ -62,7 +30,7 @@ export function generateYaml(options: GenerateOptions): string {
   const { config, profile, mode, includeComment = true } = options;
 
   // Build the output object in the correct order
-  const output: any = {};
+  const output: Record<string, unknown> = {};
 
   // Settings
   if (config.settings) {
@@ -74,7 +42,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Plex
   if (config.plex && config.plex.enabled !== false) {
-    const plexConfig: any = { ...config.plex, enabled: undefined };
+    const plexConfig: Record<string, unknown> = { ...config.plex, enabled: undefined };
     delete plexConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.plex) {
@@ -92,7 +60,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // TMDB
   if (config.tmdb && config.tmdb.enabled !== false) {
-    const tmdbConfig: any = { ...config.tmdb, enabled: undefined };
+    const tmdbConfig: Record<string, unknown> = { ...config.tmdb, enabled: undefined };
     delete tmdbConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.tmdb?.apikey) {
@@ -105,7 +73,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Tautulli
   if (config.tautulli?.enabled) {
-    const tautulliConfig: any = { ...config.tautulli, enabled: undefined };
+    const tautulliConfig: Record<string, unknown> = { ...config.tautulli, enabled: undefined };
     delete tautulliConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.tautulli) {
@@ -125,7 +93,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // MDBList
   if (config.mdblist?.enabled) {
-    const mdblistConfig: any = { ...config.mdblist, enabled: undefined };
+    const mdblistConfig: Record<string, unknown> = { ...config.mdblist, enabled: undefined };
     delete mdblistConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.mdblist?.apikey) {
@@ -140,7 +108,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Radarr
   if (config.radarr?.enabled) {
-    const radarrConfig: any = { ...config.radarr, enabled: undefined };
+    const radarrConfig: Record<string, unknown> = { ...config.radarr, enabled: undefined };
     delete radarrConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.radarr) {
@@ -160,7 +128,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Sonarr
   if (config.sonarr?.enabled) {
-    const sonarrConfig: any = { ...config.sonarr, enabled: undefined };
+    const sonarrConfig: Record<string, unknown> = { ...config.sonarr, enabled: undefined };
     delete sonarrConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.sonarr) {
@@ -180,7 +148,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Trakt
   if (config.trakt?.enabled) {
-    const traktConfig: any = { ...config.trakt, enabled: undefined };
+    const traktConfig: Record<string, unknown> = { ...config.trakt, enabled: undefined };
     delete traktConfig.extras;
 
     if (mode !== 'template' && profile?.secrets.trakt) {
@@ -209,9 +177,9 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Libraries
   if (config.libraries) {
-    output.libraries = {};
+    const libraries: Record<string, unknown> = {};
     for (const [libraryName, library] of Object.entries(config.libraries)) {
-      const libraryConfig: any = {};
+      const libraryConfig: Record<string, unknown> = {};
 
       if (library.template_variables) {
         libraryConfig.template_variables = library.template_variables;
@@ -241,8 +209,9 @@ export function generateYaml(options: GenerateOptions): string {
         libraryConfig.settings = library.settings;
       }
 
-      output.libraries[libraryName] = mergeExtras(libraryConfig, library.extras);
+      libraries[libraryName] = mergeExtras(libraryConfig, library.extras);
     }
+    output.libraries = libraries;
   }
 
   // Add root-level extras

@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import type { Library } from '@kometa-studio/shared';
 import styles from './LibrariesEditor.module.css';
 import { LibraryEditor } from './LibraryEditor';
 
 interface LibrariesEditorProps {
-  libraries: Record<string, any>;
-  onChange: (libraries: Record<string, any>) => void;
+  libraries: Record<string, Library>;
+  onChange: (libraries: Record<string, Library>) => void;
 }
 
 export function LibrariesEditor({ libraries, onChange }: LibrariesEditorProps) {
@@ -37,7 +38,7 @@ export function LibrariesEditor({ libraries, onChange }: LibrariesEditorProps) {
     }
   };
 
-  const handleLibraryChange = (name: string, library: any) => {
+  const handleLibraryChange = (name: string, library: Library) => {
     onChange({
       ...libraries,
       [name]: library,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './YamlPreviewPanel.module.css';
 import { configApi, profileApi } from '../../api/client';
@@ -19,10 +19,54 @@ export function YamlPreviewPanel() {
   const [loading, setLoading] = useState(false);
   const [showValidation, setShowValidation] = useState(true);
 
+  const loadProfiles = useCallback(async () => {
+    try {
+      const { profiles: profileList } = await profileApi.list();
+      setProfiles(profileList);
+      // Only auto-select first profile if no profile is currently selected
+      if (profileList.length > 0 && !selectedProfile) {
+        setSelectedProfile(profileList[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to load profiles:', error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedProfile intentionally excluded to avoid re-fetching
+  }, []);
+
+  const loadYaml = useCallback(async () => {
+    if (!configId) return;
+
+    setLoading(true);
+    try {
+      const { yaml: yamlContent } = await configApi.renderYaml(
+        configId,
+        selectedProfile || undefined,
+        mode
+      );
+      setYaml(yamlContent);
+    } catch (error) {
+      console.error('Failed to load YAML:', error);
+      setYaml('# Error loading YAML\n' + (error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, [configId, selectedProfile, mode]);
+
+  const loadValidation = useCallback(async () => {
+    if (!configId) return;
+
+    try {
+      const result = await configApi.validate(configId, selectedProfile || undefined);
+      setValidation(result);
+    } catch (error) {
+      console.error('Failed to validate:', error);
+    }
+  }, [configId, selectedProfile]);
+
   // Load profiles when component mounts or when navigating
   useEffect(() => {
     loadProfiles();
-  }, [location.pathname]);
+  }, [loadProfiles, location.pathname]);
 
   // Auto-select profile from navigation state (e.g., after import)
   useEffect(() => {
@@ -40,50 +84,7 @@ export function YamlPreviewPanel() {
       setYaml('');
       setValidation(null);
     }
-  }, [configId, selectedProfile, mode]);
-
-  const loadProfiles = async () => {
-    try {
-      const { profiles: profileList } = await profileApi.list();
-      setProfiles(profileList);
-      // Only auto-select first profile if no profile is currently selected
-      if (profileList.length > 0 && !selectedProfile) {
-        setSelectedProfile(profileList[0].id);
-      }
-    } catch (error) {
-      console.error('Failed to load profiles:', error);
-    }
-  };
-
-  const loadYaml = async () => {
-    if (!configId) return;
-
-    setLoading(true);
-    try {
-      const { yaml: yamlContent } = await configApi.renderYaml(
-        configId,
-        selectedProfile || undefined,
-        mode
-      );
-      setYaml(yamlContent);
-    } catch (error) {
-      console.error('Failed to load YAML:', error);
-      setYaml('# Error loading YAML\n' + (error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadValidation = async () => {
-    if (!configId) return;
-
-    try {
-      const result = await configApi.validate(configId, selectedProfile || undefined);
-      setValidation(result);
-    } catch (error) {
-      console.error('Failed to validate:', error);
-    }
-  };
+  }, [configId, loadYaml, loadValidation]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(yaml);

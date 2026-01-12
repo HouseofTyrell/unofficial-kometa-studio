@@ -9,8 +9,8 @@ interface IDELayoutProps {
 }
 
 export function IDELayout({ children }: IDELayoutProps) {
-  const [sidebarWidth, setSidebarWidth] = useState(250);
-  const [previewWidth, setPreviewWidth] = useState(400);
+  const [sidebarWidth, _setSidebarWidth] = useState(250);
+  const [previewWidth, _setPreviewWidth] = useState(400);
   const location = useLocation();
 
   // Hide preview panel on pages that don't need it

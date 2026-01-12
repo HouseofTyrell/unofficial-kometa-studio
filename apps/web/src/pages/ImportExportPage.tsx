@@ -27,12 +27,10 @@ export function ImportExportPage() {
         config: {},
       });
 
-      const result = await configApi.importYaml(newConfig.id, yamlInput, true);
+      await configApi.importYaml(newConfig.id, yamlInput, true);
 
-      // Navigate to the imported configuration, passing profileId if one was created
-      navigate(`/config/${newConfig.id}`, {
-        state: { profileId: result.profileId },
-      });
+      // Navigate to the imported configuration
+      navigate(`/config/${newConfig.id}`);
     } catch (error) {
       console.error('Failed to import:', error);
       alert(`Import failed: ${(error as Error).message}`);

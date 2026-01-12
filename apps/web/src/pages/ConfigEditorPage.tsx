@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import type { KometaConfig, Library } from '@kometa-studio/shared';
 import styles from './ConfigEditorPage.module.css';
-import { configApi, profileApi } from '../api/client';
+import { configApi, profileApi, ConfigEntity, ProfileEntity } from '../api/client';
 import { LibrariesEditor } from '../components/editors/LibrariesEditor';
 import { SettingsEditor } from '../components/editors/SettingsEditor';
 import { IntegrationsEditor } from '../components/editors/IntegrationsEditor';
@@ -15,7 +16,7 @@ import {
 type EditorSection = 'settings' | 'libraries' | 'integrations';
 
 // Client-side validation function (mirrors the shared validator)
-function validateConfig(config: any, profile?: any): ValidationResult {
+function validateConfig(config: KometaConfig, profile?: ProfileEntity | null): ValidationResult {
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
 
@@ -147,7 +148,7 @@ function validateConfig(config: any, profile?: any): ValidationResult {
 
   // Check libraries
   if (config.libraries) {
-    Object.entries(config.libraries).forEach(([libraryName, library]: [string, any]) => {
+    Object.entries(config.libraries).forEach(([libraryName, library]: [string, Library]) => {
       const hasCollections = library.collection_files && library.collection_files.length > 0;
       const hasOverlays = library.overlay_files && library.overlay_files.length > 0;
       const hasMetadata = library.metadata_files && library.metadata_files.length > 0;
@@ -180,8 +181,8 @@ function validateConfig(config: any, profile?: any): ValidationResult {
 
 export function ConfigEditorPage() {
   const { configId } = useParams<{ configId: string }>();
-  const [config, setConfig] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [config, setConfig] = useState<ConfigEntity | null>(null);
+  const [profile, setProfile] = useState<ProfileEntity | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<EditorSection>('libraries');
   const [saving, setSaving] = useState(false);
@@ -195,21 +196,7 @@ export function ConfigEditorPage() {
     }
   }, [config, profile]);
 
-  // Load config and profile when configId changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (configId) {
-      loadConfig();
-      loadActiveProfile();
-    }
-  }, [configId]);
-
-  // Re-run validation when config or profile changes
-  useEffect(() => {
-    runValidation();
-  }, [runValidation]);
-
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     if (!configId) return;
 
     setLoading(true);
@@ -222,9 +209,9 @@ export function ConfigEditorPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [configId]);
 
-  const loadActiveProfile = async () => {
+  const loadActiveProfile = useCallback(async () => {
     try {
       const { profiles } = await profileApi.list();
       if (profiles.length > 0) {
@@ -234,9 +221,22 @@ export function ConfigEditorPage() {
     } catch (error) {
       console.error('Failed to load profile for validation:', error);
     }
-  };
+  }, []);
 
-  const saveConfig = async (updatedConfig: any) => {
+  // Load config and profile when configId changes
+  useEffect(() => {
+    if (configId) {
+      loadConfig();
+      loadActiveProfile();
+    }
+  }, [configId, loadConfig, loadActiveProfile]);
+
+  // Re-run validation when config or profile changes
+  useEffect(() => {
+    runValidation();
+  }, [runValidation]);
+
+  const saveConfig = async (updatedConfig: KometaConfig) => {
     if (!configId) return;
 
     setSaving(true);
@@ -251,16 +251,17 @@ export function ConfigEditorPage() {
     }
   };
 
-  const handleConfigChange = (updates: any) => {
-    const updatedConfig = {
-      ...config,
-      config: {
-        ...config.config,
-        ...updates,
-      },
+  const handleConfigChange = (updates: Partial<KometaConfig>) => {
+    if (!config) return;
+    const newKometaConfig = {
+      ...config.config,
+      ...updates,
     };
-    setConfig(updatedConfig);
-    saveConfig(updatedConfig.config);
+    setConfig({
+      ...config,
+      config: newKometaConfig,
+    });
+    saveConfig(newKometaConfig);
   };
 
   // Handle clicking on a validation issue to navigate to the relevant section

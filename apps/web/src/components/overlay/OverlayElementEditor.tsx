@@ -32,24 +32,6 @@ export function OverlayElementEditor({
   const primarySelectedIndex =
     effectiveSelectedIndices.length > 0 ? effectiveSelectedIndices[0] : null;
 
-  // Helper to get display values for position
-  const _getPositionDisplay = (element: OverlayElement) => {
-    if (element.position) {
-      return {
-        horizontal: element.position.horizontal || 'left',
-        vertical: element.position.vertical || 'top',
-        horizontalOffset: element.offset?.horizontal || 0,
-        verticalOffset: element.offset?.vertical || 0,
-      };
-    }
-    return {
-      horizontal: 'left',
-      vertical: 'top',
-      horizontalOffset: element.x || 0,
-      verticalOffset: element.y || 0,
-    };
-  };
-
   const updateElement = (index: number, updates: Partial<OverlayElement>) => {
     const newElements = [...elements];
     newElements[index] = { ...newElements[index], ...updates };

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styles from './PosterPreview.module.css';
+import { KOMETA_CANVAS, DISPLAY } from '../../constants/overlay.constants';
 
 export interface OverlayElement {
   type: 'text' | 'image' | 'badge' | 'ribbon';
@@ -57,15 +58,11 @@ export interface PosterPreviewProps {
   interactive?: boolean;
 }
 
-// Kometa's canvas size for movies (portrait)
-const KOMETA_CANVAS_WIDTH = 1000;
-const KOMETA_CANVAS_HEIGHT = 1500;
-
 export function PosterPreview({
   posterUrl,
   overlayElements = [],
-  width = 500,
-  height = 750,
+  width = DISPLAY.WIDTH,
+  height = DISPLAY.HEIGHT,
   selectedElementIndex = null,
   selectedElementIndices = [],
   onElementSelect,
@@ -99,12 +96,12 @@ export function PosterPreview({
   );
 
   // Scale factor for converting between display and Kometa coordinates
-  const scaleFactor = width / KOMETA_CANVAS_WIDTH;
+  const scaleFactor = width / KOMETA_CANVAS.WIDTH;
 
   // Re-render preview when relevant props change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     renderPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- renderPreview is defined later but stable; deps are the actual triggers
   }, [
     posterUrl,
     overlayElements,
@@ -138,13 +135,13 @@ export function PosterPreview({
         break;
       case 'center':
         x =
-          Math.floor(KOMETA_CANVAS_WIDTH / 2) -
+          Math.floor(KOMETA_CANVAS.WIDTH / 2) -
           Math.floor(elementWidth / 2) +
           (offset.horizontal || 0);
         break;
       case 'right':
         // Kometa: image_value - over_value - value
-        x = KOMETA_CANVAS_WIDTH - elementWidth - (offset.horizontal || 0);
+        x = KOMETA_CANVAS.WIDTH - elementWidth - (offset.horizontal || 0);
         break;
       default:
         x = offset.horizontal || 0;
@@ -157,13 +154,13 @@ export function PosterPreview({
         break;
       case 'center':
         y =
-          Math.floor(KOMETA_CANVAS_HEIGHT / 2) -
+          Math.floor(KOMETA_CANVAS.HEIGHT / 2) -
           Math.floor(elementHeight / 2) +
           (offset.vertical || 0);
         break;
       case 'bottom':
         // Kometa: image_value - over_value - value
-        y = KOMETA_CANVAS_HEIGHT - elementHeight - (offset.vertical || 0);
+        y = KOMETA_CANVAS.HEIGHT - elementHeight - (offset.vertical || 0);
         break;
       default:
         y = offset.vertical || 0;
@@ -527,7 +524,7 @@ export function PosterPreview({
       case 'badge':
         return 200;
       case 'ribbon':
-        return KOMETA_CANVAS_WIDTH;
+        return KOMETA_CANVAS.WIDTH;
       case 'image':
         return 200;
       default:
@@ -675,8 +672,8 @@ export function PosterPreview({
       } else if (onElementMove && dragStartRef.current.elementPositions.length === 1) {
         // Single element move
         const { index, x: startX, y: startY } = dragStartRef.current.elementPositions[0];
-        const newX = Math.max(0, Math.min(KOMETA_CANVAS_WIDTH - 50, startX + deltaX));
-        const newY = Math.max(0, Math.min(KOMETA_CANVAS_HEIGHT - 50, startY + deltaY));
+        const newX = Math.max(0, Math.min(KOMETA_CANVAS.WIDTH - 50, startX + deltaX));
+        const newY = Math.max(0, Math.min(KOMETA_CANVAS.HEIGHT - 50, startY + deltaY));
         onElementMove(index, Math.round(newX), Math.round(newY));
       }
     },

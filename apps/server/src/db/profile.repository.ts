@@ -1,5 +1,5 @@
 import { getDatabase } from './database.js';
-import type { Profile, ProfileSecrets } from '@kometa-studio/shared';
+import type { ProfileSecrets } from '@kometa-studio/shared';
 import { encrypt, decrypt } from '../crypto/encryption.js';
 
 export interface ProfileRecord {

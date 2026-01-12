@@ -79,8 +79,8 @@ This is an **unofficial, community-created project** and is not affiliated with,
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/yourusername/kometa-studio.git
-   cd kometa-studio
+   git clone https://github.com/HouseofTyrell/unofficial-kometa-studio.git
+   cd unofficial-kometa-studio
    ```
 
 2. **Install dependencies**:
@@ -89,14 +89,26 @@ This is an **unofficial, community-created project** and is not affiliated with,
    pnpm install
    ```
 
-3. **Start the development server**:
+3. **Set up environment**:
+
+   ```bash
+   cp apps/server/.env.example apps/server/.env
+   ```
+
+   Generate and add a master encryption key to `apps/server/.env`:
+
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   ```
+
+4. **Start the development server**:
 
    ```bash
    pnpm dev
    ```
 
-4. **Access the application**:
-   - Frontend: http://localhost:5176
+5. **Access the application**:
+   - Frontend: http://localhost:5173
    - Backend API: http://localhost:3001
 
 📖 **New to Kometa Studio?** Check out the [Quick Start Guide](docs/QUICKSTART.md)
@@ -274,7 +286,7 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 
 - **Bug Report**: Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)
 - **Feature Request**: Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md)
-- **Questions**: Start a [discussion](https://github.com/yourusername/kometa-studio/discussions)
+- **Questions**: Start a [discussion](https://github.com/HouseofTyrell/unofficial-kometa-studio/discussions)
 
 ## 📝 License
 

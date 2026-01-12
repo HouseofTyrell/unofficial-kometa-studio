@@ -141,7 +141,7 @@ lsof -ti:3001 | xargs kill -9
 npx kill-port 3001
 ```
 
-### Port 5176 already in use
+### Port 5173 already in use
 
 **Cause**: Another process is using the frontend port.
 
@@ -149,11 +149,11 @@ npx kill-port 3001
 
 ```bash
 # Kill the process
-npx kill-port 5176
+npx kill-port 5173
 
 # Or change port in vite.config.ts
 server: {
-  port: 5177  # Use different port
+  port: 5174  # Use different port
 }
 ```
 
@@ -383,7 +383,7 @@ If your issue isn't listed here:
    - Copy any error messages
 
 3. **Search Issues**:
-   - https://github.com/yourusername/kometa-studio/issues
+   - https://github.com/HouseofTyrell/unofficial-kometa-studio/issues
    - Someone may have had the same problem
 
 4. **Report Bug**:
@@ -409,7 +409,7 @@ git --version    # Should work
 
 # Check ports
 lsof -i :3001   # Should be free or running Kometa Studio
-lsof -i :5176   # Should be free or running Kometa Studio
+lsof -i :5173   # Should be free or running Kometa Studio
 
 # Check database
 ls -lh apps/server/data/kometa-studio.db
@@ -424,4 +424,4 @@ Everything good? Then:
 pnpm dev
 ```
 
-Visit http://localhost:5176 and it should work!
+Visit http://localhost:5173 and it should work!

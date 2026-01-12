@@ -1,23 +1,27 @@
 import { useState } from 'react';
+import type { FileEntry, TemplateVariables } from '@kometa-studio/shared';
 import styles from './FileListEditor.module.css';
 
+type FileType = 'file' | 'default' | 'url' | 'git';
+
 interface FileListEditorProps {
-  files: any[];
-  onChange: (files: any[]) => void;
+  files: FileEntry[];
+  onChange: (files: FileEntry[]) => void;
 }
 
 export function FileListEditor({ files, onChange }: FileListEditorProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newFileType, setNewFileType] = useState<'file' | 'default' | 'url' | 'git'>('default');
+  const [newFileType, setNewFileType] = useState<FileType>('default');
   const [newFileValue, setNewFileValue] = useState('');
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFileValue.trim()) return;
 
-    const newFile: any = {
+    // Cast through unknown since FileEntry is a union type
+    const newFile = {
       [newFileType]: newFileValue,
-    };
+    } as unknown as FileEntry;
 
     onChange([...files, newFile]);
     setNewFileValue('');
@@ -47,7 +51,7 @@ export function FileListEditor({ files, onChange }: FileListEditorProps) {
     onChange(newFiles);
   };
 
-  const handleUpdateTemplateVars = (index: number, templateVars: any) => {
+  const handleUpdateTemplateVars = (index: number, templateVars: TemplateVariables) => {
     const newFiles = [...files];
     newFiles[index] = {
       ...newFiles[index],
@@ -56,11 +60,12 @@ export function FileListEditor({ files, onChange }: FileListEditorProps) {
     onChange(newFiles);
   };
 
-  const getFileDisplay = (file: any): { type: string; value: string } => {
-    if (file.file) return { type: 'file', value: file.file };
-    if (file.default) return { type: 'default', value: file.default };
-    if (file.url) return { type: 'url', value: file.url };
-    if (file.git) return { type: 'git', value: file.git };
+  const getFileDisplay = (file: FileEntry): { type: string; value: string } => {
+    if ('file' in file && file.file) return { type: 'file', value: file.file };
+    if ('default' in file && file.default) return { type: 'default', value: file.default };
+    if ('url' in file && file.url) return { type: 'url', value: file.url };
+    if ('git' in file && file.git) return { type: 'git', value: file.git };
+    if ('repo' in file && file.repo) return { type: 'repo', value: file.repo };
     return { type: 'unknown', value: JSON.stringify(file) };
   };
 
@@ -154,7 +159,7 @@ export function FileListEditor({ files, onChange }: FileListEditorProps) {
           <div className={styles.addFormRow}>
             <select
               value={newFileType}
-              onChange={(e) => setNewFileType(e.target.value as any)}
+              onChange={(e) => setNewFileType(e.target.value as FileType)}
               className={styles.select}
             >
               <option value="default">default</option>

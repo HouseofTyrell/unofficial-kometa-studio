@@ -81,5 +81,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript throughout
 - pnpm monorepo structure
 
-[Unreleased]: https://github.com/yourusername/kometa-studio/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/yourusername/kometa-studio/releases/tag/v0.1.0
+[Unreleased]: https://github.com/HouseofTyrell/unofficial-kometa-studio/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/HouseofTyrell/unofficial-kometa-studio/releases/tag/v0.1.0

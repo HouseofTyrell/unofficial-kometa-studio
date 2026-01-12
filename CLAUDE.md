@@ -58,7 +58,7 @@ pnpm install
 # Start development servers (both frontend and backend)
 pnpm dev
 
-# Frontend only: http://localhost:5176
+# Frontend only: http://localhost:5173
 pnpm --filter @kometa-studio/web dev
 
 # Backend only: http://localhost:3001

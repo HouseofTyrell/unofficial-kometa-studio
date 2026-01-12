@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './OverlayBuilderPage.module.css';
 import { profileApi, configApi } from '../api/client';
+import { useHistory, useHistoryKeyboard } from '../hooks/useHistory';
 import {
   TmdbService,
   DEFAULT_PREVIEW_TITLES,
@@ -79,10 +80,20 @@ export function OverlayBuilderPage() {
   const [availableEpisodes, setAvailableEpisodes] = useState<number[]>([]);
   const [selectedEpisode, setSelectedEpisode] = useState<number>(1);
 
-  // Overlay configuration
+  // Overlay configuration with undo/redo support
   const [selectedPresetId, setSelectedPresetId] = useState<string>('none');
-  const [overlayElements, setOverlayElements] = useState<OverlayElement[]>([]);
+  const {
+    state: overlayElements,
+    setState: setOverlayElements,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useHistory<OverlayElement[]>([]);
   const [selectedElementIndex, setSelectedElementIndex] = useState<number | null>(null);
+
+  // Enable keyboard shortcuts for undo/redo
+  useHistoryKeyboard(undo, redo, canUndo, canRedo);
 
   // View mode - now supports split view
   const [showCode, setShowCode] = useState(false);
@@ -825,6 +836,24 @@ export function OverlayBuilderPage() {
               )}
             </div>
             <div className={styles.editorActions}>
+              <div className={styles.historyButtons}>
+                <button
+                  className={styles.iconButton}
+                  onClick={undo}
+                  disabled={!canUndo}
+                  title="Undo (Ctrl+Z)"
+                >
+                  ↩
+                </button>
+                <button
+                  className={styles.iconButton}
+                  onClick={redo}
+                  disabled={!canRedo}
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  ↪
+                </button>
+              </div>
               <OverlayPresetSelector
                 selectedPresetId={selectedPresetId}
                 onPresetChange={handlePresetChange}

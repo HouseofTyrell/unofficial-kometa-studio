@@ -26,7 +26,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 | Feature | Description | Status |
 |---------|-------------|--------|
 | **Undo/Redo Support** | Add history tracking for overlay changes | ✅ Complete |
-| **Code View Editing** | Allow users to edit YAML in code view and sync back to visual editor | TODO in code |
+| **Code View Editing** | Allow users to edit YAML in code view and sync back to visual editor | ✅ Complete |
 | **More Preset Templates** | Add templates for: Dolby Vision, IMAX, Awards, Streaming Services | ✅ Complete (30+ presets) |
 | **Template Variable Editor** | UI for editing template variables before applying to overlays | Partial |
 | **Preview Scale Options** | Allow zooming in/out on poster preview | ✅ Complete |
@@ -278,3 +278,4 @@ When implementing a feature:
 - ✅ GitHub YAML import with live overlay preview
 - ✅ Missing overlay types: content_rating, studio, network, versions, mediastinger
 - ✅ 17 new presets across 4 new categories (Studio, Network, Versions, MediaStinger)
+- ✅ Bidirectional YAML code view editing with real-time validation

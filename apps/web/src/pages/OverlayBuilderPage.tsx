@@ -651,7 +651,11 @@ export function OverlayBuilderPage() {
   };
 
   // Handle import from GitHub
-  const handleGitHubImport = (elements: OverlayElement[], _yamlContent: string, sourceUrl: string) => {
+  const handleGitHubImport = (
+    elements: OverlayElement[],
+    _yamlContent: string,
+    sourceUrl: string
+  ) => {
     setOverlayElements(elements);
     setImportSource(sourceUrl);
     setSelectedPresetId('none');
@@ -895,7 +899,10 @@ export function OverlayBuilderPage() {
                     </button>
                   </div>
                 </div>
-                <div className={styles.posterWrapper} style={{ maxHeight: zoomLevel > 100 ? '600px' : 'auto' }}>
+                <div
+                  className={styles.posterWrapper}
+                  style={{ maxHeight: zoomLevel > 100 ? '600px' : 'auto' }}
+                >
                   <PosterPreview
                     posterUrl={posterUrl}
                     overlayElements={overlayElements}
@@ -1008,10 +1015,7 @@ export function OverlayBuilderPage() {
       )}
 
       {showImportDialog && (
-        <GitHubImport
-          onImport={handleGitHubImport}
-          onClose={() => setShowImportDialog(false)}
-        />
+        <GitHubImport onImport={handleGitHubImport} onClose={() => setShowImportDialog(false)} />
       )}
     </div>
   );

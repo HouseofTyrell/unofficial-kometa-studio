@@ -7,6 +7,7 @@ This document provides essential context for AI assistants working with the Kome
 Kometa Studio is an unofficial, community-created IDE for building and managing [Kometa](https://kometa.wiki/) (formerly Plex-Meta-Manager) configurations. It provides visual editing of YAML configs, overlay building with real-time preview, profile management, and secure secret handling.
 
 **Key Features:**
+
 - Visual YAML configuration editor
 - Overlay builder with TMDB poster integration
 - Profile management with encrypted secret storage
@@ -36,15 +37,15 @@ unofficial-kometa-studio/
 
 ### Technology Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18, TypeScript, Vite, React Router, CSS Modules |
-| Backend | Fastify, better-sqlite3, TypeScript, tsx |
-| Validation | Zod (shared schemas) |
-| YAML | yaml (parsing/generation) |
-| Package Manager | pnpm with workspaces |
-| Testing | Vitest |
-| Linting | ESLint 9 (flat config) + Prettier |
+| Layer           | Technology                                            |
+| --------------- | ----------------------------------------------------- |
+| Frontend        | React 18, TypeScript, Vite, React Router, CSS Modules |
+| Backend         | Fastify, better-sqlite3, TypeScript, tsx              |
+| Validation      | Zod (shared schemas)                                  |
+| YAML            | yaml (parsing/generation)                             |
+| Package Manager | pnpm with workspaces                                  |
+| Testing         | Vitest                                                |
+| Linting         | ESLint 9 (flat config) + Prettier                     |
 
 ## Development Workflow
 
@@ -67,6 +68,7 @@ pnpm --filter @kometa-studio/server dev
 ### Required Environment Variables
 
 The server requires a master encryption key:
+
 ```bash
 # Generate a key
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
@@ -149,11 +151,7 @@ export interface ButtonProps {
 
 export function Button({ label, onClick, disabled }: ButtonProps) {
   return (
-    <button
-      className={styles.button}
-      onClick={onClick}
-      disabled={disabled}
-    >
+    <button className={styles.button} onClick={onClick} disabled={disabled}>
       {label}
     </button>
   );
@@ -177,10 +175,7 @@ Routes are registered as Fastify plugins:
 // apps/server/src/routes/example.routes.ts
 import type { FastifyInstance } from 'fastify';
 
-export async function exampleRoutes(
-  fastify: FastifyInstance,
-  opts: { repo: Repository }
-) {
+export async function exampleRoutes(fastify: FastifyInstance, opts: { repo: Repository }) {
   const { repo } = opts;
 
   fastify.get('/api/examples', async () => {
@@ -214,6 +209,7 @@ logger.debug('Debug info', { details: '...' });
 ```
 
 The logger automatically redacts:
+
 - Keys containing: password, secret, token, apikey, authorization, etc.
 - Values matching: Base64 (32+ chars), hex (32+ chars), JWTs
 
@@ -230,6 +226,7 @@ Use conventional commits:
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Examples:
+
 ```
 feat(overlay): add drag-and-drop positioning
 fix(parser): handle null values in extras
@@ -265,7 +262,9 @@ import { describe, it, expect } from 'vitest';
 
 describe('YAML Generator', () => {
   it('should generate YAML with correct order', () => {
-    const config = { /* ... */ };
+    const config = {
+      /* ... */
+    };
     const yaml = generateYaml({ config, mode: 'template' });
 
     expect(yaml).toContain('settings:');
@@ -313,6 +312,7 @@ const results = await proxyApi.tmdb.search(profileId, 'Movie Name', 'movie');
 ### External Service Integration
 
 External APIs (TMDB, Plex, etc.) are called through the server proxy (`/api/proxy/*`) to:
+
 - Keep API keys on the server
 - Avoid CORS issues
 - Enable consistent error handling
@@ -326,6 +326,7 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 3. **Test Job**: Runs shared and server tests
 
 Triggered on:
+
 - Push to `main`/`master`
 - Pull requests to `main`/`master`
 
@@ -373,6 +374,7 @@ Triggered on:
 ### Formatting
 
 Prettier config (`.prettierrc`):
+
 ```json
 {
   "semi": true,
@@ -387,18 +389,18 @@ Run `pnpm format` before committing to ensure consistent formatting.
 
 ## File Quick Reference
 
-| Purpose | Location |
-|---------|----------|
-| Server entry | `apps/server/src/index.ts` |
-| Database setup | `apps/server/src/db/database.ts` |
-| API routes | `apps/server/src/routes/*.routes.ts` |
-| YAML parsing | `apps/server/src/yaml/parser.ts` |
-| YAML generation | `apps/server/src/yaml/generator.ts` |
-| Encryption | `apps/server/src/crypto/encryption.ts` |
-| Frontend entry | `apps/web/src/main.tsx` |
-| App routing | `apps/web/src/App.tsx` |
-| API client | `apps/web/src/api/client.ts` |
-| Shared schemas | `packages/shared/src/schemas/*.schema.ts` |
-| Validation utils | `packages/shared/src/validation/` |
-| ESLint config | `eslint.config.js` |
-| CI workflow | `.github/workflows/ci.yml` |
+| Purpose          | Location                                  |
+| ---------------- | ----------------------------------------- |
+| Server entry     | `apps/server/src/index.ts`                |
+| Database setup   | `apps/server/src/db/database.ts`          |
+| API routes       | `apps/server/src/routes/*.routes.ts`      |
+| YAML parsing     | `apps/server/src/yaml/parser.ts`          |
+| YAML generation  | `apps/server/src/yaml/generator.ts`       |
+| Encryption       | `apps/server/src/crypto/encryption.ts`    |
+| Frontend entry   | `apps/web/src/main.tsx`                   |
+| App routing      | `apps/web/src/App.tsx`                    |
+| API client       | `apps/web/src/api/client.ts`              |
+| Shared schemas   | `packages/shared/src/schemas/*.schema.ts` |
+| Validation utils | `packages/shared/src/validation/`         |
+| ESLint config    | `eslint.config.js`                        |
+| CI workflow      | `.github/workflows/ci.yml`                |

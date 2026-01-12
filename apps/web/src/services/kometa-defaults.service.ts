@@ -746,12 +746,12 @@ export class KometaDefaultsService {
 
       // Color coding based on rating severity
       const ratingColors: Record<string, string> = {
-        'G': '#4CAF50',
-        'PG': '#8BC34A',
+        G: '#4CAF50',
+        PG: '#8BC34A',
         'PG-13': '#FFC107',
-        'R': '#FF5722',
+        R: '#FF5722',
         'NC-17': '#F44336',
-        'NR': '#9E9E9E',
+        NR: '#9E9E9E',
         'TV-Y': '#4CAF50',
         'TV-Y7': '#8BC34A',
         'TV-G': '#4CAF50',
@@ -795,18 +795,29 @@ export class KometaDefaultsService {
 
       // Map common studios to their logo URLs from Kometa defaults
       const studioLogos: Record<string, string> = {
-        'Warner Bros.': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/warner.png',
-        'Universal Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/universal.png',
-        'Paramount Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/paramount.png',
-        'Walt Disney Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/disney.png',
-        '20th Century Studios': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/20th_century.png',
-        'Columbia Pictures': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/columbia.png',
-        'Lionsgate': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/lionsgate.png',
-        'New Line Cinema': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/newline.png',
-        'Marvel Studios': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/marvel.png',
-        'Pixar': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/pixar.png',
-        'DreamWorks': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/dreamworks.png',
-        'A24': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/a24.png',
+        'Warner Bros.':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/warner.png',
+        'Universal Pictures':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/universal.png',
+        'Paramount Pictures':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/paramount.png',
+        'Walt Disney Pictures':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/disney.png',
+        '20th Century Studios':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/20th_century.png',
+        'Columbia Pictures':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/columbia.png',
+        Lionsgate:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/lionsgate.png',
+        'New Line Cinema':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/newline.png',
+        'Marvel Studios':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/marvel.png',
+        Pixar:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/pixar.png',
+        DreamWorks:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/dreamworks.png',
+        A24: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/studio/a24.png',
       };
 
       const logoUrl = studioLogos[studioName] || configAssets?.studio_logo;
@@ -858,21 +869,28 @@ export class KometaDefaultsService {
 
       // Map common networks to their logo URLs from Kometa defaults
       const networkLogos: Record<string, string> = {
-        'HBO': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/hbo.png',
-        'Netflix': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/netflix.png',
-        'Amazon': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/amazon.png',
-        'Disney+': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/disney_plus.png',
-        'Apple TV+': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/apple_tv_plus.png',
-        'AMC': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/amc.png',
-        'NBC': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/nbc.png',
-        'CBS': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/cbs.png',
-        'ABC': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/abc.png',
-        'FOX': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/fox.png',
-        'FX': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/fx.png',
-        'Showtime': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/showtime.png',
-        'Paramount+': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/paramount_plus.png',
-        'Peacock': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/peacock.png',
-        'Hulu': 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/hulu.png',
+        HBO: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/hbo.png',
+        Netflix:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/netflix.png',
+        Amazon:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/amazon.png',
+        'Disney+':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/disney_plus.png',
+        'Apple TV+':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/apple_tv_plus.png',
+        AMC: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/amc.png',
+        NBC: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/nbc.png',
+        CBS: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/cbs.png',
+        ABC: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/abc.png',
+        FOX: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/fox.png',
+        FX: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/fx.png',
+        Showtime:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/showtime.png',
+        'Paramount+':
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/paramount_plus.png',
+        Peacock:
+          'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/peacock.png',
+        Hulu: 'https://raw.githubusercontent.com/Kometa-Team/Kometa/master/defaults/overlays/images/network/hulu.png',
       };
 
       const logoUrl = networkLogos[networkName] || configAssets?.network_logo;
@@ -924,19 +942,19 @@ export class KometaDefaultsService {
 
       // Map common editions to colors
       const editionColors: Record<string, string> = {
-        'Extended': '#9C27B0',
+        Extended: '#9C27B0',
         'Extended Edition': '#9C27B0',
         'Extended Cut': '#9C27B0',
         'Directors Cut': '#E91E63',
         "Director's Cut": '#E91E63',
-        'Theatrical': '#2196F3',
-        'Unrated': '#F44336',
-        'Uncut': '#F44336',
+        Theatrical: '#2196F3',
+        Unrated: '#F44336',
+        Uncut: '#F44336',
         'Special Edition': '#FF9800',
         'Ultimate Edition': '#FFD700',
-        'Remastered': '#4CAF50',
+        Remastered: '#4CAF50',
         '4K Remaster': '#4CAF50',
-        'IMAX': '#00BCD4',
+        IMAX: '#00BCD4',
       };
 
       const bgColor = editionColors[edition] || templateVars?.back_color || '#673AB7';

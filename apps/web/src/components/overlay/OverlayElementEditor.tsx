@@ -29,7 +29,8 @@ export function OverlayElementEditor({
   const isMultiSelect = effectiveSelectedIndices.length > 1;
   const selectedElement =
     effectiveSelectedIndices.length === 1 ? elements[effectiveSelectedIndices[0]] : null;
-  const primarySelectedIndex = effectiveSelectedIndices.length > 0 ? effectiveSelectedIndices[0] : null;
+  const primarySelectedIndex =
+    effectiveSelectedIndices.length > 0 ? effectiveSelectedIndices[0] : null;
 
   // Helper to get display values for position
   const _getPositionDisplay = (element: OverlayElement) => {
@@ -274,7 +275,11 @@ export function OverlayElementEditor({
           <div className={styles.listHeader}>
             <h3 className={styles.sectionTitle}>Elements ({elements.length})</h3>
             {elements.length > 0 && (
-              <button className={styles.selectAllButton} onClick={selectAll} title="Select all (Ctrl+A)">
+              <button
+                className={styles.selectAllButton}
+                onClick={selectAll}
+                title="Select all (Ctrl+A)"
+              >
                 Select All
               </button>
             )}
@@ -408,16 +413,10 @@ export function OverlayElementEditor({
             <div className={styles.bulkActions}>
               <h4 className={styles.bulkActionsTitle}>Bulk Actions</h4>
               <div className={styles.bulkButtonGroup}>
-                <button
-                  className={styles.bulkButton}
-                  onClick={duplicateSelectedElements}
-                >
+                <button className={styles.bulkButton} onClick={duplicateSelectedElements}>
                   Duplicate All
                 </button>
-                <button
-                  className={styles.bulkButtonDanger}
-                  onClick={removeSelectedElements}
-                >
+                <button className={styles.bulkButtonDanger} onClick={removeSelectedElements}>
                   Delete All
                 </button>
               </div>

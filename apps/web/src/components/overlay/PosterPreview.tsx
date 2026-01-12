@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styles from './PosterPreview.module.css';
 
 export interface OverlayElement {
@@ -88,19 +88,30 @@ export function PosterPreview({
   const elementBoundsRef = useRef<ElementBounds[]>([]);
 
   // Compute effective selected indices (prefer multi-selection over single)
-  const effectiveSelectedIndices =
-    selectedElementIndices.length > 0
-      ? selectedElementIndices
-      : selectedElementIndex !== null
-        ? [selectedElementIndex]
-        : [];
+  const effectiveSelectedIndices = useMemo(
+    () =>
+      selectedElementIndices.length > 0
+        ? selectedElementIndices
+        : selectedElementIndex !== null
+          ? [selectedElementIndex]
+          : [],
+    [selectedElementIndices, selectedElementIndex]
+  );
 
   // Scale factor for converting between display and Kometa coordinates
   const scaleFactor = width / KOMETA_CANVAS_WIDTH;
 
+  // Re-render preview when relevant props change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     renderPreview();
-  }, [posterUrl, overlayElements, selectedElementIndex, selectedElementIndices]);
+  }, [
+    posterUrl,
+    overlayElements,
+    selectedElementIndex,
+    selectedElementIndices,
+    effectiveSelectedIndices,
+  ]);
 
   // Convert position-based coordinates to absolute x/y
   // Kometa uses 1000x1500 coordinate system for movies (portrait)
@@ -278,13 +289,33 @@ export function PosterPreview({
           const handleSize = 12;
           ctx.fillStyle = isMultiSelect ? '#ff9800' : '#4dabf7';
           // Top-left
-          ctx.fillRect(selectedBounds.x - handleSize / 2 - 4, selectedBounds.y - handleSize / 2 - 4, handleSize, handleSize);
+          ctx.fillRect(
+            selectedBounds.x - handleSize / 2 - 4,
+            selectedBounds.y - handleSize / 2 - 4,
+            handleSize,
+            handleSize
+          );
           // Top-right
-          ctx.fillRect(selectedBounds.x + selectedBounds.width - handleSize / 2 + 4, selectedBounds.y - handleSize / 2 - 4, handleSize, handleSize);
+          ctx.fillRect(
+            selectedBounds.x + selectedBounds.width - handleSize / 2 + 4,
+            selectedBounds.y - handleSize / 2 - 4,
+            handleSize,
+            handleSize
+          );
           // Bottom-left
-          ctx.fillRect(selectedBounds.x - handleSize / 2 - 4, selectedBounds.y + selectedBounds.height - handleSize / 2 + 4, handleSize, handleSize);
+          ctx.fillRect(
+            selectedBounds.x - handleSize / 2 - 4,
+            selectedBounds.y + selectedBounds.height - handleSize / 2 + 4,
+            handleSize,
+            handleSize
+          );
           // Bottom-right
-          ctx.fillRect(selectedBounds.x + selectedBounds.width - handleSize / 2 + 4, selectedBounds.y + selectedBounds.height - handleSize / 2 + 4, handleSize, handleSize);
+          ctx.fillRect(
+            selectedBounds.x + selectedBounds.width - handleSize / 2 + 4,
+            selectedBounds.y + selectedBounds.height - handleSize / 2 + 4,
+            handleSize,
+            handleSize
+          );
         }
       }
 
@@ -520,15 +551,18 @@ export function PosterPreview({
   };
 
   // Convert screen coordinates to Kometa canvas coordinates
-  const screenToCanvas = useCallback((screenX: number, screenY: number): { x: number; y: number } => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+  const screenToCanvas = useCallback(
+    (screenX: number, screenY: number): { x: number; y: number } => {
+      const canvas = canvasRef.current;
+      if (!canvas) return { x: 0, y: 0 };
 
-    const rect = canvas.getBoundingClientRect();
-    const x = (screenX - rect.left) / scaleFactor;
-    const y = (screenY - rect.top) / scaleFactor;
-    return { x, y };
-  }, [scaleFactor]);
+      const rect = canvas.getBoundingClientRect();
+      const x = (screenX - rect.left) / scaleFactor;
+      const y = (screenY - rect.top) / scaleFactor;
+      return { x, y };
+    },
+    [scaleFactor]
+  );
 
   // Hit test to find element at position
   const hitTest = useCallback((canvasX: number, canvasY: number): number | null => {
@@ -548,92 +582,106 @@ export function PosterPreview({
   }, []);
 
   // Mouse event handlers for drag & drop with multi-selection support
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!interactive) return;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!interactive) return;
 
-    const { x, y } = screenToCanvas(e.clientX, e.clientY);
-    const hitIndex = hitTest(x, y);
-    const isShiftKey = e.shiftKey;
-    const isCtrlKey = e.ctrlKey || e.metaKey; // Support Cmd on Mac
+      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      const hitIndex = hitTest(x, y);
+      const isShiftKey = e.shiftKey;
+      const isCtrlKey = e.ctrlKey || e.metaKey; // Support Cmd on Mac
 
-    if (hitIndex !== null) {
-      // Handle multi-selection with Shift or Ctrl/Cmd
-      if (onElementsSelect && (isShiftKey || isCtrlKey)) {
-        const currentSelection = [...effectiveSelectedIndices];
+      if (hitIndex !== null) {
+        // Handle multi-selection with Shift or Ctrl/Cmd
+        if (onElementsSelect && (isShiftKey || isCtrlKey)) {
+          const currentSelection = [...effectiveSelectedIndices];
 
-        if (isCtrlKey) {
-          // Toggle selection
-          const existingIdx = currentSelection.indexOf(hitIndex);
-          if (existingIdx >= 0) {
-            currentSelection.splice(existingIdx, 1);
-          } else {
-            currentSelection.push(hitIndex);
+          if (isCtrlKey) {
+            // Toggle selection
+            const existingIdx = currentSelection.indexOf(hitIndex);
+            if (existingIdx >= 0) {
+              currentSelection.splice(existingIdx, 1);
+            } else {
+              currentSelection.push(hitIndex);
+            }
+            onElementsSelect(currentSelection);
+          } else if (isShiftKey && currentSelection.length > 0) {
+            // Range selection
+            const lastSelected = currentSelection[currentSelection.length - 1];
+            const start = Math.min(lastSelected, hitIndex);
+            const end = Math.max(lastSelected, hitIndex);
+            const rangeSelection = new Set(currentSelection);
+            for (let i = start; i <= end; i++) {
+              rangeSelection.add(i);
+            }
+            onElementsSelect(Array.from(rangeSelection));
           }
-          onElementsSelect(currentSelection);
-        } else if (isShiftKey && currentSelection.length > 0) {
-          // Range selection
-          const lastSelected = currentSelection[currentSelection.length - 1];
-          const start = Math.min(lastSelected, hitIndex);
-          const end = Math.max(lastSelected, hitIndex);
-          const rangeSelection = new Set(currentSelection);
-          for (let i = start; i <= end; i++) {
-            rangeSelection.add(i);
-          }
-          onElementsSelect(Array.from(rangeSelection));
+        } else {
+          // Single selection (clear multi-selection)
+          onElementSelect?.(hitIndex);
+          onElementsSelect?.([hitIndex]);
         }
+
+        // Start dragging - capture all selected elements' positions
+        const indicesToDrag = effectiveSelectedIndices.includes(hitIndex)
+          ? effectiveSelectedIndices
+          : [hitIndex];
+
+        const elementPositions = indicesToDrag.map((idx) => {
+          const element = overlayElements[idx];
+          const pos = calculateAbsolutePosition(element);
+          return { index: idx, x: pos.x, y: pos.y };
+        });
+
+        dragStartRef.current = {
+          mouseX: x,
+          mouseY: y,
+          elementPositions,
+        };
+        setIsDragging(true);
       } else {
-        // Single selection (clear multi-selection)
-        onElementSelect?.(hitIndex);
-        onElementsSelect?.([hitIndex]);
+        // Clicked on empty space - deselect all
+        onElementSelect?.(null);
+        onElementsSelect?.([]);
       }
+    },
+    [
+      interactive,
+      screenToCanvas,
+      hitTest,
+      onElementSelect,
+      onElementsSelect,
+      overlayElements,
+      effectiveSelectedIndices,
+    ]
+  );
 
-      // Start dragging - capture all selected elements' positions
-      const indicesToDrag = effectiveSelectedIndices.includes(hitIndex)
-        ? effectiveSelectedIndices
-        : [hitIndex];
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!interactive || !isDragging || !dragStartRef.current) return;
 
-      const elementPositions = indicesToDrag.map((idx) => {
-        const element = overlayElements[idx];
-        const pos = calculateAbsolutePosition(element);
-        return { index: idx, x: pos.x, y: pos.y };
-      });
+      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      const deltaX = x - dragStartRef.current.mouseX;
+      const deltaY = y - dragStartRef.current.mouseY;
 
-      dragStartRef.current = {
-        mouseX: x,
-        mouseY: y,
-        elementPositions,
-      };
-      setIsDragging(true);
-    } else {
-      // Clicked on empty space - deselect all
-      onElementSelect?.(null);
-      onElementsSelect?.([]);
-    }
-  }, [interactive, screenToCanvas, hitTest, onElementSelect, onElementsSelect, overlayElements, effectiveSelectedIndices]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!interactive || !isDragging || !dragStartRef.current) return;
-
-    const { x, y } = screenToCanvas(e.clientX, e.clientY);
-    const deltaX = x - dragStartRef.current.mouseX;
-    const deltaY = y - dragStartRef.current.mouseY;
-
-    // Move all selected elements together
-    if (onElementsMove && dragStartRef.current.elementPositions.length > 1) {
-      // Multi-element move
-      onElementsMove(
-        dragStartRef.current.elementPositions.map((p) => p.index),
-        Math.round(deltaX),
-        Math.round(deltaY)
-      );
-    } else if (onElementMove && dragStartRef.current.elementPositions.length === 1) {
-      // Single element move
-      const { index, x: startX, y: startY } = dragStartRef.current.elementPositions[0];
-      const newX = Math.max(0, Math.min(KOMETA_CANVAS_WIDTH - 50, startX + deltaX));
-      const newY = Math.max(0, Math.min(KOMETA_CANVAS_HEIGHT - 50, startY + deltaY));
-      onElementMove(index, Math.round(newX), Math.round(newY));
-    }
-  }, [interactive, isDragging, screenToCanvas, onElementMove, onElementsMove]);
+      // Move all selected elements together
+      if (onElementsMove && dragStartRef.current.elementPositions.length > 1) {
+        // Multi-element move
+        onElementsMove(
+          dragStartRef.current.elementPositions.map((p) => p.index),
+          Math.round(deltaX),
+          Math.round(deltaY)
+        );
+      } else if (onElementMove && dragStartRef.current.elementPositions.length === 1) {
+        // Single element move
+        const { index, x: startX, y: startY } = dragStartRef.current.elementPositions[0];
+        const newX = Math.max(0, Math.min(KOMETA_CANVAS_WIDTH - 50, startX + deltaX));
+        const newY = Math.max(0, Math.min(KOMETA_CANVAS_HEIGHT - 50, startY + deltaY));
+        onElementMove(index, Math.round(newX), Math.round(newY));
+      }
+    },
+    [interactive, isDragging, screenToCanvas, onElementMove, onElementsMove]
+  );
 
   const handleMouseUp = useCallback(() => {
     if (!interactive) return;

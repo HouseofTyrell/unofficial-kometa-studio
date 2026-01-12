@@ -195,6 +195,8 @@ export function ConfigEditorPage() {
     }
   }, [config, profile]);
 
+  // Load config and profile when configId changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (configId) {
       loadConfig();

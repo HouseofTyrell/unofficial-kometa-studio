@@ -33,9 +33,7 @@ export function GitHubImport({ onImport, onClose }: GitHubImportProps) {
     }
 
     // Convert github.com/user/repo/blob/branch/path to raw URL
-    const githubMatch = inputUrl.match(
-      /github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)/
-    );
+    const githubMatch = inputUrl.match(/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)/);
     if (githubMatch) {
       const [, user, repo, branch, path] = githubMatch;
       return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;

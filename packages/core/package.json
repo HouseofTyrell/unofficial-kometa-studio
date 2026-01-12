@@ -1,5 +1,5 @@
 {
-  "name": "@kometa-studio/core",
+  "name": "@houseoftyrell/kometa-core",
   "version": "0.1.0",
   "description": "Core library for parsing, generating, and validating Kometa (Plex-Meta-Manager) YAML configurations",
   "type": "module",

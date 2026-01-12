@@ -1,4 +1,4 @@
-# @kometa-studio/core
+# @houseoftyrell/kometa-core
 
 Core library for parsing, generating, and validating [Kometa](https://kometa.wiki/) (formerly Plex-Meta-Manager) YAML configurations.
 
@@ -8,14 +8,14 @@ Core library for parsing, generating, and validating [Kometa](https://kometa.wik
 
 ```bash
 # Configure npm to use GitHub Packages for @kometa-studio scope
-echo "@kometa-studio:registry=https://npm.pkg.github.com" >> .npmrc
+echo "@houseoftyrell:registry=https://npm.pkg.github.com" >> .npmrc
 
 # Install the package
-npm install @kometa-studio/core
+npm install @houseoftyrell/kometa-core
 # or
-pnpm add @kometa-studio/core
+pnpm add @houseoftyrell/kometa-core
 # or
-yarn add @kometa-studio/core
+yarn add @houseoftyrell/kometa-core
 ```
 
 ### Authentication
@@ -32,7 +32,7 @@ To install from GitHub Packages, you need to authenticate. Create a GitHub Perso
 ### Parse a Kometa YAML Configuration
 
 ```typescript
-import { parseKometaYaml } from '@kometa-studio/core';
+import { parseKometaYaml } from '@houseoftyrell/kometa-core';
 
 const yamlContent = `
 settings:
@@ -57,7 +57,7 @@ console.log(config.libraries?.Movies?.collection_files); // [{ default: 'imdb' }
 ### Extract Secrets from YAML
 
 ```typescript
-import { extractSecretsFromYaml } from '@kometa-studio/core';
+import { extractSecretsFromYaml } from '@houseoftyrell/kometa-core';
 
 const secrets = extractSecretsFromYaml(yamlContent);
 console.log(secrets.plex?.token); // 'your-plex-token'
@@ -67,7 +67,7 @@ console.log(secrets.plex?.url); // 'http://localhost:32400'
 ### Generate YAML from Configuration
 
 ```typescript
-import { generateYaml } from '@kometa-studio/core';
+import { generateYaml } from '@houseoftyrell/kometa-core';
 
 const config = {
   settings: { cache: true },
@@ -103,7 +103,7 @@ const fullYaml = generateYaml({ config, profile, mode: 'full' });
 ### Validate Configuration
 
 ```typescript
-import { validateConfig } from '@kometa-studio/core';
+import { validateConfig } from '@houseoftyrell/kometa-core';
 
 const config = {
   plex: { enabled: true },
@@ -118,7 +118,7 @@ console.log(result.warnings); // Array of warnings about missing credentials
 ### Use Zod Schemas for Type Safety
 
 ```typescript
-import { KometaConfigSchema, type KometaConfig } from '@kometa-studio/core';
+import { KometaConfigSchema, type KometaConfig } from '@houseoftyrell/kometa-core';
 
 // Validate unknown data
 const data = JSON.parse(someJsonString);
@@ -166,7 +166,7 @@ import type {
   FileEntry,
   ValidationResult,
   ValidationIssue,
-} from '@kometa-studio/core';
+} from '@houseoftyrell/kometa-core';
 ```
 
 ## Features

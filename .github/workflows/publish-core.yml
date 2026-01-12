@@ -41,16 +41,16 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@kometa-studio'
+          scope: '@houseoftyrell'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build core package
-        run: pnpm --filter @kometa-studio/core build
+        run: pnpm --filter @houseoftyrell/kometa-core build
 
       - name: Run core tests
-        run: pnpm --filter @kometa-studio/core test
+        run: pnpm --filter @houseoftyrell/kometa-core test
 
       - name: Bump version (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'

@@ -63,7 +63,7 @@ jobs:
         run: pnpm --filter @kometa-studio/shared build
 
       - name: Build core package
-        run: pnpm --filter @kometa-studio/core build
+        run: pnpm --filter @houseoftyrell/kometa-core build
 
       - name: Build server
         run: pnpm --filter @kometa-studio/server build
@@ -102,8 +102,8 @@ jobs:
 
       - name: Build and test core package
         run: |
-          pnpm --filter @kometa-studio/core build
-          pnpm --filter @kometa-studio/core test
+          pnpm --filter @houseoftyrell/kometa-core build
+          pnpm --filter @houseoftyrell/kometa-core test
 
       # Note: Server tests have a pre-existing failure in YAML parser tests
       # TODO: Fix the YAML parser test and enable strict test checking

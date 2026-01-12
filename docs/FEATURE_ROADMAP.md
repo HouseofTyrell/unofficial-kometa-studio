@@ -27,7 +27,7 @@ This document outlines proposed features for Kometa Studio, organized by priorit
 |---------|-------------|--------|
 | **Undo/Redo Support** | Add history tracking for overlay changes | ✅ Complete |
 | **Code View Editing** | Allow users to edit YAML in code view and sync back to visual editor | TODO in code |
-| **More Preset Templates** | Add templates for: Dolby Vision, IMAX, Awards, Streaming Services | 5 presets exist |
+| **More Preset Templates** | Add templates for: Dolby Vision, IMAX, Awards, Streaming Services | ✅ Complete (30+ presets) |
 | **Template Variable Editor** | UI for editing template variables before applying to overlays | Partial |
 | **Preview Scale Options** | Allow zooming in/out on poster preview | Not started |
 
@@ -272,3 +272,4 @@ When implementing a feature:
 - ✅ Undo/redo support with keyboard shortcuts (Ctrl+Z, Ctrl+Shift+Z)
 - ✅ Dark/light theme toggle with system preference detection
 - ✅ Verified TypeScript build and YAML parser tests pass
+- ✅ Added 30+ overlay preset templates across 11 categories

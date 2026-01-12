@@ -65,9 +65,7 @@ export function PosterSection({
                 ({overlayElements.length} overlay{overlayElements.length !== 1 ? 's' : ''})
               </span>
             )}
-            {mediaType === 'tv' && (
-              <span className={styles.posterLevel}>• {posterType} Level</span>
-            )}
+            {mediaType === 'tv' && <span className={styles.posterLevel}>• {posterType} Level</span>}
           </h2>
           <div className={styles.zoomControls}>
             <button

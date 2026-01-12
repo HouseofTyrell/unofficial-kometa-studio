@@ -177,7 +177,7 @@ export function generateYaml(options: GenerateOptions): string {
 
   // Libraries
   if (config.libraries) {
-    output.libraries = {};
+    const libraries: Record<string, unknown> = {};
     for (const [libraryName, library] of Object.entries(config.libraries)) {
       const libraryConfig: Record<string, unknown> = {};
 
@@ -209,8 +209,9 @@ export function generateYaml(options: GenerateOptions): string {
         libraryConfig.settings = library.settings;
       }
 
-      output.libraries[libraryName] = mergeExtras(libraryConfig, library.extras);
+      libraries[libraryName] = mergeExtras(libraryConfig, library.extras);
     }
+    output.libraries = libraries;
   }
 
   // Add root-level extras
